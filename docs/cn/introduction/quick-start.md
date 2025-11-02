@@ -1,4 +1,4 @@
-# Quick Start
+# 快速开始
 
 ## macOS
 
@@ -13,15 +13,15 @@ brew services start cliproxyapi
 curl -fsSL https://raw.githubusercontent.com/brokechubb/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
 ```
 
-Thanks to [brokechubb](https://github.com/brokechubb) for building the Linux installer!
+感谢 [brokechubb](https://github.com/brokechubb) 开发的 Linux 安装器！
 
 ## Windows
 
-You can download the latest release from [here](https://github.com/router-for-me/CLIProxyAPI/releases) and run it directly.
+你可以在 [这里](https://github.com/router-for-me/CLIProxyAPI/releases) 下载最新版本并直接运行。
 
-Or
+或者
 
-You can download our desktop GUI app from [here](https://github.com/router-for-me/EasyCLI/releases) and run it directly.
+你可以在 [这里](https://github.com/router-for-me/EasyCLI/releases) 下载我们的桌面图形程序并直接运行。
 
 ## Docker
 
@@ -29,15 +29,15 @@ You can download our desktop GUI app from [here](https://github.com/router-for-m
 docker run --rm -p 8317:8317 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api eceasy/cli-proxy-api:latest
 ```
 
-## Building from Source
+## 源码编译
 
-1. Clone the repository:
+1. 克隆仓库:
    ```bash
    git clone https://github.com/luispater/CLIProxyAPI.git
    cd CLIProxyAPI
    ```
 
-2. Build the application:
+2. 构建程序:
 
    Linux, macOS:
    ```bash
