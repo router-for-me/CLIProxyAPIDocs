@@ -60,6 +60,7 @@ export default defineConfig({
                 items: [
                     {text: 'Web UI', link: '/management/webui'},
                     {text: 'Desktop GUI', link: '/management/gui'},
+                    {text: 'Management API', link: '/management/api'},
                 ]
             },
             {
