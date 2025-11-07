@@ -77,7 +77,7 @@ export default defineConfig({
                 ]
             },
             {
-                text: '实操配置教程',
+                text: '配置案例',
                 items: [
                     {text: '零：配置详细解说', link: '/cn/hands-on/tutorial-0'},
                     {text: '壹：项目介绍+Qwen实战', link: '/cn/hands-on/tutorial-1'},
@@ -90,6 +90,7 @@ export default defineConfig({
                     {text: '零成本部署（HuggingFace）', link: '/cn/hands-on/tutorial-8'},
                     {text: '零成本部署（Railway）', link: '/cn/hands-on/tutorial-9'},
                     {text: '零成本部署（Render）', link: '/cn/hands-on/tutorial-10'},
+                    {text: '零成本部署（AIStudio反代）', link: '/cn/hands-on/tutorial-11'},
                 ]
             },
  

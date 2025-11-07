@@ -93,6 +93,7 @@ export default defineConfig({
                     {text: 'Zero-Cost Deployment (HuggingFace)', link: '/hands-on/tutorial-8'},
                     {text: 'Zero-Cost Deployment (Railway)', link: '/hands-on/tutorial-9'},
                     {text: 'Zero-Cost Deployment (Render)', link: '/hands-on/tutorial-10'},
+                    {text: 'Zero-Cost Deployment (AIStudio Reverse Proxy)', link: '/hands-on/tutorial-11'},
                 ]
             },
         ],
