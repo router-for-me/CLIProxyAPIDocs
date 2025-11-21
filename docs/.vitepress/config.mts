@@ -42,6 +42,7 @@ export default defineConfig({
                         text: 'Providers',
                         items:[
                             {text: 'Gemini CLI', link: '/configuration/provider/gemini-cli'},
+                            {text: 'Antigravity', link: '/configuration/provider/antigravity'},
                             {text: 'Claude Code', link: '/configuration/provider/claude-code'},
                             {text: 'Codex', link: '/configuration/provider/codex'},
                             {text: 'Qwen Code', link: '/configuration/provider/qwen-code'},

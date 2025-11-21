@@ -39,6 +39,7 @@ export default defineConfig({
                         text: '提供商',
                         items:[
                             {text: 'Gemini CLI', link: '/cn/configuration/provider/gemini-cli'},
+                            {text: '反重力', link: '/cn/configuration/provider/antigravity'},
                             {text: 'Claude Code', link: '/cn/configuration/provider/claude-code'},
                             {text: 'Codex', link: '/cn/configuration/provider/codex'},
                             {text: 'Qwen Code', link: '/cn/configuration/provider/qwen-code'},
