@@ -26,7 +26,7 @@ For this step, it is recommended to use your browser's private mode. Log in to h
 
 ![](https://img.072899.xyz/2025/11/51f860bf363cab01aa4c3fd5181b7f72.png)
 
-### Step 3: Deploy HuggingFace Space
+### Step 3 (1): Deploy HuggingFace Space
 
 Open https://huggingface.co/spaces/hkfires/AIStudioBuildWS and duplicate the Space. Fill in the `CAMOUFOX_INSTANCE_URL` field with the link to the program you prepared in Step 1, and fill in the `USER_COOKIE_1` field with the Cookie you prepared in Step 2. Then, click "Duplicate Space".
 
@@ -39,6 +39,30 @@ Wait for HuggingFace to complete the build. When you see logs like the following
 If you have multiple accounts, refer to `USER_COOKIE_1` and add environment variables like `USER_COOKIE_2`, `USER_COOKIE_3`, etc., in the HuggingFace Space settings.
 
 **Important Reminder:** Cookies are sensitive information. Please **be sure to use "Secrets"** (not "Variables") to store them to prevent leakage.
+
+### Step 3 (2): Server Docker Deployment
+
+If you have your own server (VPS), you can also use Docker Compose for deployment.
+
+1.  **Download the Code**
+    ```bash
+    git clone https://github.com/hkfires/AIStudioBuildWS.git
+    cd AIStudioBuildWS
+    ```
+
+2.  **Configure Environment Variables**
+    Copy `.env.example` to `.env` and fill in the necessary information (`CAMOUFOX_INSTANCE_URL` and `USER_COOKIE_1`, etc.).
+    
+    You can also place Cookie files in JSON format (any filename) in the `cookies` directory, and the program will automatically read them.
+    ```bash
+    cp .env.example .env
+    nano .env
+    ```
+
+3.  **Start the Service**
+    ```bash
+    docker compose up -d --build
+    ```
 
 After a successful deployment, you should see logs similar to the following in `CLIProxyAPI`. At this point, the entire deployment is complete.
 

@@ -26,7 +26,7 @@ CLIProxyAPI 自 v6.3.x 版本起，开始支持通过 WebSocket 方式接入 AI 
 
 ![](https://img.072899.xyz/2025/11/51f860bf363cab01aa4c3fd5181b7f72.png)
 
-### 第三步：部署 HuggingFace Space
+### 第三步（1）：部署 HuggingFace Space
 
 打开 https://huggingface.co/spaces/hkfires/AIStudioBuildWS ，复制该 Space。在 `CAMOUFOX_INSTANCE_URL` 处填入第一步准备的程序的链接，在 `USER_COOKIE_1` 处填入第二步准备的 Cookie，点击 Duplicate Space。
 
@@ -39,6 +39,30 @@ CLIProxyAPI 自 v6.3.x 版本起，开始支持通过 WebSocket 方式接入 AI 
 如果有多个账户，参考 `USER_COOKIE_1`，在 HuggingFace Space 的设置中依次增加 `USER_COOKIE_2`、`USER_COOKIE_3` 等环境变量即可。
 
 **重要提醒：** Cookie 属于敏感信息，请**务必使用 "Secrets"** (而不是 "Variables") 来存储，以防止 Cookie 外泄。
+
+### 第三步（2）：服务器 Docker 部署
+
+如果你拥有自己的服务器（VPS），也可以使用 Docker Compose 进行部署。
+
+1.  **下载代码**
+    ```bash
+    git clone https://github.com/hkfires/AIStudioBuildWS.git
+    cd AIStudioBuildWS
+    ```
+
+2.  **配置环境变量**
+    复制 `.env.example` 为 `.env`，并填入必要信息（`CAMOUFOX_INSTANCE_URL` 和 `USER_COOKIE_1` 等）。
+    
+    也可以在 `cookies` 目录下放置 JSON 格式的 Cookie 文件（文件名任意），程序会自动读取。
+    ```bash
+    cp .env.example .env
+    nano .env
+    ```
+
+3.  **启动服务**
+    ```bash
+    docker compose up -d --build
+    ```
 
 部署成功后，我们应该在 `CLIProxyAPI` 的中看到类似如下的日志。至此，整个部署全部完成。
 
