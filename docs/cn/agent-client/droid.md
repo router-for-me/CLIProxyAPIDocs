@@ -1,6 +1,6 @@
 # Factory Droid
 
-启动 CLI Proxy API 服务器，然后编辑 `~/.factory/config.json` 文件。
+启动 CLIProxyAPI 服务器，然后编辑 `~/.factory/config.json` 文件。
 
 config.json:
 ```json

@@ -1,10 +1,10 @@
 # Gemini CLI
 
-启动 CLI 代理 API 服务器，根据您的认证方式选择以下配置之一。
+启动 CLIProxyAPI 服务器，根据您的认证方式选择以下配置之一。
 
 ## Login with Google (OAuth)
 
-将 `CODE_ASSIST_ENDPOINT` 环境变量设置为 CLI 代理 API 服务器的 URL。
+将 `CODE_ASSIST_ENDPOINT` 环境变量设置为 CLIProxyAPI 服务器的 URL。
 
 ```bash
 export CODE_ASSIST_ENDPOINT="http://127.0.0.1:8317"
