@@ -6,7 +6,7 @@ outline: 'deep'
 
 基础路径：`http://localhost:8317/v0/management`
 
-该 API 用于管理 CLI Proxy API 的运行时配置与认证文件。所有变更会持久化写入 YAML 配置文件，并由服务自动热重载。
+该 API 用于管理 CLIProxyAPI 的运行时配置与认证文件。所有变更会持久化写入 YAML 配置文件，并由服务自动热重载。
 
 注意：以下选项不能通过 API 修改，需在配置文件中设置（如有必要可重启）：
 - `allow-remote-management`

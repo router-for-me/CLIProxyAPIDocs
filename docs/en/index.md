@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: "All Protocols"
-    details: "Support all protocols: Chat Completions / Response / Gemini / Calude"
+    details: "Support all protocols: Chat Completions / Response / Gemini / Claude"
   - title: "One Protocol"
     details: "Use a single protocol to access all models"
   - title: "Fast"

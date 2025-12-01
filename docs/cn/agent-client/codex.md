@@ -1,6 +1,6 @@
 # Codex
 
-启动 CLI Proxy API 服务器, 修改 `~/.codex/config.toml` 和 `~/.codex/auth.json` 文件。
+启动 CLIProxyAPI 服务器, 修改 `~/.codex/config.toml` 和 `~/.codex/auth.json` 文件。
 
 config.toml:
 ```toml

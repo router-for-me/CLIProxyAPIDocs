@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: "所有协议"
-    details: "支持所有协议：Chat Completions / Response / Gemini / Calude"
+    details: "支持所有协议：Chat Completions / Response / Gemini / Claude"
   - title: "一个协议"
     details: "使用一个协议访问所有模型"
   - title: "快速"
