@@ -88,14 +88,14 @@ export default defineConfig({
                     {text: '肆：中转转发接入篇', link: '/cn/hands-on/tutorial-4'},
                     {text: '伍：Docker服务器部署', link: '/cn/hands-on/tutorial-5'},
                     {text: '陆：新人最爱GUI', link: '/cn/hands-on/tutorial-6'},
-                    {text: '零成本部署（ClawCloud）', link: '/cn/hands-on/tutorial-7'},
-                    {text: '零成本部署（HuggingFace）', link: '/cn/hands-on/tutorial-8'},
-                    {text: '零成本部署（Railway）', link: '/cn/hands-on/tutorial-9'},
-                    {text: '零成本部署（Render）', link: '/cn/hands-on/tutorial-10'},
-                    {text: '零成本部署（AIStudio反代）', link: '/cn/hands-on/tutorial-11'},
+                    {text: '云部署（自带存储）', link: '/cn/hands-on/tutorial-7'},
+                    {text: '云部署（数据库存储）', link: '/cn/hands-on/tutorial-8'},
+                    {text: '云部署（对象存储）', link: '/cn/hands-on/tutorial-9'},
+                    {text: '云部署（Git存储）', link: '/cn/hands-on/tutorial-10'},
+                    {text: '零成本部署AIStudio反代', link: '/cn/hands-on/tutorial-11'},
                 ]
             },
- 
+
         ],
  
         socialLinks: [

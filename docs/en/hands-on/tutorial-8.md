@@ -1,4 +1,4 @@
-# Zero-Cost Deployment (HuggingFace)
+# Zero-Cost Deployment: HuggingFace (Database Storage)
 
 In the previous articles of the "No VPS?" series, we discussed how to achieve persistence of configuration and authentication information for CLIProxyAPI using local volumes (ClawCloud), GitHub (Render), and object storage buckets (Railway). This article will focus on how to achieve the same goal through a PostgreSQL database. In addition, considering that the container deployment mechanism of HuggingFace is different from conventional platforms, and some friends want to understand its deployment process, this article will explain it in detail.
 
