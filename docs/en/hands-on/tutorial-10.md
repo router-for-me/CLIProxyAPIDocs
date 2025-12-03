@@ -1,4 +1,4 @@
-# Zero-Cost Deployment (Render)
+# Zero-Cost Deployment: Render (Git Storage)
 
 After the release of yesterday's article "Zero-Cost Deployment (ClawCloud)", I went on to test the Render platform and found that its free plan does not include persistent storage. After reporting this to the author of CLIProxyAPI, he updated the version overnight, adding the function of persistent storage through Git. In this way, we can save the configuration files and authentication files in a private GitHub repository, without relying on the persistent storage of the container cloud.
 

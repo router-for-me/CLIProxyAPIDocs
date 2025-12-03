@@ -1,4 +1,4 @@
-# 零成本部署（AIStudio反代）
+# 零成本部署AIStudio反代
 
 > **请注意：** 本教程的部署方案需配合 `CLIProxyAPI` 使用。在开始之前，请确保你已有一个正在运行的 `CLIProxyAPI` 实例。
 

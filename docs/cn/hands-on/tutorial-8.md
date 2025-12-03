@@ -1,4 +1,4 @@
-# 零成本部署（HuggingFace）
+# 零成本部署：HuggingFace (数据库存储)
 
 在《没有VPS？》系列的前几篇文章中，我们分别探讨了如何利用本地卷 (ClawCloud)、GitHub (Render) 及对象存储桶 (Railway) 为 CLIProxyAPI 实现配置与认证信息的持久化。本文将聚焦于如何通过 PostgreSQL 数据库达成同样的目标。此外，考虑到 HuggingFace 的容器部署机制与常规平台有所不同，且有朋友希望了解其部署流程，本文将一并进行详细说明。
 

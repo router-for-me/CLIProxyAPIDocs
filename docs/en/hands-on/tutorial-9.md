@@ -1,4 +1,4 @@
-# Zero-Cost Deployment (Railway)
+# Zero-Cost Deployment: Railway (Object Storage)
 
 Following the first two articles in the "No VPS?" series, I have tried some other container clouds. Coinciding with the addition of S3 bucket support to the CLIProxyAPI program, this article will introduce a new combination: using the Railway container service and deploying with a ClawCloud S3 bucket.
 
