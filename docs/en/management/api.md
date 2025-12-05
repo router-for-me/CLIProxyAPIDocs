@@ -109,6 +109,21 @@ If a plaintext key is detected in the config at startup, it will be bcrypt‑has
         - The response no longer includes `generative-language-api-key`; use `GET /generative-language-api-key` if you need a pure-string view.
         - When no configuration is loaded yet the handler returns `{}`.
 
+### Latest Version
+- GET `/latest-version` — Fetch the latest release version string (no asset download)
+    - Request:
+      ```bash
+      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+        http://localhost:8317/v0/management/latest-version
+      ```
+    - Response:
+      ```json
+      { "latest-version": "v1.2.3" }
+      ```
+    - Notes:
+        - Data is retrieved from `https://api.github.com/repos/router-for-me/CLIProxyAPI/releases/latest` with `User-Agent: CLIProxyAPI`.
+        - When `proxy-url` is set, the request honors that proxy; the endpoint only returns the version value and does not download release assets.
+
 ### Debug
 - GET `/debug` — Get the current debug state
     - Request:

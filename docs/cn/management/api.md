@@ -109,6 +109,21 @@ outline: 'deep'
         - 返回中不再包含 `generative-language-api-key`；若需纯字符串视图，可使用专用的 `GET /generative-language-api-key` 接口。
         - 若服务尚未加载配置文件，则返回空对象 `{}`。
 
+### 最新版本
+- GET `/latest-version` — 查询最新发行版本号（仅返回版本字符串，不下载资源）
+    - 请求：
+      ```bash
+      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+        http://localhost:8317/v0/management/latest-version
+      ```
+    - 响应：
+      ```json
+      { "latest-version": "v1.2.3" }
+      ```
+    - 说明：
+        - 版本信息来源 `https://api.github.com/repos/router-for-me/CLIProxyAPI/releases/latest`，请求头使用 `User-Agent: CLIProxyAPI`。
+        - 若配置了 `proxy-url`，查询会复用该代理；仅返回版本号，不会下载发布资产。
+
 ### Debug
 - GET `/debug` — 获取当前 debug 状态
     - 请求：
