@@ -54,6 +54,7 @@ export default defineConfig({
                             {text: 'Codex Compatibility', link: '/configuration/provider/codex-compatibility'},
                         ]
                     },
+                    {text: 'Thinking Budgets', link: '/configuration/thinking'},
                 ]
             },
             {

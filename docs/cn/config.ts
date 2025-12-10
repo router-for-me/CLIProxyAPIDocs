@@ -51,6 +51,7 @@ export default defineConfig({
                             {text: 'Codex 兼容', link: '/cn/configuration/provider/codex-compatibility'},
                         ]
                     },
+                    {text: '思考量设置', link: '/cn/configuration/thinking'},
                 ]
             },
             {
