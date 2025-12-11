@@ -1,71 +1,63 @@
-# 思考量设置（模型名称后缀）
+# 通过模型名括号设置思考量
 
-CLIProxyAPI 支持在模型名称上追加后缀来控制思考预算与思考输出开关。代理会剥离后缀后再路由到上游，并将解析到的配置写入请求体。
+在模型名称末尾追加 `(值)` 来控制思考预算或推理等级。代理会在路由前移除括号，并将解析结果写入请求。
 
-## 后缀速查
+## 可用取值
 
-- `-thinking-<数字>`：显式指定思考预算（单位为提供商原生 token），会按照模型的支持区间自动夹紧。
-- `-thinking-<等级>`：使用预设等级，等级映射如下（仍会按模型区间夹紧）：
+- `(数字)`：显式思考预算（提供商原生 token），按模型支持区间夹紧。
+- `(等级)`：预设推理等级（不区分大小写）：
 
-| 等级        | 约等于预算  | 说明      |
-|-----------|--------|---------|
-| `minimal` | 512    | 低成本推理   |
-| `low`     | 1024   | 快速推理    |
-| `medium`  | 8192   | 默认推理量   |
-| `high`    | 24576  | 深度推理    |
-| `xhigh`   | 32768  | 更高推理量   |
-| `auto`    | 动态（-1） | 由上游自动分配 |
-| `none`    | 0      | 关闭思考    |
+| 等级        | 约等于预算                | 说明      |
+|-----------|----------------------|---------|
+| `minimal` | 512                  | 低成本推理   |
+| `low`     | 1024                 | 快速推理    |
+| `medium`  | 8192                 | 默认推理深度  |
+| `high`    | 24576                | 深度推理    |
+| `xhigh`   | 32768                | 更深推理    |
+| `auto`    | 动态（允许则为 -1，否则取中点/下限） | 由上游自动分配 |
+| `none`    | 0（若不允许 0 则夹紧到最小值）    | 关闭思考    |
 
-- `-thinking`：等价于 `-thinking-medium`。
-- `-reasoning`：设置动态思考（预算 `-1`）并强制 `include_thoughts=true`。
-- `-nothinking`：关闭思考（预算 `0`，`include_thoughts=false`）。
-
-> 后缀大小写不敏感；如果使用 `provider://model` 形式（如 `openrouter://gemini-3-pro-preview-thinking-high`），请将后缀放在模型名部分。
+- 空括号 `()` 会被忽略。`provider://model` 形式请在模型名后加括号，例如 `openrouter://gemini-3-pro-preview(high)`。
 
 ## 应用规则
 
-- 仅对注册了思考能力的模型生效；若模型不支持思考，后缀会被移除但不会向上游写入思考字段。
-- 预算会按模型注册信息夹紧：低于最小值会提升到最小值，高于最大值会降低到最大值；只有当模型标记 `DynamicAllowed` 时才接受 `-1`，只有 `ZeroAllowed` 为真时才允许 0。
-- Gemini 标准/CLI 请求会写入 `generationConfig.thinkingConfig.thinkingBudget` 与 `include_thoughts`，后缀指定的值会覆盖请求体中的同名字段。
-- OpenAI/Codex/Qwen/iFlow/OpenRouter 路径会在未设置时补全推理强度：Chat Completions 填充 `reasoning_effort`，Responses 路径填充 `reasoning.effort`；如果请求已显式提供这些字段则不会覆盖。
-- 若模型默认自带思考（例如 `gemini-3-pro-preview`），在未显式提供思考配置时仍会按默认启用；添加后缀可覆盖默认行为。
+- 仅对声明支持思考的模型生效；不支持的模型只会移除括号，不注入思考字段。
+- Gemini（标准与 CLI）：按夹紧后的值写入 `generationConfig.thinkingConfig.thinkingBudget`（或 `request.generationConfig.thinkingConfig...`），不会改动 `include_thoughts`。自带默认思考的模型（如 `gemini-3-pro-preview`）在缺省情况下仍会自动启用思考，括号中的预算会覆盖默认值。
+- Claude API：提供预算/等级时会设置 `thinking.type=enabled` 并填入归一化后的 `thinking.budget_tokens`，必要时提升 `max_tokens`。
+- OpenAI/Codex/Qwen/iFlow/OpenRouter：等级/`auto`/`none` 会覆盖 `reasoning_effort`（chat）或 `reasoning.effort`（Responses）；纯数字预算不会为这些协议改写 reasoning_effort。
+- 使用离散等级的模型会校验等级，不支持的取值会返回 400。
 
 ## 使用示例
 
-- 动态思考并输出思考过程：
-
-```bash
-curl -X POST http://localhost:8317/v1beta/models/gemini-2.5-flash-reasoning:generateContent \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{ "contents": [ { "parts": [ { "text": "帮我总结要点" } ] } ] }'
-# 代理会请求上游模型 models/gemini-2.5-flash，写入 thinkingBudget=-1、include_thoughts=true
-```
-
-- 设定具体思考预算并禁止思考输出：
+- 动态思考预算（Gemini）：
 
 ```bash
 curl -X POST http://localhost:8317/v1/chat/completions \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
-        "model": "gemini-3-pro-preview-thinking-12000-nothinking",
-        "messages": [{ "role": "user", "content": "列出三个改进点" }]
+        "model": "gemini-3-pro-preview(auto)",
+        "messages": [{ "role": "user", "content": "帮我总结要点" }]
       }'
-# 代理会将模型名归一为 gemini-3-pro-preview，并把 thinkingBudget=12000（夹紧后）写入请求，
-# 同时注入 include_thoughts=false，若未设置 reasoning_effort 则填充对应等级。
+# 归一为 gemini-3-pro-preview，写入 thinkingBudget=-1（若不支持动态则按模型区间夹紧），不修改 include_thoughts。
 ```
 
-- 使用等级快捷方式：
+- OpenAI Responses 高等级推理：
 
 ```bash
-# 中等思考量（约 8192）：
-model=gemini-3-pro-preview-thinking
+curl -X POST http://localhost:8317/v1/responses \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+        "model": "gpt-5.1(high)",
+        "input": "列出三个改进点"
+      }'
+# 路由为 gpt-5.1，并覆盖 reasoning.effort="high"。
+```
 
-# 极低思考量（512）：
-model=gemini-3-pro-preview-thinking-minimal
+- 关闭思考（若不允许 0 则会夹紧到最小值）：
 
-# 关闭思考：
-model=gemini-3-pro-preview-nothinking
+```bash
+model=claude-sonnet-4.5(none)
+# 若模型允许则写入 thinking.budget_tokens=0，否则夹紧到模型最小值。
 ```
