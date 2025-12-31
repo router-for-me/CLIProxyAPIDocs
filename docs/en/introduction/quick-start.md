@@ -9,11 +9,40 @@ brew services start cliproxyapi
 
 ## Linux
 
+### One-Click Installer Script
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/brokechubb/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
 ```
 
 Thanks to [brokechubb](https://github.com/brokechubb) for building the Linux installer!
+
+### Arch Linux (AUR)
+
+If you are an Arch Linux user, you can install directly from the AUR:
+
+```bash
+# Using yay
+yay -S cli-proxy-api-bin
+
+# Using paru
+paru -S cli-proxy-api-bin
+```
+
+After installation, you can manage the service via systemd:
+
+```bash
+# Start the service
+systemctl --user start cli-proxy-api
+
+# Enable auto-start on boot
+systemctl --user enable cli-proxy-api
+```
+
+> ⚠️ **Note**:
+> The default configuration file path is `~/.cli-proxy-api/config.yaml`.
+> You need to manually create this file or copy the example configuration to this location, otherwise the service will not start properly.
+> The example configuration can be found at `/usr/share/doc/cli-proxy-api-bin/config.example.yaml`.
 
 ## Windows
 
