@@ -40,9 +40,11 @@ systemctl --user enable cli-proxy-api
 ```
 
 > ⚠️ **注意**：
-> 默认配置文件路径为 `~/.cli-proxy-api/config.yaml`。
-> 你需要手动创建此文件或将示例配置复制到该位置，否则服务无法正常启动。
-> 示例配置通常位于 `/usr/share/doc/cli-proxy-api-bin/config.example.yaml`。
+> 服务启动前需要配置文件。你可以通过复制示例配置文件来创建它：
+> ```bash
+> mkdir -p ~/.cli-proxy-api
+> cp /usr/share/doc/cli-proxy-api-bin/config.example.yaml ~/.cli-proxy-api/config.yaml
+> ```
 
 ## Windows
 

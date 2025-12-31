@@ -40,9 +40,11 @@ systemctl --user enable cli-proxy-api
 ```
 
 > ⚠️ **Note**:
-> The default configuration file path is `~/.cli-proxy-api/config.yaml`.
-> You need to manually create this file or copy the example configuration to this location, otherwise the service will not start properly.
-> The example configuration can be found at `/usr/share/doc/cli-proxy-api-bin/config.example.yaml`.
+> A configuration file is required before starting the service. You can create it by copying the example configuration:
+> ```bash
+> mkdir -p ~/.cli-proxy-api
+> cp /usr/share/doc/cli-proxy-api-bin/config.example.yaml ~/.cli-proxy-api/config.yaml
+> ```
 
 ## Windows
 
