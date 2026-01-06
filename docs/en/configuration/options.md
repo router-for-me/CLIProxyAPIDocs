@@ -1,57 +1,141 @@
 # Configuration Options
 
-| Parameter                                            | Type     | Default            | Description                                                                                                                                                                               |
-|------------------------------------------------------|----------|--------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `port`                                               | integer  | 8317               | The port number on which the server will listen.                                                                                                                                          |
-| `auth-dir`                                           | string   | "~/.cli-proxy-api" | Directory where authentication tokens are stored. Supports using `~` for the home directory. If you use Windows, please set the directory like this: `C:/cli-proxy-api/`                  |
-| `proxy-url`                                          | string   | ""                 | Proxy URL. Supports socks5/http/https protocols. Example: socks5://user:pass@192.168.1.1:1080/                                                                                            |
-| `request-retry`                                      | integer  | 0                  | Number of times to retry a request. Retries will occur if the HTTP response code is 403, 408, 500, 502, 503, or 504.                                                                      |
-| `remote-management.allow-remote`                     | boolean  | false              | Whether to allow remote (non-localhost) access to the management API. If false, only localhost can access. A management key is still required for localhost.                              |
-| `remote-management.secret-key`                       | string   | ""                 | Management key. If a plaintext value is provided, it will be hashed on startup using bcrypt and persisted back to the config file. If empty, the entire management API is disabled (404). |
-| `remote-management.disable-control-panel`            | boolean  | false              | When true, skip downloading `management.html` and return 404 for `/management.html`, effectively disabling the bundled management UI.                                                     |
-| `ampcode`                                            | object   | {}                 | Amp CLI integration block. Legacy `amp-upstream-*` keys are auto-migrated into this structure on load and rewritten.                                                                      |
-| `ampcode.upstream-url`                               | string   | ""                 | Amp control plane URL. When empty, only provider aliases are registered (management proxy disabled).                                                                                      |
-| `ampcode.upstream-api-key`                           | string   | ""                 | Optional ampcode.com API key override with highest precedence.                                                                                                                            |
-| `ampcode.restrict-management-to-localhost`           | boolean  | true               | Whether to restrict Amp management routes to localhost only.                                                                                                                              |
-| `ampcode.model-mappings`                             | object[] | []                 | Amp model fallback mappings: map requested model (`from`) to an available local model (`to`).                                                                                             |
-| `ampcode.model-mappings.*.from`                      | string   | ""                 | Model name requested by Amp CLI.                                                                                                                                                          |
-| `ampcode.model-mappings.*.to`                        | string   | ""                 | Local or proxy-available model to route to instead.                                                                                                                                       |
-| `quota-exceeded`                                     | object   | {}                 | Configuration for handling quota exceeded.                                                                                                                                                |
-| `quota-exceeded.switch-project`                      | boolean  | true               | Whether to automatically switch to another project when a quota is exceeded.                                                                                                              |
-| `quota-exceeded.switch-preview-model`                | boolean  | true               | Whether to automatically switch to a preview model when a quota is exceeded.                                                                                                              |
-| `debug`                                              | boolean  | false              | Enable debug mode for verbose logging.                                                                                                                                                    |
-| `logging-to-file`                                    | boolean  | true               | Write application logs to rotating files instead of stdout. Set to `false` to log to stdout/stderr.                                                                                       |
-| `usage-statistics-enabled`                           | boolean  | true               | Enable in-memory usage aggregation for management APIs. Disable to drop all collected usage metrics.                                                                                      |
-| `api-keys`                                           | string[] | []                 | Legacy shorthand for inline API keys. Values are mirrored into the `config-api-key` provider for backwards compatibility.                                                                 |
-| `gemini-api-key`                                     | object[] | []                 | Gemini API key entries with optional per-key `base-url` and `proxy-url` overrides.                                                                                                        |
-| `gemini-api-key.*.api-key`                           | string   | ""                 | Gemini API key.                                                                                                                                                                           |
-| `gemini-api-key.*.base-url`                          | string   | ""                 | Optional Gemini API endpoint override.                                                                                                                                                    |
-| `gemini-api-key.*.headers`                           | object   | {}                 | Optional extra HTTP headers sent to the overridden Gemini endpoint only.                                                                                                                  |
-| `gemini-api-key.*.proxy-url`                         | string   | ""                 | Optional per-key proxy override for the Gemini API key.                                                                                                                                   |
-| `generative-language-api-key`                        | string[] | []                 | (Legacy alias) Pure key list mirrored from `gemini-api-key`; loads migrate into `gemini-api-key` and the legacy field is removed on save.                                                 |
-| `codex-api-key`                                      | object   | {}                 | List of Codex API keys.                                                                                                                                                                   |
-| `codex-api-key.api-key`                              | string   | ""                 | Codex API key.                                                                                                                                                                            |
-| `codex-api-key.base-url`                             | string   | ""                 | Custom Codex API endpoint, if you use a third-party API endpoint.                                                                                                                         |
-| `codex-api-key.proxy-url`                            | string   | ""                 | Proxy URL for this specific API key. Overrides the global proxy-url setting. Supports socks5/http/https protocols.                                                                        |
-| `claude-api-key`                                     | object   | {}                 | List of Claude API keys.                                                                                                                                                                  |
-| `claude-api-key.api-key`                             | string   | ""                 | Claude API key.                                                                                                                                                                           |
-| `claude-api-key.base-url`                            | string   | ""                 | Custom Claude API endpoint, if you use a third-party API endpoint.                                                                                                                        |
-| `claude-api-key.proxy-url`                           | string   | ""                 | Proxy URL for this specific API key. Overrides the global proxy-url setting. Supports socks5/http/https protocols.                                                                        |
-| `claude-api-key.models`                              | object[] | []                 | Model alias entries for this key.                                                                                                                                                         |
-| `claude-api-key.models.*.name`                       | string   | ""                 | Upstream Claude model name invoked against the API.                                                                                                                                       |
-| `claude-api-key.models.*.alias`                      | string   | ""                 | Client-facing alias that maps to the upstream model name.                                                                                                                                 |
-| `openai-compatibility`                               | object[] | []                 | Upstream OpenAI-compatible providers configuration (name, base-url, API keys, models); only `api-key-entries` are persisted.                                                             |
-| `openai-compatibility.*.name`                        | string   | ""                 | The name of the provider. It will be used in the user agent and other places.                                                                                                             |
-| `openai-compatibility.*.base-url`                    | string   | ""                 | The base URL of the provider.                                                                                                                                                             |
-| `openai-compatibility.*.api-keys`                    | string[] | []                 | (Deprecated) Parsed for compatibility, migrated into `api-key-entries`, and removed on save.                                                                                              |
-| `openai-compatibility.*.api-key-entries`             | object[] | []                 | API key entries with optional per-key proxy configuration. Preferred over api-keys.                                                                                                       |
-| `openai-compatibility.*.api-key-entries.*.api-key`   | string   | ""                 | The API key for this entry.                                                                                                                                                               |
-| `openai-compatibility.*.api-key-entries.*.proxy-url` | string   | ""                 | Proxy URL for this specific API key. Overrides the global proxy-url setting. Supports socks5/http/https protocols.                                                                        |
-| `openai-compatibility.*.models`                      | object[] | []                 | Model alias definitions routing client aliases to upstream names.                                                                                                                         |
-| `openai-compatibility.*.models.*.name`               | string   | ""                 | Upstream model name invoked against the provider.                                                                                                                                         |
-| `openai-compatibility.*.models.*.alias`              | string   | ""                 | Client alias routed to the upstream model.                                                                                                                                                |
+Defaults stay aligned with `config.example.yaml`.
 
-> [!NOTE]  
-> 
-> When `claude-api-key.models` is specified, only the provided aliases are registered in the model registry (mirroring OpenAI compatibility behaviour), and the default Claude catalog is suppressed for that credential.   
+## Core
 
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `host` | string | `""` | Bind address; `""` listens on all IPv4/IPv6; use `127.0.0.1` to restrict to localhost. |
+| `port` | integer | `8317` | Server port. |
+| `tls.enable` | boolean | `false` | Enable HTTPS. |
+| `tls.cert` | string | `""` | TLS certificate path. |
+| `tls.key` | string | `""` | TLS private key path. |
+| `auth-dir` | string | `"~/.cli-proxy-api"` | Credential storage directory; `~` supported. |
+| `api-keys` | string[] | `[]` | Built-in API keys. |
+| `debug` | boolean | `false` | Verbose logging. |
+| `commercial-mode` | boolean | `false` | Disable high-overhead middleware to lower memory. |
+| `logging-to-file` | boolean | `false` | Write rotating log files instead of stdout. |
+| `logs-max-total-size-mb` | integer | `0` | Log directory size cap; 0 disables limiting. |
+| `usage-statistics-enabled` | boolean | `false` | Enable in-memory usage aggregation. |
+| `proxy-url` | string | `""` | Global proxy (socks5/http/https). |
+| `force-model-prefix` | boolean | `false` | Unprefixed model requests use only unprefixed credentials. |
+| `request-retry` | integer | `3` | Retries on 403/408/500/502/503/504. |
+| `max-retry-interval` | integer | `30` | Max wait (seconds) for cooled-down credential before retry. |
+| `routing.strategy` | string | `"round-robin"` | Credential selection when multiple match: `round-robin` or `fill-first`. |
+| `ws-auth` | boolean | `false` | Require auth for `/v1/ws`. |
+| `streaming.keepalive-seconds` | integer | `0` | SSE keep-alive interval; ≤0 disables. |
+| `streaming.bootstrap-retries` | integer | `0` | Safe retries before first byte. |
+
+## Management API
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `remote-management.allow-remote` | boolean | `false` | Permit non-localhost management access. |
+| `remote-management.secret-key` | string | `""` | Management key; plaintext is hashed on startup; empty disables all `/v0/management` (404). |
+| `remote-management.disable-control-panel` | boolean | `false` | Disable bundled management UI assets/routes. |
+| `remote-management.panel-github-repository` | string | `"https://github.com/router-for-me/Cli-Proxy-API-Management-Center"` | Repo or releases API for the management UI bundle. |
+
+## Quota & Routing
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `quota-exceeded.switch-project` | boolean | `true` | Auto-switch project on quota exhaustion. |
+| `quota-exceeded.switch-preview-model` | boolean | `true` | Auto-switch to preview model on exhaustion. |
+
+## Provider Credentials (arrays; default `[]`)
+
+### Gemini
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `gemini-api-key.*.api-key` | string | `""` | API key. |
+| `gemini-api-key.*.prefix` | string | `""` | Optional prefix; call as `prefix/model`. |
+| `gemini-api-key.*.base-url` | string | `"https://generativelanguage.googleapis.com"` | Custom endpoint. |
+| `gemini-api-key.*.headers` | object | `{}` | Extra headers for that endpoint. |
+| `gemini-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `gemini-api-key.*.models.*.name` | string | `""` | Upstream model name. |
+| `gemini-api-key.*.models.*.alias` | string | `""` | Client alias. |
+| `gemini-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards supported). |
+
+### Codex
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `codex-api-key.*.api-key` | string | `""` | API key. |
+| `codex-api-key.*.prefix` | string | `""` | Optional prefix. |
+| `codex-api-key.*.base-url` | string | `""` | Custom Codex endpoint. |
+| `codex-api-key.*.headers` | object | `{}` | Extra headers. |
+| `codex-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `codex-api-key.*.models.*.name` | string | `""` | Upstream model name. |
+| `codex-api-key.*.models.*.alias` | string | `""` | Client alias. |
+| `codex-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards). |
+
+### Claude
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `claude-api-key.*.api-key` | string | `""` | API key. |
+| `claude-api-key.*.prefix` | string | `""` | Optional prefix. |
+| `claude-api-key.*.base-url` | string | `""` | Custom Claude endpoint. |
+| `claude-api-key.*.headers` | object | `{}` | Extra headers. |
+| `claude-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `claude-api-key.*.models.*.name` | string | `""` | Upstream model name. |
+| `claude-api-key.*.models.*.alias` | string | `""` | Client alias. |
+| `claude-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards). |
+
+### OpenAI Compatibility
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `openai-compatibility.*.name` | string | `""` | Provider name (used in UA, etc.). |
+| `openai-compatibility.*.prefix` | string | `""` | Optional prefix. |
+| `openai-compatibility.*.base-url` | string | `""` | Provider base URL. |
+| `openai-compatibility.*.headers` | object | `{}` | Extra headers. |
+| `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API key. |
+| `openai-compatibility.*.api-key-entries.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `openai-compatibility.*.models.*.name` | string | `""` | Upstream model name. |
+| `openai-compatibility.*.models.*.alias` | string | `""` | Client alias. |
+
+### Vertex
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `vertex-api-key.*.api-key` | string | `""` | `x-goog-api-key` value. |
+| `vertex-api-key.*.prefix` | string | `""` | Optional prefix. |
+| `vertex-api-key.*.base-url` | string | `""` | Vertex-compatible endpoint. |
+| `vertex-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `vertex-api-key.*.headers` | object | `{}` | Extra headers. |
+| `vertex-api-key.*.models.*.name` | string | `""` | Upstream model name. |
+| `vertex-api-key.*.models.*.alias` | string | `""` | Client alias. |
+
+## Amp Integration (`ampcode`)
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `ampcode.upstream-url` | string | `""` | Upstream URL for Amp CLI OAuth/management. |
+| `ampcode.upstream-api-key` | string | `""` | Override API key for Amp upstream. |
+| `ampcode.upstream-api-keys[].upstream-api-key` | string | `""` | Upstream key for mapped clients. |
+| `ampcode.upstream-api-keys[].api-keys` | string[] | `[]` | Client keys routed to that upstream key. |
+| `ampcode.restrict-management-to-localhost` | boolean | `false` | Restrict Amp management routes to localhost. |
+| `ampcode.force-model-mappings` | boolean | `false` | Force model mappings before checking local API keys. |
+| `ampcode.model-mappings[].from` | string | `""` | Amp-requested model. |
+| `ampcode.model-mappings[].to` | string | `""` | Local available model to route to. |
+
+## OAuth Model Controls
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `oauth-model-mappings` | object | `{}` | Rename models per channel (gemini-cli, vertex, aistudio, antigravity, claude, codex, qwen, iflow). |
+| `oauth-excluded-models` | object | `{}` | Exclude models per channel; wildcards supported. |
+
+## Payload Rules
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `payload.default[].models[].name` | string | `""` | Matching model name (wildcards ok). |
+| `payload.default[].models[].protocol` | string | `""` | Restrict to protocol: `openai`/`gemini`/`claude`/`codex`. |
+| `payload.default[].params` | object | `{}` | JSON path → value applied when missing. |
+| `payload.override[].models[].name` | string | `""` | Matching model name (wildcards). |
+| `payload.override[].models[].protocol` | string | `""` | Restrict to protocol. |
+| `payload.override[].params` | object | `{}` | JSON path → value always overwritten. |

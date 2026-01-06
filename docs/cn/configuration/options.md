@@ -1,56 +1,141 @@
 # 配置选项
 
-| 参数                                                   | 类型       | 默认值                | 描述                                                                        |
-|------------------------------------------------------|----------|--------------------|---------------------------------------------------------------------------|
-| `port`                                               | integer  | 8317               | 服务器将监听的端口号。                                                               |
-| `auth-dir`                                           | string   | "~/.cli-proxy-api" | 存储身份验证令牌的目录。支持使用 `~` 来表示主目录。如果你使用Windows，建议设置成`C:/cli-proxy-api/`。        |
-| `proxy-url`                                          | string   | ""                 | 代理URL。支持socks5/http/https协议。例如：socks5://user:pass@192.168.1.1:1080/       |
-| `request-retry`                                      | integer  | 0                  | 请求重试次数。如果HTTP响应码为403、408、500、502、503或504，将会触发重试。                          |
-| `remote-management.allow-remote`                     | boolean  | false              | 是否允许远程（非localhost）访问管理接口。为false时仅允许本地访问；本地访问同样需要管理密钥。                     |
-| `remote-management.secret-key`                       | string   | ""                 | 管理密钥。若配置为明文，启动时会自动进行bcrypt加密并写回配置文件。若为空，管理接口整体不可用（404）。                   |
-| `remote-management.disable-control-panel`            | boolean  | false              | 当为 true 时，不再下载 `management.html`，且 `/management.html` 会返回 404，从而禁用内置管理界面。 |
-| `ampcode`                                            | object   | {}                 | Amp CLI 集成的上游与安全配置块。旧的 `amp-upstream-*` 字段会在加载时自动迁移到此节点并写回新格式。                |
-| `ampcode.upstream-url`                               | string   | ""                 | Amp 控制平面地址。为空时仅注册本地提供商别名，不代理管理路由。                                              |
-| `ampcode.upstream-api-key`                           | string   | ""                 | 可选的 ampcode.com API Key 覆盖项，优先级最高。                                             |
-| `ampcode.restrict-management-to-localhost`           | boolean  | true               | 是否将 Amp 管理路由限制为仅允许 localhost 访问。                                                |
-| `ampcode.model-mappings`                             | object[] | []                 | Amp 模型回退映射，`from` 为 Amp 请求的模型，`to` 为本地可用模型。                                   |
-| `ampcode.model-mappings.*.from`                      | string   | ""                 | Amp CLI 请求的模型名。                                                               |
-| `ampcode.model-mappings.*.to`                        | string   | ""                 | 映射到的本地或代理可用模型名。                                                          |
-| `quota-exceeded`                                     | object   | {}                 | 用于处理配额超限的配置。                                                              |
-| `quota-exceeded.switch-project`                      | boolean  | true               | 当配额超限时，是否自动切换到另一个项目。                                                      |
-| `quota-exceeded.switch-preview-model`                | boolean  | true               | 当配额超限时，是否自动切换到预览模型。                                                       |
-| `debug`                                              | boolean  | false              | 启用调试模式以获取详细日志。                                                            |
-| `logging-to-file`                                    | boolean  | true               | 是否将应用日志写入滚动文件；设为 false 时输出到 stdout/stderr。                                |
-| `usage-statistics-enabled`                           | boolean  | true               | 是否启用内存中的使用统计；设为 false 时直接丢弃所有统计数据。                                        |
-| `api-keys`                                           | string[] | []                 | 兼容旧配置的简写，会自动同步到默认 `config-api-key` 提供方。                                   |
-| `gemini-api-key`                                     | object[] | []                 | Gemini API 密钥配置，支持为每个密钥设置可选的 `base-url` 与 `proxy-url`。                    |
-| `gemini-api-key.*.api-key`                           | string   | ""                 | Gemini API 密钥。                                                            |
-| `gemini-api-key.*.base-url`                          | string   | ""                 | 可选的 Gemini API 端点覆盖地址。                                                    |
-| `gemini-api-key.*.headers`                           | object   | {}                 | 可选的额外 HTTP 头部，仅在访问覆盖后的 Gemini 端点时发送。                                      |
-| `gemini-api-key.*.proxy-url`                         | string   | ""                 | 可选的单独代理设置，会覆盖全局 `proxy-url`。                                              |
-| `generative-language-api-key`                        | string[] | []                 | （兼容别名）旧管理接口返回的纯密钥列表，加载时会自动合并到 `gemini-api-key` 并从配置文件中移除。                |
-| `codex-api-key`                                      | object   | {}                 | Codex API密钥列表。                                                            |
-| `codex-api-key.api-key`                              | string   | ""                 | Codex API密钥。                                                              |
-| `codex-api-key.base-url`                             | string   | ""                 | 自定义的Codex API端点                                                           |
-| `codex-api-key.proxy-url`                            | string   | ""                 | 针对该API密钥的代理URL。会覆盖全局proxy-url设置。支持socks5/http/https协议。                    |
-| `claude-api-key`                                     | object   | {}                 | Claude API密钥列表。                                                           |
-| `claude-api-key.api-key`                             | string   | ""                 | Claude API密钥。                                                             |
-| `claude-api-key.base-url`                            | string   | ""                 | 自定义的Claude API端点，如果您使用第三方的API端点。                                          |
-| `claude-api-key.proxy-url`                           | string   | ""                 | 针对该API密钥的代理URL。会覆盖全局proxy-url设置。支持socks5/http/https协议。                    |
-| `claude-api-key.models`                              | object[] | []                 | Model alias entries for this key.                                         |
-| `claude-api-key.models.*.name`                       | string   | ""                 | Upstream Claude model name invoked against the API.                       |
-| `claude-api-key.models.*.alias`                      | string   | ""                 | Client-facing alias that maps to the upstream model name.                 |
-| `openai-compatibility`                               | object[] | []                 | 上游OpenAI兼容提供商的配置（名称、基础URL、API密钥、模型），仅 `api-key-entries` 会被持久化。                |
-| `openai-compatibility.*.name`                        | string   | ""                 | 提供商的名称。它将被用于用户代理（User Agent）和其他地方。                                        |
-| `openai-compatibility.*.base-url`                    | string   | ""                 | 提供商的基础URL。                                                                |
-| `openai-compatibility.*.api-keys`                    | string[] | []                 | （已弃用）读取时会自动迁移到 `api-key-entries` 并在保存时从配置文件移除。                            |
-| `openai-compatibility.*.api-key-entries`             | object[] | []                 | API密钥条目，支持可选的每密钥代理配置。优先于api-keys。                                         |
-| `openai-compatibility.*.api-key-entries.*.api-key`   | string   | ""                 | 该条目的API密钥。                                                                |
-| `openai-compatibility.*.api-key-entries.*.proxy-url` | string   | ""                 | 针对该API密钥的代理URL。会覆盖全局proxy-url设置。支持socks5/http/https协议。                    |
-| `openai-compatibility.*.models`                      | object[] | []                 | Model alias definitions routing client aliases to upstream names.         |
-| `openai-compatibility.*.models.*.name`               | string   | ""                 | Upstream model name invoked against the provider.                         |
-| `openai-compatibility.*.models.*.alias`              | string   | ""                 | Client alias routed to the upstream model.                                |
+以下默认值与 `config.example.yaml` 保持同步。
 
+## 基础
 
-> [!NOTE]
-> 当指定了 `claude-api-key.models` 时，只有提供了别名的模型才会被注册到模型注册表中（此行为与 OpenAI 的兼容模式一致），并且该凭证的默认 Claude 其他未定义模型将无法访问。
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `host` | string | `""` | 绑定地址；`""` 监听所有 IPv4/IPv6；用 `127.0.0.1` 仅限本机。 |
+| `port` | integer | `8317` | 服务器监听端口。 |
+| `tls.enable` | boolean | `false` | 是否启用 HTTPS。 |
+| `tls.cert` | string | `""` | TLS 证书路径。 |
+| `tls.key` | string | `""` | TLS 私钥路径。 |
+| `auth-dir` | string | `"~/.cli-proxy-api"` | 身份凭据目录，支持 `~`。 |
+| `api-keys` | string[] | `[]` | 内置 API 密钥列表。 |
+| `debug` | boolean | `false` | 调试日志。 |
+| `commercial-mode` | boolean | `false` | 关闭高开销中间件以降低内存。 |
+| `logging-to-file` | boolean | `false` | 写入滚动日志文件而非 stdout。 |
+| `logs-max-total-size-mb` | integer | `0` | 日志目录大小上限，0 表示不限制。 |
+| `usage-statistics-enabled` | boolean | `false` | 是否启用内存用量统计。 |
+| `proxy-url` | string | `""` | 全局代理，支持 socks5/http/https。 |
+| `force-model-prefix` | boolean | `false` | 无前缀的模型请求仅使用无前缀凭据。 |
+| `request-retry` | integer | `3` | 403/408/500/502/503/504 时的重试次数。 |
+| `max-retry-interval` | integer | `30` | 冷却凭据等待秒数上限，超出即触发重试。 |
+| `routing.strategy` | string | `"round-robin"` | 多匹配凭据的选择策略：`round-robin` 或 `fill-first`。 |
+| `ws-auth` | boolean | `false` | 是否为 `/v1/ws` 启用认证。 |
+| `streaming.keepalive-seconds` | integer | `0` | SSE 保活间隔，≤0 禁用。 |
+| `streaming.bootstrap-retries` | integer | `0` | 首字节前的安全重试次数。 |
+
+## 管理 API
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `remote-management.allow-remote` | boolean | `false` | 是否允许非 localhost 访问管理接口。 |
+| `remote-management.secret-key` | string | `""` | 管理密钥；明文将启动时哈希；为空则整体 404。 |
+| `remote-management.disable-control-panel` | boolean | `false` | true 时禁用内置管理面板资源与路由。 |
+| `remote-management.panel-github-repository` | string | `"https://github.com/router-for-me/Cli-Proxy-API-Management-Center"` | 管理面板资源仓库或 releases API 地址。 |
+
+## 配额与路由
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `quota-exceeded.switch-project` | boolean | `true` | 配额超限时自动切换项目。 |
+| `quota-exceeded.switch-preview-model` | boolean | `true` | 配额超限时自动切换预览模型。 |
+
+## 提供商凭据（均为数组，未配置时默认 `[]`）
+
+### Gemini
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `gemini-api-key.*.api-key` | string | `""` | API Key。 |
+| `gemini-api-key.*.prefix` | string | `""` | 可选前缀，需以 `prefix/model` 访问。 |
+| `gemini-api-key.*.base-url` | string | `"https://generativelanguage.googleapis.com"` | 自定义端点。 |
+| `gemini-api-key.*.headers` | object | `{}` | 仅对该端点附加的自定义请求头。 |
+| `gemini-api-key.*.proxy-url` | string | `""` | 覆盖全局代理。 |
+| `gemini-api-key.*.models.*.name` | string | `""` | 上游模型名。 |
+| `gemini-api-key.*.models.*.alias` | string | `""` | 客户端别名。 |
+| `gemini-api-key.*.excluded-models` | string[] | `[]` | 排除匹配的模型（支持通配符）。 |
+
+### Codex
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `codex-api-key.*.api-key` | string | `""` | API Key。 |
+| `codex-api-key.*.prefix` | string | `""` | 可选前缀。 |
+| `codex-api-key.*.base-url` | string | `""` | 自定义 Codex 端点。 |
+| `codex-api-key.*.headers` | object | `{}` | 自定义请求头。 |
+| `codex-api-key.*.proxy-url` | string | `""` | 覆盖全局代理。 |
+| `codex-api-key.*.models.*.name` | string | `""` | 上游模型名。 |
+| `codex-api-key.*.models.*.alias` | string | `""` | 客户端别名。 |
+| `codex-api-key.*.excluded-models` | string[] | `[]` | 排除模型（支持通配符）。 |
+
+### Claude
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `claude-api-key.*.api-key` | string | `""` | API Key。 |
+| `claude-api-key.*.prefix` | string | `""` | 可选前缀。 |
+| `claude-api-key.*.base-url` | string | `""` | 自定义 Claude 端点。 |
+| `claude-api-key.*.headers` | object | `{}` | 自定义请求头。 |
+| `claude-api-key.*.proxy-url` | string | `""` | 覆盖全局代理。 |
+| `claude-api-key.*.models.*.name` | string | `""` | 上游模型名。 |
+| `claude-api-key.*.models.*.alias` | string | `""` | 客户端别名。 |
+| `claude-api-key.*.excluded-models` | string[] | `[]` | 排除模型（支持通配符）。 |
+
+### OpenAI 兼容提供商
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `openai-compatibility.*.name` | string | `""` | 提供商名称（用于 UA 等）。 |
+| `openai-compatibility.*.prefix` | string | `""` | 可选前缀。 |
+| `openai-compatibility.*.base-url` | string | `""` | 提供商基础 URL。 |
+| `openai-compatibility.*.headers` | object | `{}` | 额外请求头。 |
+| `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API Key。 |
+| `openai-compatibility.*.api-key-entries.*.proxy-url` | string | `""` | 针对该密钥的代理。 |
+| `openai-compatibility.*.models.*.name` | string | `""` | 上游模型名。 |
+| `openai-compatibility.*.models.*.alias` | string | `""` | 客户端别名。 |
+
+### Vertex
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `vertex-api-key.*.api-key` | string | `""` | `x-goog-api-key` 值。 |
+| `vertex-api-key.*.prefix` | string | `""` | 可选前缀。 |
+| `vertex-api-key.*.base-url` | string | `""` | Vertex 兼容端点。 |
+| `vertex-api-key.*.proxy-url` | string | `""` | 针对该密钥的代理。 |
+| `vertex-api-key.*.headers` | object | `{}` | 额外请求头。 |
+| `vertex-api-key.*.models.*.name` | string | `""` | 上游模型名。 |
+| `vertex-api-key.*.models.*.alias` | string | `""` | 客户端别名。 |
+
+## Amp 集成 (`ampcode`)
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `ampcode.upstream-url` | string | `""` | Amp CLI OAuth/管理上游地址。 |
+| `ampcode.upstream-api-key` | string | `""` | 覆盖用的 Amp 上游 API Key。 |
+| `ampcode.upstream-api-keys[].upstream-api-key` | string | `""` | 为特定客户端映射的上游 Key。 |
+| `ampcode.upstream-api-keys[].api-keys` | string[] | `[]` | 需要映射到该上游 Key 的客户端密钥。 |
+| `ampcode.restrict-management-to-localhost` | boolean | `false` | 是否将 Amp 管理路由限制为 localhost。 |
+| `ampcode.force-model-mappings` | boolean | `false` | 是否在检查本地 API 密钥前强制执行模型映射。 |
+| `ampcode.model-mappings[].from` | string | `""` | Amp 请求的模型名。 |
+| `ampcode.model-mappings[].to` | string | `""` | 本地可用模型名。 |
+
+## OAuth 模型映射
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `oauth-model-mappings` | object | `{}` | 按渠道重命名模型（gemini-cli、vertex、aistudio、antigravity、claude、codex、qwen、iflow）。 |
+| `oauth-excluded-models` | object | `{}` | 按渠道排除模型，支持通配符。 |
+
+## Payload 规则
+
+| 参数 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| `payload.default[].models[].name` | string | `""` | 匹配的模型名（可通配）。 |
+| `payload.default[].models[].protocol` | string | `""` | 限定协议：`openai`/`gemini`/`claude`/`codex`。 |
+| `payload.default[].params` | object | `{}` | 缺省时写入的 JSON 路径 → 值。 |
+| `payload.override[].models[].name` | string | `""` | 匹配的模型名（可通配）。 |
+| `payload.override[].models[].protocol` | string | `""` | 限定协议。 |
+| `payload.override[].params` | object | `{}` | 总是覆盖的 JSON 路径 → 值。 |
