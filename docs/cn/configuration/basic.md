@@ -8,7 +8,7 @@
 ./cli-proxy-api --config /path/to/your/config.yaml
 ```
 
-### 配置文件示例（与 `config.example.yaml` 同步）
+### 配置文件示例
 
 ```yaml
 # 服务器绑定主机/接口，默认空字符串同时绑定 IPv4/IPv6。

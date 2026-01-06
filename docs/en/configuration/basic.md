@@ -8,7 +8,7 @@ The server reads a YAML configuration file (`config.yaml`) from the project root
 ./cli-proxy-api --config /path/to/your/config.yaml
 ```
 
-### Example Configuration (kept in sync with `config.example.yaml`)
+### Example Configuration
 
 ```yaml
 # Server host/interface to bind to. Default is empty ("") to bind all interfaces (IPv4 + IPv6).
