@@ -91,191 +91,191 @@ routing:
 ws-auth: false
 
 # Streaming behavior (SSE keep-alives + safe bootstrap retries).
-# streaming:
-#   keepalive-seconds: 15   # Default: 0 (disabled). <= 0 disables keep-alives.
-#   bootstrap-retries: 1    # Default: 0 (disabled). Retries before first byte is sent.
+streaming:
+  keepalive-seconds: 15   # Default: 0 (disabled). <= 0 disables keep-alives.
+  bootstrap-retries: 1    # Default: 0 (disabled). Retries before first byte is sent.
 
 # Gemini API keys
-# gemini-api-key:
-#   - api-key: "AIzaSy...01"
-#     prefix: "test" # optional: require calls like "test/gemini-3-pro-preview" to target this credential
-#     base-url: "https://generativelanguage.googleapis.com"
-#     headers:
-#       X-Custom-Header: "custom-value"
-#     proxy-url: "socks5://proxy.example.com:1080"
-#     models:
-#       - name: "gemini-2.5-flash" # upstream model name
-#         alias: "gemini-flash"    # client alias mapped to the upstream model
-#     excluded-models:
-#       - "gemini-2.5-pro"     # exclude specific models from this provider (exact match)
-#       - "gemini-2.5-*"       # wildcard matching prefix (e.g. gemini-2.5-flash, gemini-2.5-pro)
-#       - "*-preview"          # wildcard matching suffix (e.g. gemini-3-pro-preview)
-#       - "*flash*"            # wildcard matching substring (e.g. gemini-2.5-flash-lite)
-#   - api-key: "AIzaSy...02"
+gemini-api-key:
+  - api-key: "AIzaSy...01"
+    prefix: "test" # optional: require calls like "test/gemini-3-pro-preview" to target this credential
+    base-url: "https://generativelanguage.googleapis.com"
+    headers:
+      X-Custom-Header: "custom-value"
+    proxy-url: "socks5://proxy.example.com:1080"
+    models:
+      - name: "gemini-2.5-flash" # upstream model name
+        alias: "gemini-flash"    # client alias mapped to the upstream model
+    excluded-models:
+      - "gemini-2.5-pro"     # exclude specific models from this provider (exact match)
+      - "gemini-2.5-*"       # wildcard matching prefix (e.g. gemini-2.5-flash, gemini-2.5-pro)
+      - "*-preview"          # wildcard matching suffix (e.g. gemini-3-pro-preview)
+      - "*flash*"            # wildcard matching substring (e.g. gemini-2.5-flash-lite)
+  - api-key: "AIzaSy...02"
 
 # Codex API keys
-# codex-api-key:
-#   - api-key: "sk-atSM..."
-#     prefix: "test" # optional: require calls like "test/gpt-5-codex" to target this credential
-#     base-url: "https://www.example.com" # use the custom codex API endpoint
-#     headers:
-#       X-Custom-Header: "custom-value"
-#     proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
-#     models:
-#       - name: "gpt-5-codex"   # upstream model name
-#         alias: "codex-latest" # client alias mapped to the upstream model
-#     excluded-models:
-#       - "gpt-5.1"         # exclude specific models (exact match)
-#       - "gpt-5-*"         # wildcard matching prefix (e.g. gpt-5-medium, gpt-5-codex)
-#       - "*-mini"          # wildcard matching suffix (e.g. gpt-5-codex-mini)
-#       - "*codex*"         # wildcard matching substring (e.g. gpt-5-codex-low)
+codex-api-key:
+  - api-key: "sk-atSM..."
+    prefix: "test" # optional: require calls like "test/gpt-5-codex" to target this credential
+    base-url: "https://www.example.com" # use the custom codex API endpoint
+    headers:
+      X-Custom-Header: "custom-value"
+    proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
+    models:
+      - name: "gpt-5-codex"   # upstream model name
+        alias: "codex-latest" # client alias mapped to the upstream model
+    excluded-models:
+      - "gpt-5.1"         # exclude specific models (exact match)
+      - "gpt-5-*"         # wildcard matching prefix (e.g. gpt-5-medium, gpt-5-codex)
+      - "*-mini"          # wildcard matching suffix (e.g. gpt-5-codex-mini)
+      - "*codex*"         # wildcard matching substring (e.g. gpt-5-codex-low)
 
 # Claude API keys
-# claude-api-key:
-#   - api-key: "sk-atSM..." # use the official claude API key, no need to set the base url
-#   - api-key: "sk-atSM..."
-#     prefix: "test" # optional: require calls like "test/claude-sonnet-latest" to target this credential
-#     base-url: "https://www.example.com" # use the custom claude API endpoint
-#     headers:
-#       X-Custom-Header: "custom-value"
-#     proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
-#     models:
-#       - name: "claude-3-5-sonnet-20241022" # upstream model name
-#         alias: "claude-sonnet-latest"      # client alias mapped to the upstream model
-#     excluded-models:
-#       - "claude-opus-4-5-20251101" # exclude specific models (exact match)
-#       - "claude-3-*"               # wildcard matching prefix (e.g. claude-3-7-sonnet-20250219)
-#       - "*-thinking"               # wildcard matching suffix (e.g. claude-opus-4-5-thinking)
-#       - "*haiku*"                  # wildcard matching substring (e.g. claude-3-5-haiku-20241022)
+claude-api-key:
+  - api-key: "sk-atSM..." # use the official claude API key, no need to set the base url
+  - api-key: "sk-atSM..."
+    prefix: "test" # optional: require calls like "test/claude-sonnet-latest" to target this credential
+    base-url: "https://www.example.com" # use the custom claude API endpoint
+    headers:
+      X-Custom-Header: "custom-value"
+    proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
+    models:
+      - name: "claude-3-5-sonnet-20241022" # upstream model name
+        alias: "claude-sonnet-latest"      # client alias mapped to the upstream model
+    excluded-models:
+      - "claude-opus-4-5-20251101" # exclude specific models (exact match)
+      - "claude-3-*"               # wildcard matching prefix (e.g. claude-3-7-sonnet-20250219)
+      - "*-thinking"               # wildcard matching suffix (e.g. claude-opus-4-5-thinking)
+      - "*haiku*"                  # wildcard matching substring (e.g. claude-3-5-haiku-20241022)
 
 # OpenAI compatibility providers
-# openai-compatibility:
-#   - name: "openrouter" # The name of the provider; it will be used in the user agent and other places.
-#     prefix: "test" # optional: require calls like "test/kimi-k2" to target this provider's credentials
-#     base-url: "https://openrouter.ai/api/v1" # The base URL of the provider.
-#     headers:
-#       X-Custom-Header: "custom-value"
-#     api-key-entries:
-#       - api-key: "sk-or-v1-...b780"
-#         proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
-#       - api-key: "sk-or-v1-...b781" # without proxy-url
-#     models: # The models supported by the provider.
-#       - name: "moonshotai/kimi-k2:free" # The actual model name.
-#         alias: "kimi-k2" # The alias used in the API.
+openai-compatibility:
+  - name: "openrouter" # The name of the provider; it will be used in the user agent and other places.
+    prefix: "test" # optional: require calls like "test/kimi-k2" to target this provider's credentials
+    base-url: "https://openrouter.ai/api/v1" # The base URL of the provider.
+    headers:
+      X-Custom-Header: "custom-value"
+    api-key-entries:
+      - api-key: "sk-or-v1-...b780"
+        proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
+      - api-key: "sk-or-v1-...b781" # without proxy-url
+    models: # The models supported by the provider.
+      - name: "moonshotai/kimi-k2:free" # The actual model name.
+        alias: "kimi-k2" # The alias used in the API.
 
 # Vertex API keys (Vertex-compatible endpoints, use API key + base URL)
-# vertex-api-key:
-#   - api-key: "vk-123..."                        # x-goog-api-key header
-#     prefix: "test"                              # optional: require calls like "test/vertex-pro" to target this credential
-#     base-url: "https://example.com/api"         # e.g. https://zenmux.ai/api
-#     proxy-url: "socks5://proxy.example.com:1080" # optional per-key proxy override
-#     headers:
-#       X-Custom-Header: "custom-value"
-#     models:                                     # optional: map aliases to upstream model names
-#       - name: "gemini-2.5-flash"                # upstream model name
-#         alias: "vertex-flash"                   # client-visible alias
-#       - name: "gemini-2.5-pro"
-#         alias: "vertex-pro"
+vertex-api-key:
+  - api-key: "vk-123..."                        # x-goog-api-key header
+    prefix: "test"                              # optional: require calls like "test/vertex-pro" to target this credential
+    base-url: "https://example.com/api"         # e.g. https://zenmux.ai/api
+    proxy-url: "socks5://proxy.example.com:1080" # optional per-key proxy override
+    headers:
+      X-Custom-Header: "custom-value"
+    models:                                     # optional: map aliases to upstream model names
+      - name: "gemini-2.5-flash"                # upstream model name
+        alias: "vertex-flash"                   # client-visible alias
+      - name: "gemini-2.5-pro"
+        alias: "vertex-pro"
 
 # Amp Integration
-# ampcode:
-#   # Configure upstream URL for Amp CLI OAuth and management features
-#   upstream-url: "https://ampcode.com"
-#   # Optional: Override API key for Amp upstream (otherwise uses env or file)
-#   upstream-api-key: ""
-#   # Per-client upstream API key mapping
-#   # Maps client API keys (from top-level api-keys) to different Amp upstream API keys.
-#   # Useful when different clients need to use different Amp accounts/quotas.
-#   # If a client key isn't mapped, falls back to upstream-api-key (default behavior).
-#   upstream-api-keys:
-#     - upstream-api-key: "amp_key_for_team_a"    # Upstream key to use for these clients
-#       api-keys:                                 # Client keys that use this upstream key
-#         - "your-api-key-1"
-#         - "your-api-key-2"
-#     - upstream-api-key: "amp_key_for_team_b"
-#       api-keys:
-#         - "your-api-key-3"
-#   # Restrict Amp management routes (/api/auth, /api/user, etc.) to localhost only (default: false)
-#   restrict-management-to-localhost: false
-#   # Force model mappings to run before checking local API keys (default: false)
-#   force-model-mappings: false
-#   # Amp Model Mappings
-#   # Route unavailable Amp models to alternative models available in your local proxy.
-#   # Useful when Amp CLI requests models you don't have access to (e.g., Claude Opus 4.5)
-#   # but you have a similar model available (e.g., Claude Sonnet 4).
-#   model-mappings:
-#     - from: "claude-opus-4-5-20251101"          # Model requested by Amp CLI
-#       to: "gemini-claude-opus-4-5-thinking"     # Route to this available model instead
-#     - from: "claude-sonnet-4-5-20250929"
-#       to: "gemini-claude-sonnet-4-5-thinking"
-#     - from: "claude-haiku-4-5-20251001"
-#       to: "gemini-2.5-flash"
+ampcode:
+  # Configure upstream URL for Amp CLI OAuth and management features
+  upstream-url: "https://ampcode.com"
+  # Optional: Override API key for Amp upstream (otherwise uses env or file)
+  upstream-api-key: ""
+  # Per-client upstream API key mapping
+  # Maps client API keys (from top-level api-keys) to different Amp upstream API keys.
+  # Useful when different clients need to use different Amp accounts/quotas.
+  # If a client key isn't mapped, falls back to upstream-api-key (default behavior).
+  upstream-api-keys:
+    - upstream-api-key: "amp_key_for_team_a"    # Upstream key to use for these clients
+      api-keys:                                 # Client keys that use this upstream key
+        - "your-api-key-1"
+        - "your-api-key-2"
+    - upstream-api-key: "amp_key_for_team_b"
+      api-keys:
+        - "your-api-key-3"
+  # Restrict Amp management routes (/api/auth, /api/user, etc.) to localhost only (default: false)
+  restrict-management-to-localhost: false
+  # Force model mappings to run before checking local API keys (default: false)
+  force-model-mappings: false
+  # Amp Model Mappings
+  # Route unavailable Amp models to alternative models available in your local proxy.
+  # Useful when Amp CLI requests models you don't have access to (e.g., Claude Opus 4.5)
+  # but you have a similar model available (e.g., Claude Sonnet 4).
+  model-mappings:
+    - from: "claude-opus-4-5-20251101"          # Model requested by Amp CLI
+      to: "gemini-claude-opus-4-5-thinking"     # Route to this available model instead
+    - from: "claude-sonnet-4-5-20250929"
+      to: "gemini-claude-sonnet-4-5-thinking"
+    - from: "claude-haiku-4-5-20251001"
+      to: "gemini-2.5-flash"
 
 # Global OAuth model name mappings (per channel)
 # These mappings rename model IDs for both model listing and request routing.
 # Supported channels: gemini-cli, vertex, aistudio, antigravity, claude, codex, qwen, iflow.
 # NOTE: Mappings do not apply to gemini-api-key, codex-api-key, claude-api-key, openai-compatibility, vertex-api-key, or ampcode.
-# oauth-model-mappings:
-#   gemini-cli:
-#     - name: "gemini-2.5-pro"          # original model name under this channel
-#       alias: "g2.5p"                  # client-visible alias
-#       fork: true                      # when true, keep original and also add the alias as an extra model (default: false)
-#   vertex:
-#     - name: "gemini-2.5-pro"
-#       alias: "g2.5p"
-#   aistudio:
-#     - name: "gemini-2.5-pro"
-#       alias: "g2.5p"
-#   antigravity:
-#     - name: "gemini-3-pro-preview"
-#       alias: "g3p"
-#   claude:
-#     - name: "claude-sonnet-4-5-20250929"
-#       alias: "cs4.5"
-#   codex:
-#     - name: "gpt-5"
-#       alias: "g5"
-#   qwen:
-#     - name: "qwen3-coder-plus"
-#       alias: "qwen-plus"
-#   iflow:
-#     - name: "glm-4.7"
-#       alias: "glm-god"
+oauth-model-mappings:
+  gemini-cli:
+    - name: "gemini-2.5-pro"          # original model name under this channel
+      alias: "g2.5p"                  # client-visible alias
+      fork: true                      # when true, keep original and also add the alias as an extra model (default: false)
+  vertex:
+    - name: "gemini-2.5-pro"
+      alias: "g2.5p"
+  aistudio:
+    - name: "gemini-2.5-pro"
+      alias: "g2.5p"
+  antigravity:
+    - name: "gemini-3-pro-preview"
+      alias: "g3p"
+  claude:
+    - name: "claude-sonnet-4-5-20250929"
+      alias: "cs4.5"
+  codex:
+    - name: "gpt-5"
+      alias: "g5"
+  qwen:
+    - name: "qwen3-coder-plus"
+      alias: "qwen-plus"
+  iflow:
+    - name: "glm-4.7"
+      alias: "glm-god"
 
 # OAuth provider excluded models
-# oauth-excluded-models:
-#   gemini-cli:
-#     - "gemini-2.5-pro"     # exclude specific models (exact match)
-#     - "gemini-2.5-*"       # wildcard matching prefix (e.g. gemini-2.5-flash, gemini-2.5-pro)
-#     - "*-preview"          # wildcard matching suffix (e.g. gemini-3-pro-preview)
-#     - "*flash*"            # wildcard matching substring (e.g. gemini-2.5-flash-lite)
-#   vertex:
-#     - "gemini-3-pro-preview"
-#   aistudio:
-#     - "gemini-3-pro-preview"
-#   antigravity:
-#     - "gemini-3-pro-preview"
-#   claude:
-#     - "claude-3-5-haiku-20241022"
-#   codex:
-#     - "gpt-5-codex-mini"
-#   qwen:
-#     - "vision-model"
-#   iflow:
-#     - "tstars2.0"
+oauth-excluded-models:
+  gemini-cli:
+    - "gemini-2.5-pro"     # exclude specific models (exact match)
+    - "gemini-2.5-*"       # wildcard matching prefix (e.g. gemini-2.5-flash, gemini-2.5-pro)
+    - "*-preview"          # wildcard matching suffix (e.g. gemini-3-pro-preview)
+    - "*flash*"            # wildcard matching substring (e.g. gemini-2.5-flash-lite)
+  vertex:
+    - "gemini-3-pro-preview"
+  aistudio:
+    - "gemini-3-pro-preview"
+  antigravity:
+    - "gemini-3-pro-preview"
+  claude:
+    - "claude-3-5-haiku-20241022"
+  codex:
+    - "gpt-5-codex-mini"
+  qwen:
+    - "vision-model"
+  iflow:
+    - "tstars2.0"
 
 # Optional payload configuration
-# payload:
-#   default: # Default rules only set parameters when they are missing in the payload.
-#     - models:
-#         - name: "gemini-2.5-pro" # Supports wildcards (e.g., "gemini-*")
-#           protocol: "gemini" # restricts the rule to a specific protocol, options: openai, gemini, claude, codex
-#       params: # JSON path (gjson/sjson syntax) -> value
-#         "generationConfig.thinkingConfig.thinkingBudget": 32768
-#   override: # Override rules always set parameters, overwriting any existing values.
-#     - models:
-#         - name: "gpt-*" # Supports wildcards (e.g., "gpt-*")
-#           protocol: "codex" # restricts the rule to a specific protocol, options: openai, gemini, claude, codex
-#       params: # JSON path (gjson/sjson syntax) -> value
-#         "reasoning.effort": "high"
+payload:
+  default: # Default rules only set parameters when they are missing in the payload.
+    - models:
+        - name: "gemini-2.5-pro" # Supports wildcards (e.g., "gemini-*")
+          protocol: "gemini" # restricts the rule to a specific protocol, options: openai, gemini, claude, codex
+      params: # JSON path (gjson/sjson syntax) -> value
+        "generationConfig.thinkingConfig.thinkingBudget": 32768
+  override: # Override rules always set parameters, overwriting any existing values.
+    - models:
+        - name: "gpt-*" # Supports wildcards (e.g., "gpt-*")
+          protocol: "codex" # restricts the rule to a specific protocol, options: openai, gemini, claude, codex
+      params: # JSON path (gjson/sjson syntax) -> value
+        "reasoning.effort": "high"
 ```
