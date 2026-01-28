@@ -5,6 +5,8 @@ You can use this service as a backend for [this AI Studio App](https://aistudio.
 1.  **Start the CLIProxyAPI Service**: Ensure your CLIProxyAPI instance is running, either locally or remotely.
 2.  **Access the AI Studio App**: Log in to your Google account in your browser, then open the following link:
     - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
+  
+**Note**: If you are using the Brave browser, you may need to disable its shields feature as it can block the WebSocket connection. This issue can also occur with other ad-blockers.
 
 ## Connection Configuration
 
