@@ -9,11 +9,42 @@ brew services start cliproxyapi
 
 ## Linux
 
+### 一键安装脚本
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/brokechubb/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
 ```
 
 感谢 [brokechubb](https://github.com/brokechubb) 开发的 Linux 安装器！
+
+### Arch Linux (AUR)
+
+如果你是 Arch Linux 用户，可以直接从 AUR 安装：
+
+```bash
+# 使用 yay
+yay -S cli-proxy-api-bin
+
+# 使用 paru
+paru -S cli-proxy-api-bin
+```
+
+安装完成后，你可以通过 systemd 管理服务：
+
+```bash
+# 启动服务
+systemctl --user start cli-proxy-api
+
+# 设置开机自启
+systemctl --user enable cli-proxy-api
+```
+
+> ⚠️ **注意**：
+> 服务启动前需要配置文件。你可以通过复制示例配置文件来创建它：
+> ```bash
+> mkdir -p ~/.cli-proxy-api
+> cp /usr/share/doc/cli-proxy-api-bin/config.example.yaml ~/.cli-proxy-api/config.yaml
+> ```
 
 ## Windows
 
