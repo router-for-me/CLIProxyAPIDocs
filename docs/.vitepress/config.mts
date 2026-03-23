@@ -304,6 +304,7 @@ export default defineConfig({
 							{ text: 'Gemini CLI', link: '/ru/agent-client/gemini-cli' },
 							{ text: 'Factory Droid', link: '/ru/agent-client/droid' },
 							{ text: 'Amp CLI', link: '/ru/agent-client/amp-cli' },
+							{ text: 'OpenCode', link: '/ru/agent-client/opencode' },
 						],
 					},
 					{
