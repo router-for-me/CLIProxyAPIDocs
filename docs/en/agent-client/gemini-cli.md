@@ -27,3 +27,7 @@ export GEMINI_API_KEY="sk-dummy"
 
 > [!NOTE]  
 > Unlike OAuth mode, this mode allows CLIProxyAPI to be configured as any IP address or domain.
+
+## See also
+
+For a practical macOS setup with a thin `.app` launcher, built-in Web UI, and a separate update workflow, see [macOS Local Launcher](/management/macos-local-launcher).

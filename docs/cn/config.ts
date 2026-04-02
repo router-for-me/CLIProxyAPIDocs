@@ -58,6 +58,7 @@ export default defineConfig({
                 text: '管理',
                 items: [
                     {text: 'Web UI', link: '/cn/management/webui'},
+                    {text: 'macOS 本地启动器', link: '/cn/management/macos-local-launcher'},
                     {text: '桌面客户端', link: '/cn/management/gui'},
                     {text: '管理 API', link: '/cn/management/api'},
                 ]

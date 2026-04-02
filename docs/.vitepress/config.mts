@@ -89,14 +89,15 @@ export default defineConfig({
 					{ text: 'Thinking Budgets', link: '/configuration/thinking' },
 				],
 			},
-			{
-				text: 'Management',
-				items: [
-					{ text: 'Web UI', link: '/management/webui' },
-					{ text: 'Desktop GUI', link: '/management/gui' },
-					{ text: 'Management API', link: '/management/api' },
-				],
-			},
+					{
+						text: 'Management',
+						items: [
+							{ text: 'Web UI', link: '/management/webui' },
+							{ text: 'macOS Local Launcher', link: '/management/macos-local-launcher' },
+							{ text: 'Desktop GUI', link: '/management/gui' },
+							{ text: 'Management API', link: '/management/api' },
+						],
+					},
 			{
 				text: 'Agent Client Configuration',
 				items: [
@@ -292,6 +293,7 @@ export default defineConfig({
 						text: 'Управление',
 						items: [
 							{ text: 'Web UI', link: '/ru/management/webui' },
+							{ text: 'Локальный лаунчер для macOS', link: '/ru/management/macos-local-launcher' },
 							{ text: 'Desktop GUI', link: '/ru/management/gui' },
 							{ text: 'Management API', link: '/ru/management/api' },
 						],
