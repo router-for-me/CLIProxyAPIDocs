@@ -39,7 +39,7 @@ Notes:
 - The `<key>` argument is currently ignored. Use `queue` for readability.
 - Without `count`, `LPOP`/`RPOP` return a single Bulk String (JSON) or `nil` when empty.
 - With `count`, `LPOP`/`RPOP` return an Array of Bulk Strings; an empty array when empty.
-- Items are kept in memory for **~1 minute**. Poll frequently if you need lossless capture.
+- Items are retained in memory for `redis-usage-queue-retention-seconds` (seconds, default `60`, max `3600`). Poll frequently if you need lossless capture.
 
 ## Examples
 
@@ -99,4 +99,3 @@ Example:
   "request_id": "ctx-request-id"
 }
 ```
-
