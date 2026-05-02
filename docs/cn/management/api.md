@@ -9,13 +9,13 @@ outline: 'deep'
 该 API 用于管理 CLIProxyAPI 的运行时配置与认证文件。所有变更会持久化写入 YAML 配置文件，并由服务自动热重载。
 
 注意：以下选项不能通过 API 修改，需在配置文件中设置（如有必要可重启）：
-- `allow-remote-management`
-- `remote-management-key`（若在启动时检测到明文，会自动进行 bcrypt 加密并写回配置）
+- `remote-management.allow-remote`
+- `remote-management.secret-key`（若在启动时检测到明文，会自动进行 bcrypt 加密并写回配置）
 
 ## 认证
 
 - 所有请求（包括本地访问）都必须提供有效的管理密钥.
-- 远程访问需要在配置文件中开启远程访问： `allow-remote-management: true`
+- 远程访问需要在配置文件中开启远程访问： `remote-management.allow-remote: true`
 - 通过以下任意方式提供管理密钥（明文）：
     - `Authorization: Bearer <plaintext-key>`
     - `X-Management-Key: <plaintext-key>`
@@ -23,10 +23,10 @@ outline: 'deep'
 若在启动时检测到配置中的管理密钥为明文，会自动使用 bcrypt 加密并回写到配置文件中。
 
 其它说明：
-- 设置环境变量 `MANAGEMENT_PASSWORD` 会将其视为额外的明文管理密钥，并强制启用远程管理（即便 `allow-remote-management` 为 false）。该值不会写入配置，需要通过 `Authorization` / `X-Management-Key` 头部直接发送。
+- 设置环境变量 `MANAGEMENT_PASSWORD` 会将其视为额外的明文管理密钥，并强制启用远程管理（即便 `remote-management.allow-remote` 为 false）。该值不会写入配置，需要通过 `Authorization` / `X-Management-Key` 头部直接发送。
 - 通过 `cliproxy run --password <pwd>` 或 SDK 的 `WithLocalManagementPassword` 启动服务后，来自 `127.0.0.1`/`::1` 的请求可使用该“本地密码”替代远程密钥，同样通过上述头部传递；该密码仅存在于运行时内存。
 - 仅当 `remote-management.secret-key` 为空且未设置 `MANAGEMENT_PASSWORD` 时，管理 API 才会整体被禁用（所有 `/v0/management` 路由均返回 404）。
-- 对于远程 IP，连续 5 次认证失败会触发临时封禁（约 30 分钟）。
+- 对于任意客户端 IP（包括 localhost），连续 5 次认证失败会触发临时封禁（约 30 分钟）。
 
 ## 请求/响应约定
 
@@ -38,108 +38,10 @@ outline: 'deep'
 
 ## 端点说明
 
-### Usage（请求统计）
-- GET `/usage` — 获取内存中的请求统计
-    - 响应：
-      ```json
-      {
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {
-            "2024-05-20": 12
-          },
-          "requests_by_hour": {
-            "09": 4,
-            "18": 8
-          },
-          "tokens_by_day": {
-            "2024-05-20": 9876
-          },
-          "tokens_by_hour": {
-            "09": 1234,
-            "18": 865
-          },
-          "apis": {
-            "POST /v1/chat/completions": {
-              "total_requests": 12,
-              "total_tokens": 9021,
-              "models": {
-                "gpt-4o-mini": {
-                  "total_requests": 8,
-                  "total_tokens": 7123,
-                  "details": [
-                    {
-                      "timestamp": "2024-05-20T09:15:04.123456Z",
-                      "source": "openai",
-                      "auth_index": "a1b2c3d4e5f67890",
-                      "tokens": {
-                        "input_tokens": 523,
-                        "output_tokens": 308,
-                        "reasoning_tokens": 0,
-                        "cached_tokens": 0,
-                        "total_tokens": 831
-                      },
-                      "failed": false
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "failed_requests": 2
-      }
-      ```
-    - 说明：
-        - 仅统计带有 token 使用信息的请求，服务重启后数据会被清空。
-        - 小时维度会将所有日期折叠到 `00`–`23` 的统一小时桶中。
-        - 顶层字段 `failed_requests` 与 `usage.failure_count` 相同，便于轮询。
-- GET `/usage/export` — 导出完整的请求统计快照（用于备份/迁移）
-    - 响应：
-      ```json
-      {
-        "version": 1,
-        "exported_at": "2025-12-26T03:49:51Z",
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {},
-          "requests_by_hour": {},
-          "tokens_by_day": {},
-          "tokens_by_hour": {},
-          "apis": {}
-        }
-      }
-      ```
-    - 说明：
-        - `exported_at` 为 UTC 时间（RFC 3339）。
-        - `usage` 的结构与 `GET /usage` 返回的 `usage` 字段一致。
-- POST `/usage/import` — 导入并合并请求统计快照到内存（自动去重）
-    - 请求：
-      ```bash
-      curl -X POST -H 'Content-Type: application/json' \
-      -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        --data-binary @usage-export.json \
-        http://localhost:8317/v0/management/usage/import
-      ```
-    - 响应：
-      ```json
-      {
-        "added": 10,
-        "skipped": 2,
-        "total_requests": 123,
-        "failed_requests": 4
-      }
-      ```
-    - 说明：
-        - 该接口为“合并”而非覆盖；重复请求明细会被跳过并计入 `skipped`。
-        - 可直接使用 `GET /usage/export` 的响应 JSON 作为请求体（其中 `exported_at` 会被忽略）。
-        - `version` 当前支持 `1`（也接受省略/`0` 作为兼容）。
+### 用量统计（Redis）
+- 内存聚合的 usage 端点（`/usage`、`/usage/export`、`/usage/import`）已移除。
+- 如需以 JSON 拉取每次请求的用量记录，请使用同端口暴露的 [Redis 用量队列](/management/redis-usage-queue)（RESP）。
+- 通过 `/usage-statistics-enabled` 开启/关闭用量发布。
 
 ### Config
 - GET `/config` — 获取完整的配置
@@ -443,6 +345,27 @@ outline: 'deep'
       { "status": "ok" }
       ```
 
+- GET `/api-key-usage` — 按 provider 与 API key 分组的近期请求桶
+    - 响应：
+      ```json
+      {
+        "openai": {
+          "https://openrouter.ai/api/v1|k1": {
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ]
+          }
+        }
+      }
+      ```
+    - 说明：
+        - 顶层 key 为 provider 名称。
+        - 二级 key 为 `base_url|api_key`（base URL 可能为空，例如 `|k1`）。
+        - `recent_requests` 为固定长度 20 个 bucket（每个 bucket 10 分钟，使用本地时间标签 `HH:MM-HH:MM`）。
+
 ### Gemini API Key
 - GET `/gemini-api-key`
     - 请求：
@@ -453,8 +376,8 @@ outline: 'deep'
       ```json
       {
         "gemini-api-key": [
-          {"api-key":"AIzaSy...01","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
-          {"api-key":"AIzaSy...02","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
+          {"api-key":"AIzaSy...01","auth-index":"a1b2c3d4e5f67890","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
+          {"api-key":"AIzaSy...02","auth-index":"b1c2d3e4f5a67890","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
         ]
       }
       ```
@@ -728,7 +651,20 @@ outline: 'deep'
       ```
     - 响应：
       ```json
-      { "openai-compatibility": [ { "name": "openrouter", "base-url": "https://openrouter.ai/api/v1", "api-key-entries": [ { "api-key": "sk", "proxy-url": "" } ], "models": [], "headers": { "X-Provider": "openrouter" } } ] }
+      {
+        "openai-compatibility": [
+          {
+            "name": "openrouter",
+            "disabled": false,
+            "base-url": "https://openrouter.ai/api/v1",
+            "api-key-entries": [
+              { "api-key": "sk", "proxy-url": "", "auth-index": "a1b2c3d4e5f67890" }
+            ],
+            "models": [],
+            "headers": { "X-Provider": "openrouter" }
+          }
+        ]
+      }
       ```
 - PUT `/openai-compatibility` — 完整改写列表
     - 请求：
@@ -747,14 +683,14 @@ outline: 'deep'
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"name":"openrouter","value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"name":"openrouter","value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
     - 请求（按索引）：
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"index":0,"value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"index":0,"value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
     - 响应：
@@ -764,6 +700,7 @@ outline: 'deep'
 
     - 说明：
         - 仍可提交遗留的 `api-keys` 字段，但所有密钥会自动迁移到 `api-key-entries` 中，返回结果中的 `api-keys` 会逐步留空。
+        - `disabled: true` 可在不删除配置的情况下禁用该提供商（路由/选钥会跳过）。
         - `headers` 可用于为某个兼容提供商统一追加 HTTP 头，服务端会自动去除空白键值。
         - `base-url` 不能为空；若 PUT/PATCH 将 `base-url` 设为空字符串，则该提供商会被删除。
 - DELETE `/openai-compatibility` — 删除（`?name=` 或 `?index=`）
@@ -859,6 +796,7 @@ outline: 'deep'
         "files": [
           {
             "id": "claude-user@example.com",
+            "auth_index": "a1b2c3d4e5f67890",
             "name": "claude-user@example.com.json",
             "provider": "claude",
             "label": "Claude Prod",
@@ -871,6 +809,12 @@ outline: 'deep'
             "path": "/abs/path/auths/claude-user@example.com.json",
             "size": 2345,
             "modtime": "2025-08-30T12:34:56Z",
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ],
             "email": "user@example.com",
             "account_type": "anthropic",
             "account": "workspace-1",
@@ -884,6 +828,9 @@ outline: 'deep'
     - 说明：
         - 列表对 `name` 做不区分大小写的排序；`status`、`status_message`、`disabled`、`unavailable` 直接反映运行时认证状态，便于识别失效凭据。
         - `runtime_only=true` 表示该凭据仅存在于运行时存储（例如 Git/PG/ObjectStore 或远程导入），`source` 会是 `memory`；若存在对应磁盘文件则 `source=file` 并补充 `path`/`size`/`modtime`。
+        - `auth_index` 是凭据的稳定运行时标识（可用于 `/api-call` 等接口）。
+        - `success`/`failed` 为累计计数（内存态）。
+        - `recent_requests` 为固定长度 20 个 bucket（每个 bucket 10 分钟，使用本地时间标签 `HH:MM-HH:MM`）。
         - `email`、`account_type`、`account`、`last_refresh` 来源于 JSON 内的元数据（自动兼容 `last_refresh`／`lastRefreshedAt` 等字段）。
         - 当核心认证管理器不可用时会退回到扫描 `auth-dir`，此时仅返回 `name`、`size`、`modtime`、`type`、`email` 字段。
         - `runtime_only` 数据无法通过下载/删除端点处理，需要在对应提供商后台或通过其他 API 撤销。
@@ -1064,4 +1011,4 @@ outline: 'deep'
 ## 说明
 
 - 变更会写回 YAML 配置文件，并由文件监控器热重载配置与客户端。
-- `allow-remote-management` 与 `remote-management-key` 不能通过 API 修改，需在配置文件中设置。
+- `remote-management.allow-remote` 与 `remote-management.secret-key` 不能通过 API 修改，需在配置文件中设置。

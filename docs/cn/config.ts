@@ -58,6 +58,7 @@ export default defineConfig({
                     {text: 'Web UI', link: '/cn/management/webui'},
                     {text: '桌面客户端', link: '/cn/management/gui'},
                     {text: '管理 API', link: '/cn/management/api'},
+                    {text: 'Redis 用量队列', link: '/cn/management/redis-usage-queue'},
                 ]
             },
             {

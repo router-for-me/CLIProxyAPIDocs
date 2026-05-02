@@ -9,22 +9,22 @@ Base path: `http://localhost:8317/v0/management`
 This API manages the CLI Proxy API’s runtime configuration and authentication files. All changes are persisted to the YAML config file and hot‑reloaded by the service.
 
 Note: The following options cannot be modified via API and must be set in the config file (restart if needed):
-- `allow-remote-management`
-- `remote-management-key` (if plaintext is detected at startup, it is automatically bcrypt‑hashed and written back to the config)
+- `remote-management.allow-remote`
+- `remote-management.secret-key` (if plaintext is detected at startup, it is automatically bcrypt‑hashed and written back to the config)
 
 ## Authentication
 
 - All requests (including localhost) must provide a valid management key.
-- Remote access requires enabling remote management in the config: `allow-remote-management: true`.
+- Remote access requires enabling remote management in the config: `remote-management.allow-remote: true`.
 - Provide the management key (in plaintext) via either:
     - `Authorization: Bearer <plaintext-key>`
     - `X-Management-Key: <plaintext-key>`
 
 Additional notes:
-- Setting the `MANAGEMENT_PASSWORD` environment variable registers an additional plaintext management secret and forces remote management to stay enabled even when `allow-remote-management` is false. The value is never persisted and must be sent via the same `Authorization`/`X-Management-Key` headers.
+- Setting the `MANAGEMENT_PASSWORD` environment variable registers an additional plaintext management secret and forces remote management to stay enabled even when `remote-management.allow-remote` is false. The value is never persisted and must be sent via the same `Authorization`/`X-Management-Key` headers.
 - When the proxy starts with `cliproxy run --password <pwd>` or via the SDK’s `WithLocalManagementPassword`, localhost clients (`127.0.0.1`/`::1`) may present that local-only password through the same headers; it only lives in memory and is not written to disk.
 - The Management API returns 404 only when both `remote-management.secret-key` is empty and `MANAGEMENT_PASSWORD` is unset.
-- For remote IPs, 5 consecutive authentication failures trigger a temporary ban (~30 minutes) before further attempts are allowed.
+- For a given client IP (including localhost), 5 consecutive authentication failures trigger a temporary ban (~30 minutes) before further attempts are allowed.
 
 If a plaintext key is detected in the config at startup, it will be bcrypt‑hashed and written back to the config file automatically.
 
@@ -38,108 +38,10 @@ If a plaintext key is detected in the config at startup, it will be bcrypt‑has
 
 ## Endpoints
 
-### Usage Statistics
-- GET `/usage` — Retrieve aggregated in-memory request metrics
-    - Response:
-      ```json
-      {
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {
-            "2024-05-20": 12
-          },
-          "requests_by_hour": {
-            "09": 4,
-            "18": 8
-          },
-          "tokens_by_day": {
-            "2024-05-20": 9876
-          },
-          "tokens_by_hour": {
-            "09": 1234,
-            "18": 865
-          },
-          "apis": {
-            "POST /v1/chat/completions": {
-              "total_requests": 12,
-              "total_tokens": 9021,
-              "models": {
-                "gpt-4o-mini": {
-                  "total_requests": 8,
-                  "total_tokens": 7123,
-                  "details": [
-                    {
-                      "timestamp": "2024-05-20T09:15:04.123456Z",
-                      "source": "openai",
-                      "auth_index": "a1b2c3d4e5f67890",
-                      "tokens": {
-                        "input_tokens": 523,
-                        "output_tokens": 308,
-                        "reasoning_tokens": 0,
-                        "cached_tokens": 0,
-                        "total_tokens": 831
-                      },
-                      "failed": false
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "failed_requests": 2
-      }
-      ```
-    - Notes:
-        - Statistics are recalculated for every request that reports token usage; data resets when the server restarts.
-        - Hourly counters fold all days into the same hour bucket (`00`–`23`).
-        - The top-level `failed_requests` repeats `usage.failure_count` for convenience when polling.
-- GET `/usage/export` — Export a complete usage snapshot (backup/migration)
-    - Response:
-      ```json
-      {
-        "version": 1,
-        "exported_at": "2025-12-26T03:49:51Z",
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {},
-          "requests_by_hour": {},
-          "tokens_by_day": {},
-          "tokens_by_hour": {},
-          "apis": {}
-        }
-      }
-      ```
-    - Notes:
-        - `exported_at` is UTC time (RFC 3339).
-        - The `usage` object uses the same schema as `GET /usage`’s `usage` field.
-- POST `/usage/import` — Import and merge a usage snapshot into memory (deduplicated)
-    - Request:
-      ```bash
-      curl -X POST -H 'Content-Type: application/json' \
-      -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        --data-binary @usage-export.json \
-        http://localhost:8317/v0/management/usage/import
-      ```
-    - Response:
-      ```json
-      {
-        "added": 10,
-        "skipped": 2,
-        "total_requests": 123,
-        "failed_requests": 4
-      }
-      ```
-    - Notes:
-        - This endpoint merges (does not overwrite); duplicate request details are skipped and counted in `skipped`.
-        - You may POST the full JSON returned by `GET /usage/export` directly (`exported_at` is ignored).
-        - `version` currently supports `1` (and also accepts omitted/`0` for compatibility).
+### Usage Telemetry (Redis)
+- Aggregated in-memory usage endpoints (`/usage`, `/usage/export`, `/usage/import`) are no longer available.
+- For per-request usage records as JSON, use the [Redis Usage Queue](/management/redis-usage-queue) (RESP) exposed on the same port as HTTP.
+- Use `/usage-statistics-enabled` to enable/disable usage publishing.
 
 ### Config
 - GET `/config` — Get the full config
@@ -443,6 +345,27 @@ These endpoints update the inline `config-api-key` provider inside the `auth.pro
       { "status": "ok" }
       ```
 
+- GET `/api-key-usage` — Recent request buckets grouped by provider and API key
+    - Response:
+      ```json
+      {
+        "openai": {
+          "https://openrouter.ai/api/v1|k1": {
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ]
+          }
+        }
+      }
+      ```
+    - Notes:
+        - Top-level keys are provider names.
+        - Second-level keys are `base_url|api_key` (base URL may be empty, e.g. `|k1`).
+        - `recent_requests` is a fixed-length list of 20 buckets (10 minutes per bucket, local time label `HH:MM-HH:MM`).
+
 ### Gemini API Key
 - GET `/gemini-api-key`
     - Request:
@@ -453,8 +376,8 @@ These endpoints update the inline `config-api-key` provider inside the `auth.pro
       ```json
       {
         "gemini-api-key": [
-          {"api-key":"AIzaSy...01","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
-          {"api-key":"AIzaSy...02","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
+          {"api-key":"AIzaSy...01","auth-index":"a1b2c3d4e5f67890","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
+          {"api-key":"AIzaSy...02","auth-index":"b1c2d3e4f5a67890","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
         ]
       }
       ```
@@ -728,7 +651,20 @@ These endpoints update the inline `config-api-key` provider inside the `auth.pro
       ```
     - Response:
       ```json
-      { "openai-compatibility": [ { "name": "openrouter", "base-url": "https://openrouter.ai/api/v1", "api-key-entries": [ { "api-key": "sk", "proxy-url": "" } ], "models": [], "headers": { "X-Provider": "openrouter" } } ] }
+      {
+        "openai-compatibility": [
+          {
+            "name": "openrouter",
+            "disabled": false,
+            "base-url": "https://openrouter.ai/api/v1",
+            "api-key-entries": [
+              { "api-key": "sk", "proxy-url": "", "auth-index": "a1b2c3d4e5f67890" }
+            ],
+            "models": [],
+            "headers": { "X-Provider": "openrouter" }
+          }
+        ]
+      }
       ```
 - PUT `/openai-compatibility` — Replace the list
     - Request:
@@ -747,14 +683,14 @@ These endpoints update the inline `config-api-key` provider inside the `auth.pro
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"name":"openrouter","value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"name":"openrouter","value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
     - Request (by index):
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"index":0,"value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"index":0,"value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
     - Response:
@@ -764,6 +700,7 @@ These endpoints update the inline `config-api-key` provider inside the `auth.pro
 
     - Notes:
         - Legacy `api-keys` input remains accepted; keys are migrated into `api-key-entries` automatically so the legacy field will eventually remain empty in responses.
+        - `disabled: true` skips this provider for routing and auth selection, without removing it from the config.
         - `headers` lets you define provider-wide HTTP headers; blank keys/values are dropped.
         - Providers without a `base-url` are removed. Sending a PATCH with `base-url` set to an empty string deletes that provider.
 - DELETE `/openai-compatibility` — Delete (`?name=` or `?index=`)
@@ -859,6 +796,7 @@ Manage JSON token files under `auth-dir`: list, download, upload, delete.
         "files": [
           {
             "id": "claude-user@example.com",
+            "auth_index": "a1b2c3d4e5f67890",
             "name": "claude-user@example.com.json",
             "provider": "claude",
             "label": "Claude Prod",
@@ -871,6 +809,12 @@ Manage JSON token files under `auth-dir`: list, download, upload, delete.
             "path": "/abs/path/auths/claude-user@example.com.json",
             "size": 2345,
             "modtime": "2025-08-30T12:34:56Z",
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ],
             "email": "user@example.com",
             "account_type": "anthropic",
             "account": "workspace-1",
@@ -884,6 +828,9 @@ Manage JSON token files under `auth-dir`: list, download, upload, delete.
     - Notes:
         - Entries are sorted case-insensitively by `name`. `status`, `status_message`, `disabled`, and `unavailable` mirror the runtime auth manager so you can see whether a credential is healthy.
         - `runtime_only: true` indicates the credential only exists in memory (for example Git/Postgres/ObjectStore backends); `source` switches to `memory`. When a `.json` file exists on disk, `source=file` and the response includes `path`/`size`/`modtime`.
+        - `auth_index` is a stable runtime identifier for a credential (useful with `/api-call` and request correlation).
+        - `success`/`failed` are cumulative counters (in memory).
+        - `recent_requests` is a fixed-length list of 20 buckets (10 minutes per bucket, local time label `HH:MM-HH:MM`).
         - `email`, `account_type`, `account`, and `last_refresh` are pulled from the JSON metadata (keys such as `last_refresh`, `lastRefreshedAt`, `last_refreshed_at`, etc.).
         - If the runtime auth manager is unavailable the handler falls back to scanning `auth-dir`, returning only `name`, `size`, `modtime`, `type`, and `email`.
         - `runtime_only` entries cannot be downloaded or deleted via the file endpoints—they must be revoked from the upstream provider or a different API.
@@ -1062,4 +1009,4 @@ Generic error format:
 ## Notes
 
 - Changes are written back to the YAML config file and hot‑reloaded by the file watcher and clients.
-- `allow-remote-management` and `remote-management-key` cannot be changed via the API; configure them in the config file.
+- `remote-management.allow-remote` and `remote-management.secret-key` cannot be changed via the API; configure them in the config file.

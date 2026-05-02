@@ -9,22 +9,22 @@ outline: 'deep'
 Этот API управляет конфигурацией среды выполнения и файлами аутентификации CLIProxyAPI. Все изменения сохраняются в конфигурационный файл YAML и применяются сервисом через hot‑reloading.
 
 Примечание: Следующие опции не могут быть изменены через API и должны быть заданы в конфигурационном файле (при необходимости перезапустите сервис):
-- `allow-remote-management`
-- `remote-management-key` (если при запуске обнаружен открытый текст, он автоматически хешируется с помощью bcrypt и записывается обратно в конфигурацию)
+- `remote-management.allow-remote`
+- `remote-management.secret-key` (если при запуске обнаружен открытый текст, он автоматически хешируется с помощью bcrypt и записывается обратно в конфигурацию)
 
 ## Аутентификация
 
 - Все запросы (включая localhost) должны содержать валидный ключ управления.
-- Для удаленного доступа необходимо включить удаленное управление в конфигурации: `allow-remote-management: true`.
+- Для удаленного доступа необходимо включить удаленное управление в конфигурации: `remote-management.allow-remote: true`.
 - Передайте ключ управления (в виде открытого текста) одним из способов:
     - `Authorization: Bearer <plaintext-key>`
     - `X-Management-Key: <plaintext-key>`
 
 Дополнительные примечания:
-- Установка переменной окружения `MANAGEMENT_PASSWORD` регистрирует дополнительный секрет управления в открытом виде и принудительно оставляет удаленное управление включенным, даже если `allow-remote-management` имеет значение false. Значение никогда не сохраняется на диске и должно передаваться через те же заголовки `Authorization`/`X-Management-Key`.
+- Установка переменной окружения `MANAGEMENT_PASSWORD` регистрирует дополнительный секрет управления в открытом виде и принудительно оставляет удаленное управление включенным, даже если `remote-management.allow-remote` имеет значение false. Значение никогда не сохраняется на диске и должно передаваться через те же заголовки `Authorization`/`X-Management-Key`.
 - Когда прокси запускается с помощью `cliproxy run --password <pwd>` или через `WithLocalManagementPassword` в SDK, клиенты localhost (`127.0.0.1`/`::1`) могут предоставлять этот локальный пароль через те же заголовки; он хранится только в памяти и не записывается на диск.
 - Management API возвращает 404 только в том случае, если `remote-management.secret-key` пуст и `MANAGEMENT_PASSWORD` не задан.
-- Для удаленных IP-адресов 5 последовательных неудачных попыток аутентификации вызывают временную блокировку (~30 минут), прежде чем будут разрешены дальнейшие попытки.
+- Для любого IP клиента (включая localhost) 5 последовательных неудачных попыток аутентификации вызывают временную блокировку (~30 минут), прежде чем будут разрешены дальнейшие попытки.
 
 Если при запуске в конфигурации обнаруживается ключ в открытом виде, он будет автоматически захеширован с помощью bcrypt и перезаписан в файл конфигурации.
 
@@ -37,108 +37,10 @@ outline: 'deep'
 
 ## Эндпоинты
 
-### Статистика использования
-- GET `/usage` — Получить агрегированные метрики запросов из оперативной памяти
-    - Ответ:
-      ```json
-      {
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {
-            "2024-05-20": 12
-          },
-          "requests_by_hour": {
-            "09": 4,
-            "18": 8
-          },
-          "tokens_by_day": {
-            "2024-05-20": 9876
-          },
-          "tokens_by_hour": {
-            "09": 1234,
-            "18": 865
-          },
-          "apis": {
-            "POST /v1/chat/completions": {
-              "total_requests": 12,
-              "total_tokens": 9021,
-              "models": {
-                "gpt-4o-mini": {
-                  "total_requests": 8,
-                  "total_tokens": 7123,
-                  "details": [
-                    {
-                      "timestamp": "2024-05-20T09:15:04.123456Z",
-                      "source": "openai",
-                      "auth_index": "a1b2c3d4e5f67890",
-                      "tokens": {
-                        "input_tokens": 523,
-                        "output_tokens": 308,
-                        "reasoning_tokens": 0,
-                        "cached_tokens": 0,
-                        "total_tokens": 831
-                      },
-                      "failed": false
-                    }
-                  ]
-                }
-              }
-            }
-          }
-        },
-        "failed_requests": 2
-      }
-      ```
-- Примечания:
-        - Статистика пересчитывается для каждого запроса, сообщающего об использовании токенов; данные сбрасываются при перезапуске сервера.
-        - Почасовые счетчики объединяют все дни в один и тот же часовой интервал (`00`–`23`).
-        - Поле верхнего уровня `failed_requests` дублирует `usage.failure_count` для удобства при опросе.
-- GET `/usage/export` — Экспорт полного снимка использования (резервное копирование/миграция)
-    - Ответ:
-      ```json
-      {
-        "version": 1,
-        "exported_at": "2025-12-26T03:49:51Z",
-        "usage": {
-          "total_requests": 24,
-          "success_count": 22,
-          "failure_count": 2,
-          "total_tokens": 13890,
-          "requests_by_day": {},
-          "requests_by_hour": {},
-          "tokens_by_day": {},
-          "tokens_by_hour": {},
-          "apis": {}
-        }
-      }
-      ```
-    - Примечания:
-        - `exported_at` — это время в формате UTC (RFC 3339).
-- Объект `usage` использует ту же схему, что и поле `usage` в `GET /usage`.
-- POST `/usage/import` — Импорт и объединение снимка использования в памяти (с дедупликацией)
-    - Запрос:
-      ```bash
-      curl -X POST -H 'Content-Type: application/json' \
-      -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        --data-binary @usage-export.json \
-        http://localhost:8317/v0/management/usage/import
-      ```
-    - Ответ:
-      ```json
-      {
-        "added": 10,
-        "skipped": 2,
-        "total_requests": 123,
-        "failed_requests": 4
-      }
-      ```
-    - Примечания:
-        - Этот эндпоинт выполняет слияние (не перезаписывает); дублирующиеся детали запросов пропускаются и учитываются в `skipped`.
-        - Вы можете отправить POST-запросом полный JSON, возвращаемый `GET /usage/export`, напрямую (`exported_at` игнорируется).
-        - `version` в данный момент поддерживает `1` (а также принимает пропущенное значение или `0` для совместимости).
+### Usage Telemetry (Redis)
+- Агрегированные usage эндпоинты (`/usage`, `/usage/export`, `/usage/import`) больше недоступны.
+- Для per-request usage записей в JSON используйте [Redis очередь usage](/ru/management/redis-usage-queue) (RESP), доступную на том же порту, что и HTTP.
+- Используйте `/usage-statistics-enabled` для включения/отключения публикации usage.
 
 ### Config
 - GET `/config` — Получить полный конфиг
@@ -438,6 +340,27 @@ outline: 'deep'
       { "status": "ok" }
       ```
 
+- GET `/api-key-usage` — Последние bucket'ы запросов, сгруппированные по провайдеру и API key
+    - Ответ:
+      ```json
+      {
+        "openai": {
+          "https://openrouter.ai/api/v1|k1": {
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ]
+          }
+        }
+      }
+      ```
+    - Примечания:
+        - Ключи верхнего уровня — имена провайдеров.
+        - Ключ второго уровня — `base_url|api_key` (base URL может быть пустым, например `|k1`).
+        - `recent_requests` — список фиксированной длины из 20 bucket'ов (10 минут на bucket, локальная метка `HH:MM-HH:MM`).
+
 ### Gemini API Key
 - GET `/gemini-api-key`
     - Запрос:
@@ -448,8 +371,8 @@ outline: 'deep'
       ```json
       {
         "gemini-api-key": [
-          {"api-key":"AIzaSy...01","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
-          {"api-key":"AIzaSy...02","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
+          {"api-key":"AIzaSy...01","auth-index":"a1b2c3d4e5f67890","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},
+          {"api-key":"AIzaSy...02","auth-index":"b1c2d3e4f5a67890","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}
         ]
       }
       ```
@@ -721,9 +644,22 @@ outline: 'deep'
       ```bash
       curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/openai-compatibility
       ```
-- Ответ:
+    - Ответ:
       ```json
-      { "openai-compatibility": [ { "name": "openrouter", "base-url": "https://openrouter.ai/api/v1", "api-key-entries": [ { "api-key": "sk", "proxy-url": "" } ], "models": [], "headers": { "X-Provider": "openrouter" } } ] }
+      {
+        "openai-compatibility": [
+          {
+            "name": "openrouter",
+            "disabled": false,
+            "base-url": "https://openrouter.ai/api/v1",
+            "api-key-entries": [
+              { "api-key": "sk", "proxy-url": "", "auth-index": "a1b2c3d4e5f67890" }
+            ],
+            "models": [],
+            "headers": { "X-Provider": "openrouter" }
+          }
+        ]
+      }
       ```
 - PUT `/openai-compatibility` — Заменить список
     - Запрос:
@@ -742,14 +678,14 @@ outline: 'deep'
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"name":"openrouter","value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"name":"openrouter","value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
 - Запрос (по индексу):
       ```bash
       curl -X PATCH -H 'Content-Type: application/json' \
       -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        -d '{"index":0,"value":{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
+        -d '{"index":0,"value":{"name":"openrouter","disabled":false,"base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk","proxy-url":""}],"models":[],"headers":{"X-Provider":"openrouter"}}}' \
         http://localhost:8317/v0/management/openai-compatibility
       ```
     - Ответ:
@@ -759,6 +695,7 @@ outline: 'deep'
 
     - Примечания:
         - Устаревший ввод `api-keys` по-прежнему принимается; ключи автоматически переносятся в `api-key-entries`, поэтому устаревшее поле со временем будет оставаться пустым в ответах.
+        - `disabled: true` отключает провайдера без удаления из конфигурации; маршрутизация/выбор ключа пропускают его.
         - `headers` позволяет определять HTTP-заголовки для всего провайдера; пустые ключи/значения отбрасываются.
         - Провайдеры без `base-url` удаляются. Отправка PATCH с `base-url`, установленным в пустую строку, удаляет этого провайдера.
 - DELETE `/openai-compatibility` — Удалить (`?name=` или `?index=`)
@@ -853,6 +790,7 @@ outline: 'deep'
         "files": [
           {
             "id": "claude-user@example.com",
+            "auth_index": "a1b2c3d4e5f67890",
             "name": "claude-user@example.com.json",
             "provider": "claude",
             "label": "Claude Prod",
@@ -865,6 +803,12 @@ outline: 'deep'
             "path": "/abs/path/auths/claude-user@example.com.json",
             "size": 2345,
             "modtime": "2025-08-30T12:34:56Z",
+            "success": 12,
+            "failed": 1,
+            "recent_requests": [
+              { "time": "12:00-12:10", "success": 3, "failed": 0 },
+              { "time": "12:10-12:20", "success": 1, "failed": 1 }
+            ],
             "email": "user@example.com",
             "account_type": "anthropic",
             "account": "workspace-1",
@@ -878,6 +822,9 @@ outline: 'deep'
 - Примечания:
     - Записи сортируются без учета регистра по `name`. `status`, `status_message`, `disabled` и `unavailable` дублируют состояние runtime auth manager, чтобы вы могли видеть, исправны ли учетные данные.
     - `runtime_only: true` указывает на то, что учетные данные существуют только в памяти (например, бэкенды Git/Postgres/ObjectStore); `source` меняется на `memory`. Когда файл `.json` существует на диске, `source=file`, и ответ включает `path`/`size`/`modtime`.
+    - `auth_index` — стабильный runtime идентификатор учетных данных (полезен для `/api-call` и корреляции запросов).
+    - `success`/`failed` — накопительные счетчики (в памяти).
+    - `recent_requests` — список фиксированной длины из 20 bucket'ов (10 минут на bucket, локальная метка `HH:MM-HH:MM`).
     - `email`, `account_type`, `account` и `last_refresh` извлекаются из метаданных JSON (таких ключей, как `last_refresh`, `lastRefreshedAt`, `last_refreshed_at` и т. д.).
     - Если runtime auth manager недоступен, обработчик переходит к сканированию `auth-dir`, возвращая только `name`, `size`, `modtime`, `type` и `email`.
     - Записи `runtime_only` нельзя скачать или удалить через эндпоинты файлов — их необходимо отозвать у вышестоящего провайдера или через другой API.
@@ -1054,4 +1001,4 @@ outline: 'deep'
 ## Примечания
 
 - Изменения записываются обратно в YAML-файл конфигурации и обновляются через hot-reloading с помощью file watcher и клиентов.
-- allow-remote-management и remote-management-key не могут быть изменены через API; настройте их в файле конфигурации.
+- remote-management.allow-remote и remote-management.secret-key не могут быть изменены через API; настройте их в файле конфигурации.

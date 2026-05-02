@@ -22,7 +22,10 @@
 | `force-model-prefix` | boolean | `false` | 无前缀的模型请求仅使用无前缀凭据。 |
 | `request-retry` | integer | `3` | 403/408/500/502/503/504 时的重试次数。 |
 | `max-retry-interval` | integer | `30` | 冷却凭据等待秒数上限，超出即触发重试。 |
+| `disable-image-generation` | boolean \| `"chat"` | `false` | 控制内置 `image_generation` 工具的注入/可用性：`true` 时完全禁用（同时 `/v1/images/generations` 与 `/v1/images/edits` 返回 404）；`"chat"` 时仅禁用非 images 端点的注入，但保留 images 端点可用。 |
 | `routing.strategy` | string | `"round-robin"` | 多匹配凭据的选择策略：`round-robin` 或 `fill-first`。 |
+| `routing.session-affinity` | boolean | `false` | 是否启用会话粘性路由。会话 ID 取自 `metadata.user_id`（Claude Code）、`X-Session-ID`、`Session_id`（Codex）、`X-Amp-Thread-Id`（Amp CLI）、`X-Client-Request-Id`（PI）、`conversation_id`，或消息 hash。 |
+| `routing.session-affinity-ttl` | string | `"1h"` | 会话到凭据绑定的保留时长（TTL）。 |
 | `ws-auth` | boolean | `false` | 是否为 `/v1/ws` 启用认证。 |
 | `nonstream-keepalive-interval` | integer | `0` | 非 SSE 流每隔 N 秒发送空行防止空闲超时；0 禁用。 |
 | `codex-instructions-enabled` | boolean | `false` | 是否为 Codex API 请求启用官方 Codex 指令注入。 |
@@ -44,6 +47,7 @@
 | --- | --- | --- | --- |
 | `quota-exceeded.switch-project` | boolean | `true` | 配额超限时自动切换项目。 |
 | `quota-exceeded.switch-preview-model` | boolean | `true` | 配额超限时自动切换预览模型。 |
+| `quota-exceeded.antigravity-credits` | boolean | `true` | Claude 模型 credits 兜底：当所有 free-tier 凭据耗尽（429/503）时，使用带 Google One AI credits 的凭据进行最后兜底重试。 |
 
 ## 提供商凭据（均为数组，未配置时默认 `[]`）
 
@@ -95,6 +99,7 @@
 | --- | --- | --- | --- |
 | `openai-compatibility.*.name` | string | `""` | 提供商名称（用于 UA 等）。 |
 | `openai-compatibility.*.prefix` | string | `""` | 可选前缀。 |
+| `openai-compatibility.*.disabled` | boolean | `false` | 禁用该提供商（无需删除配置），路由/选钥会跳过。 |
 | `openai-compatibility.*.base-url` | string | `""` | 提供商基础 URL。 |
 | `openai-compatibility.*.headers` | object | `{}` | 额外请求头。 |
 | `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API Key。 |

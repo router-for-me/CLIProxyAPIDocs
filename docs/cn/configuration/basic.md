@@ -80,14 +80,28 @@ request-retry: 3
 # 冷却中的凭据等待的最长时间（秒），超过则触发重试。
 max-retry-interval: 30
 
+# disable-image-generation 支持：false（默认）、true、或 "chat"。
+# - true：完全禁用 image_generation（同时 /v1/images/generations 与 /v1/images/edits 返回 404）。
+# - "chat"：仅禁用非 images 端点的 image_generation 注入，但保留 /v1/images/generations 与 /v1/images/edits 可用。
+disable-image-generation: false
+
 # 配额超限时的处理
 quota-exceeded:
   switch-project: true # 配额超限时是否自动切换其他项目
   switch-preview-model: true # 配额超限时是否自动切换预览模型
+  antigravity-credits: true # Claude credits 兜底：当所有 free-tier 凭据耗尽（429/503）时，使用带 Google One AI credits 的凭据进行最后兜底重试
 
 # 多凭据匹配时的路由策略
 routing:
   strategy: "round-robin" # 轮询（默认）或 fill-first
+  # 为所有客户端启用会话粘性路由。
+  # 会话 ID 来源：metadata.user_id（Claude Code 会话格式）、
+  # X-Session-ID、Session_id（Codex）、X-Amp-Thread-Id（Amp CLI）、
+  # X-Client-Request-Id（PI）、conversation_id，或前几条消息的 hash。
+  # 当绑定的凭据不可用时，会自动故障转移。
+  session-affinity: false # 默认：false
+  # 会话绑定的保留时长。默认：1h
+  session-affinity-ttl: "1h"
 
 # 是否为 WebSocket API (/v1/ws) 启用认证
 ws-auth: false
@@ -169,6 +183,7 @@ claude-api-key:
 # OpenAI 兼容提供商
 openai-compatibility:
   - name: "openrouter" # 提供商名称，用于 UA 等
+    disabled: false # 可选：设为 true 则禁用该提供商而无需删除
     prefix: "test" # 可选：需以 "test/kimi-k2" 访问
     base-url: "https://openrouter.ai/api/v1" # 提供商基础 URL
     headers:

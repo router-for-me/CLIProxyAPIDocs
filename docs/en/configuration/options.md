@@ -22,7 +22,10 @@ Defaults stay aligned with `config.example.yaml`.
 | `force-model-prefix` | boolean | `false` | Unprefixed model requests use only unprefixed credentials. |
 | `request-retry` | integer | `3` | Retries on 403/408/500/502/503/504. |
 | `max-retry-interval` | integer | `30` | Max wait (seconds) for cooled-down credential before retry. |
+| `disable-image-generation` | boolean \| `"chat"` | `false` | Control built-in `image_generation` tool injection/availability: `true` disables everywhere (also returns 404 for `/v1/images/generations` and `/v1/images/edits`); `"chat"` disables injection on non-images endpoints but keeps the image endpoints enabled. |
 | `routing.strategy` | string | `"round-robin"` | Credential selection when multiple match: `round-robin` or `fill-first`. |
+| `routing.session-affinity` | boolean | `false` | Enable session-sticky routing for all clients. Session IDs are extracted from `metadata.user_id` (Claude Code), `X-Session-ID`, `Session_id` (Codex), `X-Amp-Thread-Id` (Amp CLI), `X-Client-Request-Id` (PI), `conversation_id`, or a message hash. |
+| `routing.session-affinity-ttl` | string | `"1h"` | TTL for session-to-auth bindings. |
 | `ws-auth` | boolean | `false` | Require auth for `/v1/ws`. |
 | `nonstream-keepalive-interval` | integer | `0` | Non-SSE blank line interval (seconds) to prevent idle timeout; 0 disables. |
 | `codex-instructions-enabled` | boolean | `false` | Enable official Codex instructions injection for Codex API requests. |
@@ -44,6 +47,7 @@ Defaults stay aligned with `config.example.yaml`.
 | --- | --- | --- | --- |
 | `quota-exceeded.switch-project` | boolean | `true` | Auto-switch project on quota exhaustion. |
 | `quota-exceeded.switch-preview-model` | boolean | `true` | Auto-switch to preview model on exhaustion. |
+| `quota-exceeded.antigravity-credits` | boolean | `true` | Credits-based fallback for Claude models. When all free-tier auths are exhausted (429/503), the conductor retries using an auth with available Google One AI credits. |
 
 ## Provider Credentials (arrays; default `[]`)
 
@@ -95,6 +99,7 @@ Defaults stay aligned with `config.example.yaml`.
 | --- | --- | --- | --- |
 | `openai-compatibility.*.name` | string | `""` | Provider name (used in UA, etc.). |
 | `openai-compatibility.*.prefix` | string | `""` | Optional prefix. |
+| `openai-compatibility.*.disabled` | boolean | `false` | Disable this provider without removing it; routing/auth selection skips it. |
 | `openai-compatibility.*.base-url` | string | `""` | Provider base URL. |
 | `openai-compatibility.*.headers` | object | `{}` | Extra headers. |
 | `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API key. |

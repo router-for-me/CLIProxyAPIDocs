@@ -78,14 +78,28 @@ request-retry: 3
 # Максимальное время ожидания в секундах для «остывших» учетных данных перед повторной попыткой.
 max-retry-interval: 30
 
+# disable-image-generation поддерживает: false (по умолчанию), true или "chat".
+# - true: отключает image_generation везде (и возвращает 404 для /v1/images/generations и /v1/images/edits).
+# - "chat": отключает внедрение image_generation на endpoints не для изображений, но оставляет /v1/images/generations и /v1/images/edits включенными.
+disable-image-generation: false
+
 # Поведение при превышении квоты
 quota-exceeded:
   switch-project: true # Автоматически переключаться на другой проект при превышении квоты
   switch-preview-model: true # Автоматически переключаться на preview-модель при превышении квоты
+  antigravity-credits: true # Credits-fallback для Claude: когда все free-tier учетные данные исчерпаны (429/503), выполнить последнюю попытку через auth с Google One AI credits
 
 # Стратегия маршрутизации для выбора учетных данных при наличии нескольких совпадений.
 routing:
   strategy: 'round-robin' # round-robin (по умолчанию), fill-first
+  # Включить универсальную session-sticky маршрутизацию для всех клиентов.
+  # Session ID извлекается из: metadata.user_id (формат сессии Claude Code),
+  # X-Session-ID, Session_id (Codex), X-Amp-Thread-Id (Amp CLI),
+  # X-Client-Request-Id (PI), conversation_id или хэша первых сообщений.
+  # Автоматический failover всегда включен, когда привязанный auth становится недоступен.
+  session-affinity: false # по умолчанию: false
+  # Как долго хранятся привязки session→auth. По умолчанию: 1h
+  session-affinity-ttl: '1h'
 
 # Если true, включает аутентификацию для WebSocket API (/v1/ws).
 ws-auth: false
@@ -169,6 +183,7 @@ claude-api-key:
 # Провайдеры, совместимые с OpenAI
 openai-compatibility:
   - name: 'openrouter' # Имя провайдера; будет использоваться в user agent и других местах.
+    disabled: false # опционально: установите true, чтобы отключить провайдера без удаления
     prefix: 'test' # опционально: требует вызовов вида "test/kimi-k2" для использования учетных данных этого провайдера
     base-url: 'https://openrouter.ai/api/v1' # Базовый URL провайдера.
     headers:

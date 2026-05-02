@@ -5,6 +5,7 @@
 通过 `openai-compatibility` 配置上游 OpenAI 兼容提供商（例如 OpenRouter）。
 
 - name：内部识别名
+- disabled：可选，设为 true 则禁用该提供商（无需删除配置）
 - base-url：提供商基础地址
 - api-key-entries：API密钥条目列表，支持可选的每密钥代理配置（推荐且为持久化格式）
 - models：将上游模型 `name` 映射为本地可用 `alias`
@@ -16,6 +17,7 @@
 ```yaml
 openai-compatibility:
   - name: "openrouter"
+    disabled: false
     base-url: "https://openrouter.ai/api/v1"
     api-key-entries:
       - api-key: "sk-or-v1-...b780"

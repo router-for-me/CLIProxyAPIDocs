@@ -81,14 +81,28 @@ request-retry: 3
 # Maximum wait time in seconds for a cooled-down credential before triggering a retry.
 max-retry-interval: 30
 
+# disable-image-generation supports: false (default), true, or "chat".
+# - true: disable image_generation everywhere (also returns 404 for /v1/images/generations and /v1/images/edits).
+# - "chat": disable image_generation injection on non-images endpoints, but keep /v1/images/generations and /v1/images/edits enabled.
+disable-image-generation: false
+
 # Quota exceeded behavior
 quota-exceeded:
   switch-project: true # Whether to automatically switch to another project when a quota is exceeded
   switch-preview-model: true # Whether to automatically switch to a preview model when a quota is exceeded
+  antigravity-credits: true # Whether to use credits as last-resort fallback when all free-tier auths are exhausted for Claude models
 
 # Routing strategy for selecting credentials when multiple match.
 routing:
   strategy: "round-robin" # round-robin (default), fill-first
+  # Enable universal session-sticky routing for all clients.
+  # Session IDs are extracted from: metadata.user_id (Claude Code session format),
+  # X-Session-ID, Session_id (Codex), X-Amp-Thread-Id (Amp CLI),
+  # X-Client-Request-Id (PI), conversation_id, or first few messages hash.
+  # Automatic failover is always enabled when bound auth becomes unavailable.
+  session-affinity: false # default: false
+  # How long session-to-auth bindings are retained. Default: 1h
+  session-affinity-ttl: "1h"
 
 # When true, enable authentication for the WebSocket API (/v1/ws).
 ws-auth: false
@@ -170,6 +184,7 @@ claude-api-key:
 # OpenAI compatibility providers
 openai-compatibility:
   - name: "openrouter" # The name of the provider; it will be used in the user agent and other places.
+    disabled: false # optional: set to true to disable this provider without removing it
     prefix: "test" # optional: require calls like "test/kimi-k2" to target this provider's credentials
     base-url: "https://openrouter.ai/api/v1" # The base URL of the provider.
     headers:

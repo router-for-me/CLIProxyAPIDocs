@@ -22,7 +22,10 @@
 | `force-model-prefix` | boolean | `false` | Запросы к моделям без префикса используют только учетные данные без префикса. |
 | `request-retry` | integer | `3` | Количество повторных попыток при ошибках 403/408/500/502/503/504. |
 | `max-retry-interval` | integer | `30` | Максимальное время ожидания (в секундах) восстановления учетных данных перед повторной попыткой. |
+| `disable-image-generation` | boolean \| `"chat"` | `false` | Управляет встроенным инструментом `image_generation`: `true` отключает его везде (и возвращает 404 для `/v1/images/generations` и `/v1/images/edits`); `"chat"` отключает внедрение на endpoints не для изображений, но оставляет images endpoints включенными. |
 | `routing.strategy` | string | `"round-robin"` | Стратегия выбора учетных данных при наличии нескольких совпадений: `round-robin` или `fill-first`. |
+| `routing.session-affinity` | boolean | `false` | Включить session-sticky маршрутизацию для всех клиентов. Session ID извлекается из `metadata.user_id` (Claude Code), `X-Session-ID`, `Session_id` (Codex), `X-Amp-Thread-Id` (Amp CLI), `X-Client-Request-Id` (PI), `conversation_id` или хэша сообщений. |
+| `routing.session-affinity-ttl` | string | `"1h"` | TTL хранения привязок session→auth. |
 | `ws-auth` | boolean | `false` | Требовать аутентификацию для `/v1/ws`. |
 | `nonstream-keepalive-interval` | integer | `0` | Интервал пустых строк для соединений без SSE (в секундах) для предотвращения таймаута простоя; 0 отключает функцию. |
 | `codex-instructions-enabled` | boolean | `false` | Включить внедрение официальных инструкций Codex для запросов к Codex API. |
@@ -44,6 +47,7 @@
 | --- | --- | --- | --- |
 | `quota-exceeded.switch-project` | boolean | `true` | Автоматическое переключение проекта при исчерпании квоты. |
 | `quota-exceeded.switch-preview-model` | boolean | `true` | Автоматическое переключение на preview-модель при исчерпании квоты. |
+| `quota-exceeded.antigravity-credits` | boolean | `true` | Credits-fallback для Claude: когда все free-tier учетные данные исчерпаны (429/503), оркестратор повторяет запрос через auth с доступными Google One AI credits. |
 
 ## Учетные данные провайдеров (массивы; по умолчанию `[]`)
 
@@ -95,6 +99,7 @@
 | --- | --- | --- | --- |
 | `openai-compatibility.*.name` | string | `""` | Имя провайдера (используется в UA и т. д.). |
 | `openai-compatibility.*.prefix` | string | `""` | Необязательный префикс. |
+| `openai-compatibility.*.disabled` | boolean | `false` | Отключить провайдера без удаления из конфигурации; маршрутизация/выбор ключа пропускают его. |
 | `openai-compatibility.*.base-url` | string | `""` | Базовый URL провайдера. |
 | `openai-compatibility.*.headers` | object | `{}` | Дополнительные заголовки. |
 | `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API-ключ. |
