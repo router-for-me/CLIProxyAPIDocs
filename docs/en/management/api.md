@@ -38,10 +38,48 @@ If a plaintext key is detected in the config at startup, it will be bcrypt‑has
 
 ## Endpoints
 
-### Usage Telemetry (Redis)
-- Aggregated in-memory usage endpoints (`/usage`, `/usage/export`, `/usage/import`) are no longer available.
+### Usage Telemetry Queue
+- Legacy aggregated usage endpoints (`/usage`, `/usage/export`, `/usage/import`) are no longer available. Use `GET /usage-queue` for per-request queue records.
 - For per-request usage records as JSON, use the [Redis Usage Queue](/management/redis-usage-queue) (RESP) exposed on the same port as HTTP.
 - Use `/usage-statistics-enabled` to enable/disable usage publishing.
+
+- GET `/usage-queue?count=10` — Pop up to `count` usage records from the queue
+    - Request:
+      ```bash
+      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+        'http://localhost:8317/v0/management/usage-queue?count=10'
+      ```
+    - Response:
+      ```json
+      [
+        {
+          "timestamp": "2026-05-05T12:00:00Z",
+          "latency_ms": 1234,
+          "source": "user@example.com",
+          "auth_index": "0",
+          "tokens": {
+            "input_tokens": 10,
+            "output_tokens": 20,
+            "reasoning_tokens": 0,
+            "cached_tokens": 0,
+            "total_tokens": 30
+          },
+          "failed": false,
+          "provider": "openai",
+          "model": "gpt-5.4",
+          "alias": "gpt-5.4",
+          "endpoint": "POST /v1/chat/completions",
+          "auth_type": "api_key",
+          "api_key": "sk-...",
+          "request_id": "req_..."
+        }
+      ]
+      ```
+    - Notes:
+        - `count` is optional and defaults to `1`; it must be a positive integer.
+        - The response is always an array, including when `count=1`; an empty queue returns `[]`.
+        - Records returned by this endpoint are removed from the queue.
+        - The Redis-compatible usage queue reads from the same queue; `LPOP` and `RPOP` also remove returned records.
 
 ### Config
 - GET `/config` — Get the full config

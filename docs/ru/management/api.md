@@ -37,10 +37,48 @@ outline: 'deep'
 
 ## Эндпоинты
 
-### Usage Telemetry (Redis)
-- Агрегированные usage эндпоинты (`/usage`, `/usage/export`, `/usage/import`) больше недоступны.
+### Очередь Usage Telemetry
+- Устаревшие агрегированные эндпоинты usage (`/usage`, `/usage/export`, `/usage/import`) больше недоступны. Используйте `GET /usage-queue` для per-request записей очереди.
 - Для per-request usage записей в JSON используйте [Redis очередь usage](/ru/management/redis-usage-queue) (RESP), доступную на том же порту, что и HTTP.
 - Используйте `/usage-statistics-enabled` для включения/отключения публикации usage.
+
+- GET `/usage-queue?count=10` — Извлечь из очереди до `count` usage записей
+    - Запрос:
+      ```bash
+      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+        'http://localhost:8317/v0/management/usage-queue?count=10'
+      ```
+    - Ответ:
+      ```json
+      [
+        {
+          "timestamp": "2026-05-05T12:00:00Z",
+          "latency_ms": 1234,
+          "source": "user@example.com",
+          "auth_index": "0",
+          "tokens": {
+            "input_tokens": 10,
+            "output_tokens": 20,
+            "reasoning_tokens": 0,
+            "cached_tokens": 0,
+            "total_tokens": 30
+          },
+          "failed": false,
+          "provider": "openai",
+          "model": "gpt-5.4",
+          "alias": "gpt-5.4",
+          "endpoint": "POST /v1/chat/completions",
+          "auth_type": "api_key",
+          "api_key": "sk-...",
+          "request_id": "req_..."
+        }
+      ]
+      ```
+    - Примечания:
+        - `count` необязателен, значение по умолчанию — `1`; он должен быть положительным целым числом.
+        - Ответ всегда является массивом, включая случай `count=1`; пустая очередь возвращает `[]`.
+        - Записи, возвращенные этим эндпоинтом, удаляются из очереди.
+        - Redis-совместимая очередь usage читает из той же очереди; `LPOP` и `RPOP` также удаляют возвращенные записи.
 
 ### Config
 - GET `/config` — Получить полный конфиг
