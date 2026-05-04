@@ -69,7 +69,8 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw RPO
   - `total_tokens` (целое число)
 - `failed` (boolean)
 - `provider` (строка)
-- `model` (строка)
+- `model` (строка, фактическое имя модели для выполнения)
+- `alias` (строка, имя модели, запрошенное клиентом)
 - `endpoint` (строка, например `POST /v1/chat/completions`)
 - `auth_type` (строка)
 - `api_key` (строка)
@@ -93,6 +94,7 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw RPO
   "failed": false,
   "provider": "openai",
   "model": "gpt-5.4",
+  "alias": "client-gpt",
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",

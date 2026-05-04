@@ -69,7 +69,8 @@ Each queue item is a single JSON object with these fields:
   - `total_tokens` (integer)
 - `failed` (boolean)
 - `provider` (string)
-- `model` (string)
+- `model` (string, actual model name used for execution)
+- `alias` (string, model name requested by the client)
 - `endpoint` (string, e.g. `POST /v1/chat/completions`)
 - `auth_type` (string)
 - `api_key` (string)
@@ -93,6 +94,7 @@ Example:
   "failed": false,
   "provider": "openai",
   "model": "gpt-5.4",
+  "alias": "client-gpt",
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",

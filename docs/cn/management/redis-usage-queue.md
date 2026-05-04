@@ -69,7 +69,8 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw RPO
   - `total_tokens`（整数）
 - `failed`（布尔值）
 - `provider`（字符串）
-- `model`（字符串）
+- `model`（字符串，实际用于执行的模型名称）
+- `alias`（字符串，客户端请求的模型名称）
 - `endpoint`（字符串，例如 `POST /v1/chat/completions`）
 - `auth_type`（字符串）
 - `api_key`（字符串）
@@ -93,6 +94,7 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw RPO
   "failed": false,
   "provider": "openai",
   "model": "gpt-5.4",
+  "alias": "client-gpt",
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",
