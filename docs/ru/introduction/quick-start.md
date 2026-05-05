@@ -12,7 +12,7 @@ brew services start cliproxyapi
 ### Скрипт установки в один клик
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/brokechubb/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
+curl -fsSL https://raw.githubusercontent.com/router-for-me/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
 ```
 
 Спасибо [brokechubb](https://github.com/brokechubb) за создание установщика для Linux!

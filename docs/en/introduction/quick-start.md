@@ -21,7 +21,7 @@ brew services start cliproxyapi
 ### One-Click Installer Script
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/brokechubb/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
+curl -fsSL https://raw.githubusercontent.com/router-for-me/cliproxyapi-installer/refs/heads/master/cliproxyapi-installer | bash
 ```
 
 Thanks to [brokechubb](https://github.com/brokechubb) for building the Linux installer!
