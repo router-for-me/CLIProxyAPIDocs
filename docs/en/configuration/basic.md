@@ -148,6 +148,10 @@ codex-api-key:
     models:
       - name: "gpt-5-codex"   # upstream model name
         alias: "codex-latest" # client alias mapped to the upstream model
+      - name: "gpt-5.4-mini"
+        alias: "codex-mini"   # compact Codex model example
+      - name: "gpt-5.4"
+        alias: "gpt-5.4-high-fast" # expose your own fast alias; clients call this alias on /v1/* and payload.override injects service_tier
     excluded-models:
       - "gpt-5.1"         # exclude specific models (exact match)
       - "gpt-5-*"         # wildcard matching prefix (e.g. gpt-5-medium, gpt-5-codex)
@@ -280,8 +284,9 @@ oauth-model-alias:
 #     - name: "claude-sonnet-4-5-20250929"
 #       alias: "cs4.5"
 #   codex:
-#     - name: "gpt-5"
-#       alias: "g5"
+#     - name: "gpt-5.4"
+#       alias: "gpt-5.4-high-fast" # clients use this alias on /v1/*
+#       fork: true
 
 # OAuth provider excluded models
 oauth-excluded-models:
@@ -320,6 +325,12 @@ payload:
         - name: "gpt-*" # Supports wildcards (e.g., "gpt-*")
           protocol: "codex" # restricts the rule to a specific protocol, options: openai, gemini, claude, codex, antigravity
       params: # JSON path (gjson/sjson syntax) -> value
+        "reasoning.effort": "high"
+    - models:
+        - name: "gpt-5.4-high-fast"
+          protocol: "codex"
+      params:
+        "service_tier": "priority"
         "reasoning.effort": "high"
   override-raw: # Override raw rules always set parameters using raw JSON (must be valid JSON).
     - models:

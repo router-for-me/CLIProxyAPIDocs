@@ -20,6 +20,8 @@ base_url = "http://127.0.0.1:8317/v1"
 wire_api = "responses"
 ```
 
+`wire_api = "responses"` is also the recommended setting when you use a Codex fast alias backed by `service_tier: "priority"`, because the current Codex fast-tier behavior is most reliable on the Responses path.
+
 auth.json:
 ```json
 {
