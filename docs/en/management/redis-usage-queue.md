@@ -33,6 +33,7 @@ This is **not** a full Redis server. Only these commands are implemented:
 - `AUTH`
 - `LPOP <key> [count]`
 - `RPOP <key> [count]`
+- `SUBSCRIBE usage`
 
 Notes:
 
@@ -40,6 +41,9 @@ Notes:
 - Without `count`, `LPOP`/`RPOP` return a single Bulk String (JSON) or `nil` when empty.
 - With `count`, `LPOP`/`RPOP` return an Array of Bulk Strings; an empty array when empty.
 - Items are retained in memory for `redis-usage-queue-retention-seconds` (seconds, default `60`, max `3600`). Poll frequently if you need lossless capture.
+- `SUBSCRIBE usage` uses Redis pub/sub framing. While at least one client is subscribed, new usage records are broadcast to all subscribed clients and are not stored in the FIFO queue. Those records cannot be fetched later with `LPOP`/`RPOP` or the Management usage queue endpoint.
+- If no clients are subscribed, new usage records continue to enter the FIFO queue as before.
+- In subscription mode, `PING`, `UNSUBSCRIBE`, and `QUIT` are supported for basic connection control.
 
 ## Examples
 
@@ -51,6 +55,9 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw LPO
 
 # pop up to 50 items
 redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw RPOP queue 50
+
+# subscribe to live usage records
+redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw SUBSCRIBE usage
 ```
 
 ## Payload schema
