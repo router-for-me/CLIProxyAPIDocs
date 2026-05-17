@@ -42,6 +42,7 @@ export default defineConfig({
                             {text: '反重力', link: '/cn/configuration/provider/antigravity'},
                             {text: 'Claude Code', link: '/cn/configuration/provider/claude-code'},
                             {text: 'Codex', link: '/cn/configuration/provider/codex'},
+                            {text: 'xAI / Grok', link: '/cn/configuration/provider/xai'},
                             {text: 'AI Studio', link: '/cn/configuration/provider/ai-studio'},
                             {text: 'OpenAI 兼容', link: '/cn/configuration/provider/openai-compatibility'},
                             {text: 'Claude Code 兼容', link: '/cn/configuration/provider/claude-code-compatibility'},

@@ -4,28 +4,30 @@ outline: deep
 
 # CLIProxyAPI是什么？
 
-**CLIProxyAPI** 是一个为 CLI 提供 OpenAI/Gemini/Claude/Codex 兼容 API 接口的代理服务器。
+**CLIProxyAPI** 是一个为 CLI 提供 OpenAI/Gemini/Claude/Codex/Grok 兼容 API 接口的代理服务器。
 
 您可以使用本地或多账户的CLI方式，通过任何与 OpenAI（包括Responses）/Gemini/Claude 兼容的客户端和SDK进行访问。
 
 ## 功能特性
 
-- 为 CLI 模型提供 OpenAI/Gemini/Claude/Codex 兼容的 API 端点
+- 为 CLI 模型提供 OpenAI/Gemini/Claude/Codex/Grok 兼容的 API 端点
 - Gemini CLI 支持（OAuth 登录）
 - 反重力 支持（OAuth 登录）
 - OpenAI Codex（GPT 系列）支持（OAuth 登录）
 - Claude Code 支持（OAuth 登录）
+- Grok Build 支持（OAuth 登录）
 - 支持流式与非流式响应
 - 函数调用/工具支持
 - 多模态输入（文本、图片）
-- 多账户支持与轮询负载均衡（Gemini、OpenAI 与 Claude）
-- 简单的 CLI 身份验证流程（Gemini、OpenAI 与 Claude）
+- 多账户支持与轮询负载均衡（Gemini、OpenAI、Claude 与 Grok）
+- 简单的 CLI 身份验证流程（Gemini、OpenAI、Claude 与 Grok）
 - 支持 Gemini AIStudio API 密钥
 - 支持 AI Studio Build 多账户轮询
 - 支持 Gemini CLI 多账户轮询
 - 支持 反重力 多账户轮询
 - 支持 Claude Code 多账户轮询
 - 支持 OpenAI Codex 多账户轮询
+- 支持 Grok Build 多账户轮询
 - 通过配置接入上游 OpenAI 兼容提供商（例如 OpenRouter）
 
 ## 支持的模型

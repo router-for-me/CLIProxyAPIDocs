@@ -4,27 +4,29 @@ outline: deep
 
 # What is CLIProxyAPI?
 
-**CLIProxyAPI** is a proxy server that provides OpenAI/Gemini/Claude/Codex compatible API interfaces for CLI.
+**CLIProxyAPI** is a proxy server that provides OpenAI/Gemini/Claude/Codex/Grok compatible API interfaces for CLI.
 
 You can use local or multi-account CLI access with OpenAI(include Responses)/Gemini/Claude-compatible clients and SDKs.
 
 ## Features
 
-- OpenAI/Gemini/Claude compatible API endpoints for CLI models
+- OpenAI/Gemini/Claude/Grok compatible API endpoints for CLI models
 - Gemini CLI support via OAuth login
 - Antigravity support via OAuth login
 - OpenAI Codex support (GPT models) via OAuth login
 - Claude Code support via OAuth login
+- Grok Build support via OAuth login
 - Streaming and non-streaming responses
 - Function calling/tools support
 - Multimodal input support (text and images)
-- Multiple accounts with round-robin load balancing (Gemini, OpenAI and Claude)
-- Simple CLI authentication flows (Gemini, OpenAI and Claude)
+- Multiple accounts with round-robin load balancing (Gemini, OpenAI, Claude and Grok)
+- Simple CLI authentication flows (Gemini, OpenAI, Claude and Grok)
 - Generative Language API Key support
 - Gemini CLI multi-account load balancing
 - Antigravity multi-account load balancing
 - Claude Code multi-account load balancing
 - OpenAI Codex multi-account load balancing
+- Grok Build multi-account load balancing
 - OpenAI-compatible upstream providers via config (e.g., OpenRouter)
 
 ## Supported Models

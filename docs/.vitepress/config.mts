@@ -65,6 +65,7 @@ export default defineConfig({
 								link: '/configuration/provider/claude-code',
 							},
 							{ text: 'Codex', link: '/configuration/provider/codex' },
+							{ text: 'xAI / Grok', link: '/configuration/provider/xai' },
 							{ text: 'AI Studio', link: '/configuration/provider/ai-studio' },
 							{
 								text: 'OpenAI Compatibility',
@@ -256,6 +257,7 @@ export default defineConfig({
 										link: '/ru/configuration/provider/claude-code',
 									},
 									{ text: 'Codex', link: '/ru/configuration/provider/codex' },
+									{ text: 'xAI / Grok', link: '/ru/configuration/provider/xai' },
 									{
 										text: 'AI Studio',
 										link: '/ru/configuration/provider/ai-studio',
