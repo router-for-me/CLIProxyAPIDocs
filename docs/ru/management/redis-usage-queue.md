@@ -82,6 +82,7 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw SUB
 - `auth_type` (строка)
 - `api_key` (строка)
 - `request_id` (строка)
+- `response_headers` (объект, опционально; upstream response headers в формате `header-name: string[]`)
 
 Пример:
 
@@ -105,6 +106,10 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw SUB
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",
-  "request_id": "ctx-request-id"
+  "request_id": "ctx-request-id",
+  "response_headers": {
+    "X-Upstream-Request-Id": ["upstream-req-1"],
+    "Retry-After": ["30"]
+  }
 }
 ```

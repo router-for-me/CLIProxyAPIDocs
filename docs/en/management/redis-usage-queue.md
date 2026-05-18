@@ -82,6 +82,7 @@ Each queue item is a single JSON object with these fields:
 - `auth_type` (string)
 - `api_key` (string)
 - `request_id` (string)
+- `response_headers` (object, optional; upstream response headers as `header-name: string[]`)
 
 Example:
 
@@ -105,6 +106,10 @@ Example:
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",
-  "request_id": "ctx-request-id"
+  "request_id": "ctx-request-id",
+  "response_headers": {
+    "X-Upstream-Request-Id": ["upstream-req-1"],
+    "Retry-After": ["30"]
+  }
 }
 ```

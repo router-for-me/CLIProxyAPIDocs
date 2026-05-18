@@ -82,6 +82,7 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw SUB
 - `auth_type`（字符串）
 - `api_key`（字符串）
 - `request_id`（字符串）
+- `response_headers`（对象，可选；上游响应 header，格式为 `header-name: string[]`）
 
 示例：
 
@@ -105,6 +106,10 @@ redis-cli -h 127.0.0.1 -p 8317 -a "<MANAGEMENT_KEY>" --no-auth-warning --raw SUB
   "endpoint": "POST /v1/chat/completions",
   "auth_type": "apikey",
   "api_key": "test-key",
-  "request_id": "ctx-request-id"
+  "request_id": "ctx-request-id",
+  "response_headers": {
+    "X-Upstream-Request-Id": ["upstream-req-1"],
+    "Retry-After": ["30"]
+  }
 }
 ```
