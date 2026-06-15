@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitepress'
+import cnConfig from '../cn/config'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -112,6 +113,70 @@ export default defineConfig({
 				],
 			},
 			{
+				text: 'Plugins',
+				items: [
+					{ text: 'Plugin Development', link: '/plugin/development' },
+					{
+						text: 'Entry Capabilities',
+						items: [
+							{ text: 'Model Registrar', link: '/plugin/model-registrar' },
+							{ text: 'Model Provider', link: '/plugin/model-provider' },
+							{ text: 'Credential Provider', link: '/plugin/auth-provider' },
+							{
+								text: 'Frontend Authentication Provider',
+								link: '/plugin/frontend-auth-provider',
+							},
+							{
+								text: 'Frontend Authentication Exclusive Mode',
+								link: '/plugin/frontend-auth-exclusive',
+							},
+							{ text: 'Scheduler', link: '/plugin/scheduler' },
+							{ text: 'Executor', link: '/plugin/executor' },
+						],
+					},
+					{
+						text: 'Request Processing',
+						items: [
+							{ text: 'Request Translator', link: '/plugin/request-translator' },
+							{ text: 'Request Normalizer', link: '/plugin/request-normalizer' },
+							{ text: 'Request Interceptor', link: '/plugin/request-interceptor' },
+						],
+					},
+					{
+						text: 'Response Processing',
+						items: [
+							{ text: 'Response Translator', link: '/plugin/response-translator' },
+							{
+								text: 'Response Pre-Translation Normalizer',
+								link: '/plugin/response-before-translator',
+							},
+							{
+								text: 'Response Post-Translation Normalizer',
+								link: '/plugin/response-after-translator',
+							},
+							{ text: 'Response Interceptor', link: '/plugin/response-interceptor' },
+							{
+								text: 'Streaming Response Interceptor',
+								link: '/plugin/response-stream-interceptor',
+							},
+						],
+					},
+					{
+						text: 'Extensions And Callbacks',
+						items: [
+							{ text: 'Thinking Applier', link: '/plugin/thinking-applier' },
+							{ text: 'Usage Observer', link: '/plugin/usage-plugin' },
+							{
+								text: 'Command Line Extension',
+								link: '/plugin/command-line-plugin',
+							},
+							{ text: 'Management API', link: '/plugin/management-api' },
+							{ text: 'Host Callbacks', link: '/plugin/host-callbacks' },
+						],
+					},
+				],
+			},
+			{
 				text: 'Docker',
 				items: [
 					{ text: 'Run with Docker', link: '/docker/docker' },
@@ -186,6 +251,7 @@ export default defineConfig({
 			label: '简体中文',
 			lang: 'zh-Hans',
 			link: '/cn',
+			themeConfig: cnConfig.themeConfig,
 		},
 		ru: {
 			label: 'Русский',
@@ -304,6 +370,97 @@ export default defineConfig({
 							{ text: 'Factory Droid', link: '/ru/agent-client/droid' },
 							{ text: 'Amp CLI', link: '/ru/agent-client/amp-cli' },
 							{ text: 'OpenCode', link: '/ru/agent-client/opencode' },
+						],
+					},
+					{
+						text: 'Плагины',
+						items: [
+							{ text: 'Разработка плагинов', link: '/ru/plugin/development' },
+							{
+								text: 'Входные возможности',
+								items: [
+									{
+										text: 'Регистратор моделей',
+										link: '/ru/plugin/model-registrar',
+									},
+									{
+										text: 'Провайдер моделей',
+										link: '/ru/plugin/model-provider',
+									},
+									{
+										text: 'Провайдер учётных данных',
+										link: '/ru/plugin/auth-provider',
+									},
+									{
+										text: 'Провайдер фронтенд-аутентификации',
+										link: '/ru/plugin/frontend-auth-provider',
+									},
+									{
+										text: 'Эксклюзивный режим фронтенд-аутентификации',
+										link: '/ru/plugin/frontend-auth-exclusive',
+									},
+									{ text: 'Планировщик', link: '/ru/plugin/scheduler' },
+									{ text: 'Исполнитель', link: '/ru/plugin/executor' },
+								],
+							},
+							{
+								text: 'Обработка запросов',
+								items: [
+									{
+										text: 'Преобразование запросов',
+										link: '/ru/plugin/request-translator',
+									},
+									{
+										text: 'Нормализация запросов',
+										link: '/ru/plugin/request-normalizer',
+									},
+									{
+										text: 'Перехват запросов',
+										link: '/ru/plugin/request-interceptor',
+									},
+								],
+							},
+							{
+								text: 'Обработка ответов',
+								items: [
+									{
+										text: 'Преобразование ответов',
+										link: '/ru/plugin/response-translator',
+									},
+									{
+										text: 'Нормализация ответа перед преобразованием',
+										link: '/ru/plugin/response-before-translator',
+									},
+									{
+										text: 'Нормализация ответа после преобразования',
+										link: '/ru/plugin/response-after-translator',
+									},
+									{
+										text: 'Перехват ответов',
+										link: '/ru/plugin/response-interceptor',
+									},
+									{
+										text: 'Перехват стриминговых ответов',
+										link: '/ru/plugin/response-stream-interceptor',
+									},
+								],
+							},
+							{
+								text: 'Расширения и callback',
+								items: [
+									{ text: 'Thinking applier', link: '/ru/plugin/thinking-applier' },
+									{
+										text: 'Наблюдение за использованием',
+										link: '/ru/plugin/usage-plugin',
+									},
+									{
+										text: 'Расширение командной строки',
+										link: '/ru/plugin/command-line-plugin',
+									},
+									{ text: 'Management API', link: '/ru/plugin/management-api' },
+									{ text: 'Callback хоста', link: '/ru/plugin/host-callbacks' },
+								],
+							},
 						],
 					},
 					{

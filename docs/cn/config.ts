@@ -74,6 +74,52 @@ export default defineConfig({
                 ]
             },
             {
+                text: '插件',
+                items: [
+                    {text: '插件开发', link: '/cn/plugin/development'},
+                    {
+                        text: '入口能力',
+                        items: [
+                            {text: '模型注册器', link: '/cn/plugin/model-registrar'},
+                            {text: '模型提供方', link: '/cn/plugin/model-provider'},
+                            {text: '凭证提供方', link: '/cn/plugin/auth-provider'},
+                            {text: '前端认证提供方', link: '/cn/plugin/frontend-auth-provider'},
+                            {text: '前端认证独占模式', link: '/cn/plugin/frontend-auth-exclusive'},
+                            {text: '调度器', link: '/cn/plugin/scheduler'},
+                            {text: '执行器', link: '/cn/plugin/executor'},
+                        ]
+                    },
+                    {
+                        text: '请求处理',
+                        items: [
+                            {text: '请求转换', link: '/cn/plugin/request-translator'},
+                            {text: '请求规整', link: '/cn/plugin/request-normalizer'},
+                            {text: '请求拦截', link: '/cn/plugin/request-interceptor'},
+                        ]
+                    },
+                    {
+                        text: '响应处理',
+                        items: [
+                            {text: '响应转换', link: '/cn/plugin/response-translator'},
+                            {text: '响应转换前规整', link: '/cn/plugin/response-before-translator'},
+                            {text: '响应转换后规整', link: '/cn/plugin/response-after-translator'},
+                            {text: '响应拦截', link: '/cn/plugin/response-interceptor'},
+                            {text: '流式响应拦截', link: '/cn/plugin/response-stream-interceptor'},
+                        ]
+                    },
+                    {
+                        text: '扩展与回调',
+                        items: [
+                            {text: 'Thinking 处理', link: '/cn/plugin/thinking-applier'},
+                            {text: '用量观察', link: '/cn/plugin/usage-plugin'},
+                            {text: '命令行扩展', link: '/cn/plugin/command-line-plugin'},
+                            {text: 'Management API', link: '/cn/plugin/management-api'},
+                            {text: '宿主回调', link: '/cn/plugin/host-callbacks'},
+                        ]
+                    },
+                ]
+            },
+            {
                 text: 'Docker',
                 items: [
                     {text: '使用 Docker', link: '/cn/docker/docker'},
