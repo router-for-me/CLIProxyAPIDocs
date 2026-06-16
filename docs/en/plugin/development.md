@@ -30,6 +30,7 @@ Each capability has its own page. The content is organized from `sdk/pluginapi/t
 | Entry capability | `frontend_auth_provider` | [Frontend authentication provider](./frontend-auth-provider) |
 | Entry capability | `frontend_auth_provider_exclusive` | [Frontend authentication exclusive mode](./frontend-auth-exclusive) |
 | Entry capability | `scheduler` | [Scheduler](./scheduler) |
+| Entry capability | `model_router` | [Model router](./model-router) |
 | Entry capability | `executor` | [Executor](./executor) |
 | Request processing | `request_translator` | [Request translator](./request-translator) |
 | Request processing | `request_normalizer` | [Request normalizer](./request-normalizer) |
@@ -226,6 +227,7 @@ Plugins declare the capabilities they implement through `capabilities`. Common c
 | Credential provider | `auth.*` | Parse, log in, poll, and refresh credentials for the plugin provider. |
 | Frontend authentication provider | `frontend_auth.*` | Authenticate client requests before proxy processing. |
 | Scheduler | `scheduler.pick` | Select a credential from candidates or delegate to a built-in scheduler. |
+| Model router | `model.route` | Route matching requests to a plugin executor, the router's own executor, or a built-in provider before provider/auth selection. |
 | Executor | `executor.*` | Directly execute upstream requests or streaming requests. |
 | Request translator | `request.translate` | Convert a canonical request into an upstream protocol. |
 | Request normalizer | `request.normalize` | Normalize requests entering the execution path. |
@@ -417,6 +419,7 @@ Common examples:
 | `examples/plugin/simple` | Complete ABI skeletons in Go, C, and Rust. |
 | `examples/plugin/codex-service-tier` | Request normalizer plugin. |
 | `examples/plugin/scheduler` | Scheduler plugin. |
+| `examples/plugin/claude-web-search-router` | ModelRouter plugin that routes Claude Code `web_search` requests to built-in providers or its own executor. |
 | `examples/plugin/management-api` | Plugin-owned management routes and resource pages. |
 | `examples/plugin/host-callback-auth-files` | Calls host credential file callbacks. |
 | `examples/plugin/host-model-callback` | Calls host model execution callbacks and demonstrates recursion protection. |
@@ -442,4 +445,3 @@ After developing a local plugin, verify it with this flow:
 5. If the plugin has resource pages, open `/v0/resource/plugins/<pluginID>/<path>`.
 6. If the plugin has a Management API, request the corresponding `/v0/management/...` route with the management key.
 7. After modifying the plugin, install or delete it through the management API, or restart the service, and confirm the old dynamic library is no longer being used.
-

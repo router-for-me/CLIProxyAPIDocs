@@ -86,6 +86,7 @@ export default defineConfig({
                             {text: '前端认证提供方', link: '/cn/plugin/frontend-auth-provider'},
                             {text: '前端认证独占模式', link: '/cn/plugin/frontend-auth-exclusive'},
                             {text: '调度器', link: '/cn/plugin/scheduler'},
+                            {text: '模型路由', link: '/cn/plugin/model-router'},
                             {text: '执行器', link: '/cn/plugin/executor'},
                         ]
                     },

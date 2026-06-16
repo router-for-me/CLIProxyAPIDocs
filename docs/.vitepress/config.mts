@@ -131,6 +131,7 @@ export default defineConfig({
 								link: '/plugin/frontend-auth-exclusive',
 							},
 							{ text: 'Scheduler', link: '/plugin/scheduler' },
+							{ text: 'Model Router', link: '/plugin/model-router' },
 							{ text: 'Executor', link: '/plugin/executor' },
 						],
 					},
@@ -400,6 +401,10 @@ export default defineConfig({
 										link: '/ru/plugin/frontend-auth-exclusive',
 									},
 									{ text: 'Планировщик', link: '/ru/plugin/scheduler' },
+									{
+										text: 'Маршрутизатор моделей',
+										link: '/ru/plugin/model-router',
+									},
 									{ text: 'Исполнитель', link: '/ru/plugin/executor' },
 								],
 							},
