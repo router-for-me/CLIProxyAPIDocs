@@ -227,7 +227,7 @@ plugins:
 | Провайдер учётных данных | `auth.*` | Разбирает, логинит, опрашивает и обновляет учётные данные провайдера плагина. |
 | Провайдер фронтенд-аутентификации | `frontend_auth.*` | Аутентифицирует клиентские запросы до обработки proxy. |
 | Планировщик | `scheduler.pick` | Выбирает учётные данные из кандидатов или делегирует встроенному планировщику. |
-| Маршрутизатор моделей | `model.route` | Маршрутизирует подходящие запросы в plugin executor, собственный executor маршрутизатора или встроенный provider до provider/auth selection. |
+| Маршрутизатор моделей | `model.route` | Маршрутизирует подходящие запросы в исполнитель плагина, собственный исполнитель маршрутизатора или встроенный провайдер до выбора провайдера и учётных данных. |
 | Исполнитель | `executor.*` | Непосредственно выполняет upstream-запросы или stream-запросы. |
 | Преобразование запросов | `request.translate` | Преобразует канонический запрос в upstream-протокол. |
 | Нормализация запросов | `request.normalize` | Нормализует запросы перед входом в путь выполнения. |
@@ -419,7 +419,7 @@ make -C examples/plugin build
 | `examples/plugin/simple` | Полные ABI skeleton на Go, C и Rust. |
 | `examples/plugin/codex-service-tier` | Плагин нормализации запросов. |
 | `examples/plugin/scheduler` | Плагин планировщика. |
-| `examples/plugin/claude-web-search-router` | ModelRouter plugin, который маршрутизирует запросы Claude Code `web_search` во встроенные provider или собственный executor. |
+| `examples/plugin/claude-web-search-router` | Плагин ModelRouter, который маршрутизирует запросы Claude Code `web_search` во встроенные провайдеры или собственный исполнитель. |
 | `examples/plugin/management-api` | Собственные management routes и resource pages плагина. |
 | `examples/plugin/host-callback-auth-files` | Вызов callback файлов учётных данных хоста. |
 | `examples/plugin/host-model-callback` | Вызов callback выполнения моделей хоста и демонстрация защиты от рекурсии. |
