@@ -11,7 +11,6 @@ You can use local or multi-account CLI access with OpenAI(include Responses)/Gem
 ## Features
 
 - OpenAI/Gemini/Claude/Grok compatible API endpoints for CLI models
-- Gemini CLI support via OAuth login
 - Antigravity support via OAuth login
 - OpenAI Codex support (GPT models) via OAuth login
 - Claude Code support via OAuth login
@@ -20,9 +19,8 @@ You can use local or multi-account CLI access with OpenAI(include Responses)/Gem
 - Function calling/tools support
 - Multimodal input support (text and images)
 - Multiple accounts with round-robin load balancing (Gemini, OpenAI, Claude and Grok)
-- Simple CLI authentication flows (Gemini, OpenAI, Claude and Grok)
+- Simple CLI authentication flows (OpenAI, Claude and Grok)
 - Generative Language API Key support
-- Gemini CLI multi-account load balancing
 - Antigravity multi-account load balancing
 - Claude Code multi-account load balancing
 - OpenAI Codex multi-account load balancing
@@ -57,4 +55,3 @@ You can use local or multi-account CLI access with OpenAI(include Responses)/Gem
 - kimi-k2
 - glm-4.6
 - tstars2.0
-- Gemini models auto-switch to preview variants when needed

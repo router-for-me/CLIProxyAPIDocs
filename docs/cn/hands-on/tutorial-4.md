@@ -1,6 +1,6 @@
 # 肆：中转转发接入篇
 
-在前几篇文章中，我们已经成功通过 OAuth 或 Cookie 方式接入了 Codex、Gemini CLI 和 Gemini Web。在本篇教程中，我们将更进一步，学习如何便捷地将各类 AI 中转服务接入 CLIProxyAPI。
+在前几篇文章中，我们已经成功通过 OAuth 或 Cookie 方式接入了内置提供商。在本篇教程中，我们将更进一步，学习如何便捷地将各类 AI 中转服务接入 CLIProxyAPI。
 
 首先，让我们回顾一下之前使用的配置文件：
 

@@ -951,7 +951,7 @@ outline: 'deep'
 
 Эти эндпоинты инициируют процессы входа провайдера и возвращают URL для открытия в браузере. Токены сохраняются в `auths/` после завершения процесса.
 
-Для Anthropic, Codex, Gemini CLI и Antigravity вы можете добавить `?is_webui=true`, чтобы повторно использовать встроенный пересыльщик обратного вызова при запуске из управления Web UI.
+Для Anthropic, Codex и Antigravity вы можете добавить `?is_webui=true`, чтобы повторно использовать встроенный пересыльщик обратного вызова при запуске из управления Web UI.
 
 - GET `/anthropic-auth-url` — Запуск входа Anthropic (Claude)
     - Запрос:
@@ -976,22 +976,6 @@ outline: 'deep'
       ```json
       { "status": "ok", "url": "https://...", "state": "codex-1716206400" }
       ```
-
-- GET `/gemini-cli-auth-url` — Запуск входа в Google (Gemini CLI)
-    - Параметры запроса:
-        - `project_id` (необязательно): ID проекта Google Cloud.
-    - Запрос:
-      ```bash
-      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        'http://localhost:8317/v0/management/gemini-cli-auth-url?project_id=<PROJECT_ID>'
-      ```
-    - Ответ:
-      ```json
-      { "status": "ok", "url": "https://...", "state": "gem-1716206400" }
-      ```
-- Примечания:
-        - Если `project_id` опущен, сервер запрашивает Cloud Resource Manager о доступных проектах, выбирает первый доступный и сохраняет его в файле токена (с пометкой `auto: true`).
-        - Процесс проверяет и, при необходимости, включает `cloudaicompanion.googleapis.com` через Service Usage API; ошибки отображаются через `/get-auth-status` как ошибки вида `project activation required: ...`.
 
 - GET `/antigravity-auth-url` — Запуск входа в Antigravity
     - Запрос:

@@ -123,7 +123,7 @@ Defaults stay aligned with `config.example.yaml`.
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `oauth-model-alias` | object | `{}` | Rename models per channel (gemini-cli, vertex, aistudio, antigravity, claude, codex). |
+| `oauth-model-alias` | object | `{}` | Rename models per channel (vertex, aistudio, antigravity, claude, codex). |
 | `oauth-model-alias.*.*.fork` | boolean | `false` | When `true`, keep original and add alias as extra model. |
 | `oauth-excluded-models` | object | `{}` | Exclude models per channel; wildcards supported. |
 

@@ -127,13 +127,13 @@ At the same time, the server's terminal will also show that the authentication f
 
 ![](https://img.072899.xyz/2025/09/a34bb04a63f7f75f687a2a626035dccd.png)
 
-So far, the authentication of Codex is all completed. For other services that require OAuth authorization, such as Gemini-CLI and Claude, the operation process is exactly the same.
+So far, the authentication of Codex is all completed. For other services that require OAuth authorization, such as Claude and Antigravity, the operation process is similar.
 
 ### **5. Principle Summary**
 
 Finally, let's summarize the principle of this remote OAuth authentication process:
 
-The OAuth authentication of Gemini-CLI, Claude, and Codex all require a "Callback" process to receive the authorization token. Due to security restrictions, the callback address of the service provider is usually forced to be set to `localhost`.
+The OAuth authentication of Claude, Codex, and Antigravity all require a "Callback" process to receive the authorization token. Due to security restrictions, the callback address of the service provider is usually forced to be set to `localhost`.
 
 When we execute the authorization command in the Docker container, there is no browser environment in the container, and we must open the authorization web page on the local computer. But after successful authorization, the browser will try to access `localhost`, which will only access our own computer, and cannot pass the token to the program on the remote server.
 

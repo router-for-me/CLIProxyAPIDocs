@@ -958,7 +958,7 @@ Mirrors the CLI `vertex-import` helper and stores Google service account JSON as
 
 These endpoints initiate provider login flows and return a URL to open in a browser. Tokens are saved under `auths/` once the flow completes.
 
-For Anthropic, Codex, Gemini CLI, and Antigravity you can append `?is_webui=true` to reuse the embedded callback forwarder when launching from the management UI.
+For Anthropic, Codex, and Antigravity you can append `?is_webui=true` to reuse the embedded callback forwarder when launching from the management UI.
 
 - GET `/anthropic-auth-url` — Start Anthropic (Claude) login
     - Request:
@@ -983,22 +983,6 @@ For Anthropic, Codex, Gemini CLI, and Antigravity you can append `?is_webui=true
       ```json
       { "status": "ok", "url": "https://...", "state": "codex-1716206400" }
       ```
-
-- GET `/gemini-cli-auth-url` — Start Google (Gemini CLI) login
-    - Query params:
-        - `project_id` (optional): Google Cloud project ID.
-    - Request:
-      ```bash
-      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        'http://localhost:8317/v0/management/gemini-cli-auth-url?project_id=<PROJECT_ID>'
-      ```
-    - Response:
-      ```json
-      { "status": "ok", "url": "https://...", "state": "gem-1716206400" }
-      ```
-    - Notes:
-        - When `project_id` is omitted, the server queries Cloud Resource Manager for accessible projects, picks the first available one, and stores it in the token file (marked with `auto: true`).
-        - The flow checks and, if needed, enables `cloudaicompanion.googleapis.com` via the Service Usage API; failures surface through `/get-auth-status` as errors such as `project activation required: ...`.
 
 - GET `/antigravity-auth-url` — Start Antigravity login
     - Request:

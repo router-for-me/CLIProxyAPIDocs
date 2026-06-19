@@ -22,7 +22,7 @@ Append `(value)` to the model name to control the thinking budget or reasoning e
 ## How It’s Applied
 
 - Only models that advertise thinking keep these settings; unsupported models simply drop the suffix without injecting thinking fields.
-- Gemini (standard & CLI): writes `generationConfig.thinkingConfig.thinkingBudget` (or `request.generationConfig.thinkingConfig...` for CLI) after clamping. `include_thoughts` is left unchanged. Models with default thinking (e.g., `gemini-3-pro-preview`) still auto-enable thinking when missing; the parentheses budget overrides the default.
+- Gemini: writes `generationConfig.thinkingConfig.thinkingBudget` after clamping. `include_thoughts` is left unchanged. Models with default thinking (e.g., `gemini-3-pro-preview`) still auto-enable thinking when missing; the parentheses budget overrides the default.
 - Claude API: when a budget/level is provided, sets `thinking.type=enabled` with normalized `thinking.budget_tokens` and bumps `max_tokens` if needed.
 - OpenAI/Codex/OpenRouter: reasoning levels/`auto`/`none` overwrite `reasoning_effort` (chat) or `reasoning.effort` (Responses). Numeric budgets do not change reasoning_effort for these protocols.
 - Level-based models enforce their supported effort levels; unsupported values return HTTP 400.

@@ -1,8 +1,6 @@
 # Three: NanoBanana Hands-on
 
-> **Important Notice: Since Gemini CLI now fully covers Gemini Web and is completely free, CLIProxyAPI will remove Gemini Web support starting from version 6.2.X. If you still want to use Gemini Web, you can use version 6.1.X. The following tutorial is based on version 6.1.X**
-
-After the previous hands-on practice, we have successfully integrated `Gemini CLI` and `Codex` on `CLIProxyAPI`. This issue will introduce how to add Gemini Web's Cookie to make `CLIProxyAPI` support the `NanoBanana` model.
+This issue will introduce how to add Gemini Web's Cookie to make `CLIProxyAPI` support the `NanoBanana` model.
 
 Gemini's `NanoBanana` model is highly praised for its excellent image processing capabilities. However, Google does not provide a free API for this model. Now, with `CLIProxyAPI`, we can use `NanoBanana` in the form of a free API by integrating Gemini Web.
 

@@ -127,13 +127,13 @@ docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --codex-l
 
 ![](https://img.072899.xyz/2025/09/a34bb04a63f7f75f687a2a626035dccd.png)
 
-至此，Codex 的认证就全部完成了。对于 Gemini-CLI 和 Claude 等其他需要 OAuth 授权的服务，操作流程完全相同。
+至此，Codex 的认证就全部完成了。对于 Claude 和反重力等其他需要 OAuth 授权的服务，操作流程类似。
 
 ### **五、 原理总结**
 
 最后，我们来总结一下这个远程 OAuth 认证流程的原理：
 
-Gemini-CLI、Claude 和 Codex 的 OAuth 认证都需要一个“回调”（Callback）过程来接收授权令牌。由于安全限制，服务商的回调地址通常强制设置为 `localhost`。
+Claude、Codex 和反重力的 OAuth 认证都需要一个“回调”（Callback）过程来接收授权令牌。由于安全限制，服务商的回调地址通常强制设置为 `localhost`。
 
 当我们在 Docker 容器中执行授权命令时，容器内没有浏览器环境，我们必须在本地电脑上打开授权网页。但授权成功后，浏览器会尝试访问 `localhost`，这只会访问到我们自己的电脑，而无法将令牌传递给远在服务器上的程序。
 
@@ -146,4 +146,3 @@ Gemini-CLI、Claude 和 Codex 的 OAuth 认证都需要一个“回调”（Call
 完成以上配置后，在客户端使用时，只需将请求的端点（Endpoint）地址指向你服务器的 `IP:端口`（例如 `http://YOUR_SERVER_IP:8317`）即可，其余操作与本地使用完全相同。
 
 至此，你已经掌握了在服务器上通过 Docker 部署 CLIProxyAPI 的完整流程，快去享受 AI 带来的便利吧！
-

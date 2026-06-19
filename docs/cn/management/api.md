@@ -958,7 +958,7 @@ outline: 'deep'
 
 以下端点用于发起各提供商的登录流程，并返回需要在浏览器中打开的 URL。流程完成后，令牌会保存到 `auths/` 目录。
 
-对于 Anthropic、Codex、Gemini CLI 与 Antigravity，可附加 `?is_webui=true` 以便从管理界面复用内置回调转发。
+对于 Anthropic、Codex 与 Antigravity，可附加 `?is_webui=true` 以便从管理界面复用内置回调转发。
 
 - GET `/anthropic-auth-url` — 开始 Anthropic（Claude）登录
     - 请求：
@@ -983,22 +983,6 @@ outline: 'deep'
       ```json
       { "status": "ok", "url": "https://...", "state": "codex-1716206400" }
       ```
-
-- GET `/gemini-cli-auth-url` — 开始 Google（Gemini CLI）登录
-    - 查询参数：
-        - `project_id`（可选）：Google Cloud 项目 ID。
-    - 请求：
-      ```bash
-      curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-        'http://localhost:8317/v0/management/gemini-cli-auth-url?project_id=<PROJECT_ID>'
-      ```
-    - 响应：
-      ```json
-      { "status": "ok", "url": "https://...", "state": "gem-1716206400" }
-      ```
-    - 说明：
-        - 若未提供 `project_id`，服务会通过 Cloud Resource Manager API 枚举可访问的项目并自动选择首个可用项目，写入的 token 会包含该项目 ID 以及 `auto: true` 标记。
-        - 登录过程中会检测 `cloudaicompanion.googleapis.com` 是否已启用，若未启用则调用 Service Usage API 尝试开启；若开启失败，`/get-auth-status` 会返回 `project activation required: ...` 之类的错误提示。
 
 - GET `/antigravity-auth-url` — 开始 Antigravity 登录
     - 请求：

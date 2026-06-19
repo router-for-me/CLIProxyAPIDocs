@@ -11,7 +11,6 @@ outline: deep
 ## Возможности
 
 - Совместимые с OpenAI/Gemini/Claude/Grok эндпоинты API для моделей CLI
-- Поддержка Gemini CLI через вход по OAuth
 - Поддержка Antigravity через вход по OAuth
 - Поддержка OpenAI Codex (модели GPT) через вход по OAuth
 - Поддержка Claude Code через вход по OAuth
@@ -20,9 +19,8 @@ outline: deep
 - Поддержка вызова функций (Function calling) и инструментов (tools)
 - Поддержка мультимодального ввода (текст и изображения)
 - Использование нескольких аккаунтов с балансировкой нагрузки round-robin (Gemini, OpenAI, Claude и Grok)
-- Простые процессы аутентификации CLI (Gemini, OpenAI, Claude и Grok)
+- Простые процессы аутентификации CLI (OpenAI, Claude и Grok)
 - Поддержка Generative Language API Key
-- Балансировка нагрузки между несколькими аккаунтами Gemini CLI
 - Балансировка нагрузки между несколькими аккаунтами Antigravity
 - Балансировка нагрузки между несколькими аккаунтами Claude Code
 - Балансировка нагрузки между несколькими аккаунтами OpenAI Codex
@@ -57,4 +55,3 @@ outline: deep
 - kimi-k2
 - glm-4.6
 - tstars2.0
-- Модели Gemini автоматически переключаются на preview-варианты при необходимости

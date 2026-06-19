@@ -122,7 +122,7 @@
 ## Управление моделями OAuth
 | Параметр | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
-| `oauth-model-alias` | object | `{}` | Переименование моделей для каждого канала (gemini-cli, vertex, aistudio, antigravity, claude, codex). |
+| `oauth-model-alias` | object | `{}` | Переименование моделей для каждого канала (vertex, aistudio, antigravity, claude, codex). |
 | `oauth-model-alias.*.*.fork` | boolean | `false` | Если `true`, сохраняет оригинал и добавляет псевдоним как дополнительную модель. |
 | `oauth-excluded-models` | object | `{}` | Исключение моделей для каждого канала; поддерживаются wildcards. |
 

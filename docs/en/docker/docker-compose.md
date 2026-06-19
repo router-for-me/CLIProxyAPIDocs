@@ -34,10 +34,6 @@
         - **Option 2: Build from Source and Run (For Developers)**: Builds the image from the local source code, tags it as `cli-proxy-api:local`, and then starts the container. This is useful if you are making changes to the source code.
 
 4. To authenticate with providers, run the login command inside the container:
-    - **Gemini**:
-    ```bash
-    docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --login
-    ```
     - **OpenAI (Codex)**:
     ```bash
     docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --codex-login

@@ -22,7 +22,7 @@
 ## 应用规则
 
 - 仅对声明支持思考的模型生效；不支持的模型只会移除括号，不注入思考字段。
-- Gemini（标准与 CLI）：按夹紧后的值写入 `generationConfig.thinkingConfig.thinkingBudget`（或 `request.generationConfig.thinkingConfig...`），不会改动 `include_thoughts`。自带默认思考的模型（如 `gemini-3-pro-preview`）在缺省情况下仍会自动启用思考，括号中的预算会覆盖默认值。
+- Gemini：按夹紧后的值写入 `generationConfig.thinkingConfig.thinkingBudget`，不会改动 `include_thoughts`。自带默认思考的模型（如 `gemini-3-pro-preview`）在缺省情况下仍会自动启用思考，括号中的预算会覆盖默认值。
 - Claude API：提供预算/等级时会设置 `thinking.type=enabled` 并填入归一化后的 `thinking.budget_tokens`，必要时提升 `max_tokens`。
 - OpenAI/Codex/OpenRouter：等级/`auto`/`none` 会覆盖 `reasoning_effort`（chat）或 `reasoning.effort`（Responses）；纯数字预算不会为这些协议改写 reasoning_effort。
 - 使用离散等级的模型会校验等级，不支持的取值会返回 400。

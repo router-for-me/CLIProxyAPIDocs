@@ -116,9 +116,7 @@ Click **Authentication Files** -> **New** in order
 
 ![](https://img.072899.xyz/2025/10/00cbb95dfeab2b8047b8270292fbe2cc.png)
 
-This time we will still use adding Gemini CLI as an example for demonstration. For preparations, please refer to "Two: Gemini CLI + Codex Hands-on"
-
-Enter **Project ID**, click **Confirm**
+Select the provider you need to authenticate, fill in the required fields, and click **Confirm**
 
 ![](https://img.072899.xyz/2025/10/994a104817d51e39f811ad190d6190d5.png)
 

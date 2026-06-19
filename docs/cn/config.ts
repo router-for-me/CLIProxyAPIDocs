@@ -3,7 +3,7 @@ import {defineConfig} from 'vitepress'
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "CLIProxyAPI",
-    description: "Wrap Gemini CLI, ChatGPT Codex, and Claude Code as an OpenAI/Gemini/Claude/Codex compatible API service, allowing you to enjoy free Gemini 2.5 Pro, GPT 5, and Claude models through an API",
+    description: "Wrap ChatGPT Codex, Claude Code, and other model providers as an OpenAI/Gemini/Claude/Codex compatible API service.",
     themeConfig: {
         // https://vitepress.dev/reference/default-theme-config
         nav: [
@@ -38,7 +38,6 @@ export default defineConfig({
                     {
                         text: '提供商',
                         items:[
-                            {text: 'Gemini CLI', link: '/cn/configuration/provider/gemini-cli'},
                             {text: '反重力', link: '/cn/configuration/provider/antigravity'},
                             {text: 'Claude Code', link: '/cn/configuration/provider/claude-code'},
                             {text: 'Codex', link: '/cn/configuration/provider/codex'},
@@ -67,7 +66,6 @@ export default defineConfig({
                 items: [
                     {text: 'Claude Code', link: '/cn/agent-client/claude-code'},
                     {text: 'Codex', link: '/cn/agent-client/codex'},
-                    {text: 'Gemini CLI', link: '/cn/agent-client/gemini-cli'},
                     {text: 'Factory Droid', link: '/cn/agent-client/droid'},
                     {text: 'OpenCode', link: '/cn/agent-client/opencode'}
                 ]
@@ -130,7 +128,6 @@ export default defineConfig({
                 text: '配置案例',
                 items: [
                     {text: '零：配置详细解说', link: '/cn/hands-on/tutorial-0'},
-                    {text: '贰：Gemini CLI+Codex实战', link: '/cn/hands-on/tutorial-2'},
                     {text: '叁：NanoBanana实战', link: '/cn/hands-on/tutorial-3'},
                     {text: '肆：中转转发接入篇', link: '/cn/hands-on/tutorial-4'},
                     {text: '伍：Docker服务器部署', link: '/cn/hands-on/tutorial-5'},

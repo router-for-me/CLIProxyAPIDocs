@@ -212,7 +212,7 @@ vertex-api-key:
 
 # 全局 OAuth 模型名称别名（按渠道）
 # 这些别名同时用于模型列表和请求路由的模型 ID 重命名。
-# 支持的渠道：gemini-cli、vertex、aistudio、antigravity、claude、codex。
+# 支持的渠道：vertex、aistudio、antigravity、claude、codex。
 # 注意：别名不适用于 gemini-api-key、codex-api-key、claude-api-key、openai-compatibility 或 vertex-api-key。
 # 您可以使用不同的别名重复相同的名称，以暴露多个客户端模型名称。
 oauth-model-alias:
@@ -231,10 +231,6 @@ oauth-model-alias:
       alias: "gemini-claude-sonnet-4-5-thinking"
     - name: "claude-opus-4-5-thinking"
       alias: "gemini-claude-opus-4-5-thinking"
-#   gemini-cli:
-#     - name: "gemini-2.5-pro"          # 该渠道下的原始模型名
-#       alias: "g2.5p"                  # 客户端可见别名
-#       fork: true                      # 为 true 时保留原名并同时增加别名作为额外模型（默认：false）
 #   vertex:
 #     - name: "gemini-2.5-pro"
 #       alias: "g2.5p"
@@ -250,11 +246,6 @@ oauth-model-alias:
 
 # OAuth 提供商的模型排除列表
 oauth-excluded-models:
-  gemini-cli:
-    - "gemini-2.5-pro"     # 精确排除
-    - "gemini-2.5-*"       # 前缀通配
-    - "*-preview"          # 后缀通配
-    - "*flash*"            # 子串通配
   vertex:
     - "gemini-3-pro-preview"
   aistudio:

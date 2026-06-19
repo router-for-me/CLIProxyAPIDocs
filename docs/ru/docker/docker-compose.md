@@ -34,10 +34,6 @@
     - **Вариант 2: Сборка из исходного кода и запуск (для разработчиков)**: Собирает образ из локального исходного кода, помечает его тегом `cli-proxy-api:local` и затем запускает контейнер. Это полезно, если вы вносите изменения в исходный код.
 
 4. Для аутентификации у провайдеров выполните команду входа внутри контейнера:
-    - **Gemini**:
-    ```bash
-    docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --login
-    ```
     - **OpenAI (Codex)**:
     ```bash
     docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --codex-login

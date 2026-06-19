@@ -1,11 +1,5 @@
 # 使用 Docker 运行
 
-运行以下命令进行登录（Gemini OAuth，端口 8085）：
-
-```bash
-docker run --rm -p 8085:8085 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api eceasy/cli-proxy-api:latest /CLIProxyAPI/CLIProxyAPI --login
-```
-
 运行以下命令进行登录（OpenAI OAuth，端口 1455）：
 
 ```bash

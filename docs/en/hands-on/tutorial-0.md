@@ -30,7 +30,7 @@ remote-management:
   disable-control-panel: false
 
 # Directory for storing authentication files, used to store authentication files
-# for Gemini CLI, Gemini Web, Claude Code, and Codex.
+# for Gemini Web, Claude Code, and Codex.
 # The default setting is the .cli-proxy-api folder in your current account
 # directory, which is compatible with Windows and Linux environments.
 # The program will automatically create this folder when it starts for the first
@@ -83,11 +83,6 @@ quota-exceeded:
   # polling accounts is normal, the client will not report an error.
   # When it is set to false, the client needs to retry or abort the operation.
   switch-project: true 
-  # Gemini CLI exclusive configuration, applicable to Gemini 2.5 Pro and
-  # Gemini 2.5 Flash models.
-  # When the official version quota is used up, it will automatically switch to
-  # the Preview model. Just keep it on.
-  switch-preview-model: true
 
 # Hidden configuration, you can turn off the interval time during retries, and
 # set it as needed.

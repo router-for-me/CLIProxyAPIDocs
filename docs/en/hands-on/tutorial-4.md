@@ -1,6 +1,6 @@
 # Four: Relay Forwarding Integration
 
-In the previous articles, we have successfully integrated Codex, Gemini CLI, and Gemini Web through OAuth or Cookie methods. In this tutorial, we will go a step further and learn how to conveniently integrate various AI relay services into CLIProxyAPI.
+In the previous articles, we have successfully integrated built-in providers through OAuth or Cookie methods. In this tutorial, we will go a step further and learn how to conveniently integrate various AI relay services into CLIProxyAPI.
 
 First, let's review the configuration file we used before:
 

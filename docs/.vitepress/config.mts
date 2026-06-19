@@ -5,7 +5,7 @@ import cnConfig from '../cn/config'
 export default defineConfig({
 	title: 'CLIProxyAPI',
 	description:
-		'Wrap Gemini CLI, ChatGPT Codex, and Claude Code as an OpenAI/Gemini/Claude/Codex compatible API service, allowing you to enjoy free Gemini 2.5 Pro, GPT 5, and Claude models through an API',
+		'Wrap ChatGPT Codex, Claude Code, and other model providers as an OpenAI/Gemini/Claude/Codex compatible API service.',
 	rewrites: {
 		'en/:rest*': ':rest*',
 	},
@@ -53,10 +53,6 @@ export default defineConfig({
 					{
 						text: 'Providers',
 						items: [
-							{
-								text: 'Gemini CLI',
-								link: '/configuration/provider/gemini-cli',
-							},
 							{
 								text: 'Antigravity',
 								link: '/configuration/provider/antigravity',
@@ -106,7 +102,6 @@ export default defineConfig({
 				items: [
 					{ text: 'Claude Code', link: '/agent-client/claude-code' },
 					{ text: 'Codex', link: '/agent-client/codex' },
-					{ text: 'Gemini CLI', link: '/agent-client/gemini-cli' },
 					{ text: 'Factory Droid', link: '/agent-client/droid' },
 					{ text: 'OpenCode', link: '/agent-client/opencode' }
 				],
@@ -189,10 +184,6 @@ export default defineConfig({
 					{
 						text: 'Zero: Detailed Configuration Explanation',
 						link: '/hands-on/tutorial-0',
-					},
-					{
-						text: 'Two: Gemini CLI + Codex Hands-on',
-						link: '/hands-on/tutorial-2',
 					},
 					{ text: 'Three: NanoBanana Hands-on', link: '/hands-on/tutorial-3' },
 					{
@@ -310,10 +301,6 @@ export default defineConfig({
 								text: 'Провайдеры',
 								items: [
 									{
-										text: 'Gemini CLI',
-										link: '/ru/configuration/provider/gemini-cli',
-									},
-									{
 										text: 'Antigravity',
 										link: '/ru/configuration/provider/antigravity',
 									},
@@ -365,7 +352,6 @@ export default defineConfig({
 						items: [
 							{ text: 'Claude Code', link: '/ru/agent-client/claude-code' },
 							{ text: 'Codex', link: '/ru/agent-client/codex' },
-							{ text: 'Gemini CLI', link: '/ru/agent-client/gemini-cli' },
 							{ text: 'Factory Droid', link: '/ru/agent-client/droid' },
 							{ text: 'OpenCode', link: '/ru/agent-client/opencode' },
 						],
@@ -481,10 +467,6 @@ export default defineConfig({
 							{
 								text: 'Zero: Подробное объяснение конфигурации',
 								link: '/ru/hands-on/tutorial-0',
-							},
-							{
-								text: 'Two: Gemini CLI + практика с Codex',
-								link: '/ru/hands-on/tutorial-2',
 							},
 							{
 								text: 'Three: Практика с NanoBanana',

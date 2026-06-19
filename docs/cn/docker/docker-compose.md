@@ -34,10 +34,6 @@
         - **选项 2：从源码构建并运行 (适用于开发者)**：从本地源代码构建镜像，将其标记为 `cli-proxy-api:local`，然后启动容器。如果您需要修改源代码，此选项很有用。
 
 4. 要在容器内运行登录命令进行身份验证：
-    - **Gemini**:
-    ```bash
-    docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --login
-    ```
     - **OpenAI (Codex)**:
     ```bash
     docker compose exec cli-proxy-api /CLIProxyAPI/CLIProxyAPI -no-browser --codex-login

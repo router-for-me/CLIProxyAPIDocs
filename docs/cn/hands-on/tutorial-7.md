@@ -116,9 +116,7 @@ api-keys:
 
 ![](https://img.072899.xyz/2025/10/00cbb95dfeab2b8047b8270292fbe2cc.png)
 
-本次我们仍以添加 Gemini CLI 为例进行演示，准备工作可参照《贰：Gemini CLI+Codex实战》
-
-输入 **Project ID**，点击 **Confirm**
+选择需要认证的提供商，填写必需字段，然后点击 **Confirm**
 
 ![](https://img.072899.xyz/2025/10/994a104817d51e39f811ad190d6190d5.png)
 

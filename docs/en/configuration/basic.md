@@ -213,7 +213,7 @@ vertex-api-key:
 
 # Global OAuth model name aliases (per channel)
 # These aliases rename model IDs for both model listing and request routing.
-# Supported channels: gemini-cli, vertex, aistudio, antigravity, claude, codex.
+# Supported channels: vertex, aistudio, antigravity, claude, codex.
 # NOTE: Aliases do not apply to gemini-api-key, codex-api-key, claude-api-key, openai-compatibility, or vertex-api-key.
 # You can repeat the same name with different aliases to expose multiple client model names.
 oauth-model-alias:
@@ -232,10 +232,6 @@ oauth-model-alias:
       alias: "gemini-claude-sonnet-4-5-thinking"
     - name: "claude-opus-4-5-thinking"
       alias: "gemini-claude-opus-4-5-thinking"
-#   gemini-cli:
-#     - name: "gemini-2.5-pro"          # original model name under this channel
-#       alias: "g2.5p"                  # client-visible alias
-#       fork: true                      # when true, keep original and also add the alias as an extra model (default: false)
 #   vertex:
 #     - name: "gemini-2.5-pro"
 #       alias: "g2.5p"
@@ -251,11 +247,6 @@ oauth-model-alias:
 
 # OAuth provider excluded models
 oauth-excluded-models:
-  gemini-cli:
-    - "gemini-2.5-pro"     # exclude specific models (exact match)
-    - "gemini-2.5-*"       # wildcard matching prefix (e.g. gemini-2.5-flash, gemini-2.5-pro)
-    - "*-preview"          # wildcard matching suffix (e.g. gemini-3-pro-preview)
-    - "*flash*"            # wildcard matching substring (e.g. gemini-2.5-flash-lite)
   vertex:
     - "gemini-3-pro-preview"
   aistudio:

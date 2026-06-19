@@ -11,7 +11,6 @@ outline: deep
 ## 功能特性
 
 - 为 CLI 模型提供 OpenAI/Gemini/Claude/Codex/Grok 兼容的 API 端点
-- Gemini CLI 支持（OAuth 登录）
 - 反重力 支持（OAuth 登录）
 - OpenAI Codex（GPT 系列）支持（OAuth 登录）
 - Claude Code 支持（OAuth 登录）
@@ -20,10 +19,9 @@ outline: deep
 - 函数调用/工具支持
 - 多模态输入（文本、图片）
 - 多账户支持与轮询负载均衡（Gemini、OpenAI、Claude 与 Grok）
-- 简单的 CLI 身份验证流程（Gemini、OpenAI、Claude 与 Grok）
+- 简单的 CLI 身份验证流程（OpenAI、Claude 与 Grok）
 - 支持 Gemini AIStudio API 密钥
 - 支持 AI Studio Build 多账户轮询
-- 支持 Gemini CLI 多账户轮询
 - 支持 反重力 多账户轮询
 - 支持 Claude Code 多账户轮询
 - 支持 OpenAI Codex 多账户轮询
@@ -58,4 +56,3 @@ outline: deep
 - kimi-k2
 - glm-4.6
 - tstars2.0
-- Gemini 模型在需要时自动切换到对应的 preview 版本

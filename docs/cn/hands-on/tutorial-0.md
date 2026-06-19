@@ -24,7 +24,7 @@ remote-management:
   # 设置为false，可以通过http://YOUR_SERVER_IP:8317/management.html打开WebUI
   disable-control-panel: false
 
-# 认证文件存放目录，用于存放 Gemini CLI、Gemini Web、Claude Code、Codex 的认证文件
+# 认证文件存放目录，用于存放 Gemini Web、Claude Code、Codex 的认证文件
 # 默认设置，是在你当前账户目录下的.cli-proxy-api文件夹，适配Windows和Linux环境
 # 程序首次启动时会自动创建该文件夹
 # Windows下默认为C:\Users\你的用户名\.cli-proxy-api
@@ -63,9 +63,6 @@ quota-exceeded:
   # 也就是说，当设置为true时，只要轮询的账号里至少有一个号是正常的，客户端这里就不会报错
   # 而设置false时，则需要客户端来进行重试或中止操作
   switch-project: true 
-  # Gemini CLI独占配置，适用于Gemini 2.5 Pro和Gemini 2.5 Flash模型
-  # 当正式版配额用完之后，会自动切换到Preview模型，保持开启即可
-  switch-preview-model: true
 
 # 隐藏配置，可以关闭重试时的间隔时间，根据需要进行设置
 # 例如某模型触发429后，程序会暂时停用它，且每次再触发都会增加停用时间，最多延长到30分钟

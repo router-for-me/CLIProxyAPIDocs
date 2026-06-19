@@ -123,7 +123,7 @@
 
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
-| `oauth-model-alias` | object | `{}` | 按渠道为模型重命名（gemini-cli、vertex、aistudio、antigravity、claude、codex）。 |
+| `oauth-model-alias` | object | `{}` | 按渠道为模型重命名（vertex、aistudio、antigravity、claude、codex）。 |
 | `oauth-model-alias.*.*.fork` | boolean | `false` | 为 `true` 时保留原名并同时添加别名作为额外模型。 |
 | `oauth-excluded-models` | object | `{}` | 按渠道排除模型，支持通配符。 |
 
