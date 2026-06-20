@@ -63,6 +63,7 @@ export default defineConfig({
 							},
 							{ text: 'Codex', link: '/configuration/provider/codex' },
 							{ text: 'xAI / Grok', link: '/configuration/provider/xai' },
+							{ text: 'Z.AI / GLM', link: '/configuration/provider/zai' },
 							{ text: 'AI Studio', link: '/configuration/provider/ai-studio' },
 							{
 								text: 'OpenAI Compatibility',
@@ -310,6 +311,7 @@ export default defineConfig({
 									},
 									{ text: 'Codex', link: '/ru/configuration/provider/codex' },
 									{ text: 'xAI / Grok', link: '/ru/configuration/provider/xai' },
+									{ text: 'Z.AI / GLM', link: '/ru/configuration/provider/zai' },
 									{
 										text: 'AI Studio',
 										link: '/ru/configuration/provider/ai-studio',
