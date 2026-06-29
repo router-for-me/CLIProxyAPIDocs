@@ -85,5 +85,5 @@ The host uses this ID to identify the plugin that originated the callback. Durin
 - Explicitly call the matching close method after using a streaming callback.
 - Do not use host callbacks to bypass the plugin's own security boundary; a plugin is still trusted in-process code.
 - Do not write credential JSON, tokens, or user request bodies to logs.
+- Do not expose credential-reading, credential-writing, or other privileged host callbacks directly through unauthenticated resource GET query parameters. If a resource page needs a user-facing control for those actions, let its same-origin JavaScript read the trusted Management Center storage and call an authenticated `/v0/management/...` route.
 - When the host model execution path can be reused, prefer `host.model.*` instead of copying host credentials into the plugin.
-

@@ -278,7 +278,7 @@ plugins:
 | 类型 | 注册字段 | 暴露路径 | 认证 |
 | --- | --- | --- | --- |
 | 插件自有 Management API | `routes` | `/v0/management/...` | 需要管理密钥。 |
-| 插件资源页面 | `resources` | `/v0/resource/plugins/<pluginID>/...` | 作为资源路由访问。 |
+| 插件资源页面 | `resources` | `/v0/resource/plugins/<pluginID>/...` | 资源请求本身不走管理鉴权。同源管理中心部署下，受信任页面的 JavaScript 可以读取已保存的管理密钥并调用 `/v0/management/...`。 |
 
 示例：插件 ID 是 `example-provider`，资源路径是 `/status`，最终访问地址是：
 
@@ -314,6 +314,9 @@ http://localhost:8317/v0/resource/plugins/example-provider/status
 - 插件资源路径会固定挂在 `/v0/resource/plugins/<pluginID>/` 下。
 - 带 `Menu` 的旧式 GET management 路由会作为浏览器资源处理，不再作为管理 API 暴露。
 - 资源路径不能包含空白、`:`、`*` 或 `..`。
+- 安装并启用带资源页的插件，应视为信任该插件的浏览器端代码。同源部署下，这些代码可以读取管理中心的 `localStorage`，包括存在时保存的管理密钥。
+- 敏感操作应放在 `/v0/management/...` 路由后面。由资源页读取已保存的管理密钥后调用这些路由，而不是在未鉴权的资源 GET 请求中直接执行敏感工作。
+- 资源页脚本应随插件一起打包，不要加载第三方脚本到可以访问同源管理上下文的页面中。
 
 ## 管理接口
 
@@ -430,6 +433,7 @@ make -C examples/plugin build
 - 插件自己的 HTTP 请求优先走 `host.http.*`，避免绕过宿主代理、日志和传输策略。
 - 需要发起模型请求时优先走 `host.model.*`，不要把宿主凭证复制进插件。
 - 流式资源使用后显式关闭。
+- 不要把读取凭证、写入凭证或执行特权动作的宿主回调直接暴露成未鉴权的资源 query 参数。面向用户的 UI 需要触发这些能力时，应使用同源受信任资源页加带管理密钥的 `/v0/management/...` 调用。
 - 插件自有配置字段保持向后兼容，删除字段时同时兼容旧配置。
 - 日志不要输出密钥、token、原始凭证 JSON 或用户敏感请求体。
 - 修改动态库后，使用插件管理接口或重启服务确保旧插件实例已经卸载。

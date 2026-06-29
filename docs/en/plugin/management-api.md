@@ -41,7 +41,7 @@ Example references:
 | Type | Registration Field | Exposed Path | Authentication |
 | --- | --- | --- | --- |
 | Plugin-owned management API | `Routes` | `/v0/management/...` | Requires the management key. |
-| Browser resource page | `Resources` | `/v0/resource/plugins/<pluginID>/...` | Accessed as a resource route. |
+| Browser resource page | `Resources` | `/v0/resource/plugins/<pluginID>/...` | The resource request itself is not management-authenticated. In same-origin Management Center deployments, trusted page JavaScript may read the stored management key and call `/v0/management/...`. |
 
 ## Registration Response
 
@@ -98,13 +98,25 @@ Response:
 ## Authentication Boundaries
 
 - Plugin management APIs under `/v0/management/...` require the management key.
-- `/v0/resource/plugins/<pluginID>/...` is a browser resource path and does not use the same Management API authentication.
+- `/v0/resource/plugins/<pluginID>/...` is a browser resource path. The GET request that serves the page does not use Management API authentication.
+- In same-origin deployments, the plugin resource page can read the Management Center's `localStorage` and reuse the stored management key. Installing and enabling such a plugin is therefore a trust decision for that plugin's browser code.
+- Cross-origin deployments cannot rely on this storage access. Plugin pages must handle missing or unreadable management state.
 - Legacy GET management routes with `Menu` are migrated by the host to resource routes to avoid exposing menu pages as management APIs.
+
+## Trusted resource page pattern
+
+For privileged actions, prefer this shape:
+
+1. Serve the plugin UI as a resource page.
+2. Let the page JavaScript read the same-origin Management Center storage when available.
+3. Use the retrieved management key to call the plugin-owned `/v0/management/...` route with `Authorization: Bearer <management-key>`.
+
+Do not bind sensitive actions directly to unauthenticated resource GET requests. A resource route that reads query parameters and immediately changes config, reads credential files, or calls privileged host callbacks is exposed as soon as the resource URL is reachable.
 
 ## Development Notes
 
 - Plugin management routes cannot override existing host `/v0/management` routes.
 - Resource paths cannot contain whitespace, `:`, `*`, or `..`.
 - When returning HTML, still avoid rendering secrets, tokens, or credential JSON into the page.
+- Bundle plugin resource page scripts yourself. Loading third-party scripts gives those scripts access to the same-origin management storage.
 - Use [host callbacks](./host-callbacks) when you need host model, HTTP, or credential file capabilities.
-

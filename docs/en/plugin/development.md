@@ -278,7 +278,7 @@ Their route boundaries are different:
 | Type | Registration Field | Exposed Path | Authentication |
 | --- | --- | --- | --- |
 | Plugin-owned Management API | `routes` | `/v0/management/...` | Requires the management key. |
-| Plugin resource page | `resources` | `/v0/resource/plugins/<pluginID>/...` | Accessed as a resource route. |
+| Plugin resource page | `resources` | `/v0/resource/plugins/<pluginID>/...` | The resource request itself is not management-authenticated. In same-origin Management Center deployments, trusted page JavaScript may read the stored management key and call `/v0/management/...`. |
 
 Example: when the plugin ID is `example-provider` and the resource path is `/status`, the final URL is:
 
@@ -314,6 +314,9 @@ Notes:
 - Plugin resource paths are always mounted under `/v0/resource/plugins/<pluginID>/`.
 - Legacy GET management routes with `Menu` are handled as browser resources and are no longer exposed as management APIs.
 - Resource paths cannot contain whitespace, `:`, `*`, or `..`.
+- Installing and enabling a plugin with resource pages is a trust decision for that plugin's browser code. In same-origin deployments, that code can read the Management Center's `localStorage`, including the saved management key when it is present.
+- Keep sensitive operations behind `/v0/management/...` routes. Let the resource page call those routes with the stored management key instead of performing sensitive work directly from an unauthenticated resource GET request.
+- Bundle resource page scripts with the plugin. Do not load third-party scripts into a page that can access the same-origin management context.
 
 ## Management Endpoints
 
@@ -430,6 +433,7 @@ During development:
 - Prefer `host.http.*` for plugin-owned HTTP requests to avoid bypassing host proxy, logging, and transport policy.
 - Prefer `host.model.*` when a model request is needed. Do not copy host credentials into the plugin.
 - Explicitly close streaming resources after use.
+- Do not expose host callbacks that read credentials, write credentials, or execute privileged actions directly through unauthenticated resource query parameters. Use a same-origin trusted resource page plus an authenticated `/v0/management/...` call when user-facing UI needs to trigger them.
 - Keep plugin-owned configuration fields backward compatible and support old configuration when removing fields.
 - Do not log secrets, tokens, raw credential JSON, or sensitive user request bodies.
 - After changing a dynamic library, use the plugin management API or restart the service so the old plugin instance is no longer loaded.

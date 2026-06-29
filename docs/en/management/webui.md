@@ -11,6 +11,16 @@ Set `remote-management.disable-control-panel` to `true` if you prefer to host th
 
 You can set the `MANAGEMENT_STATIC_PATH` environment variable to choose the directory where `management.html` is stored.
 
+## Connection storage and plugin resources
+
+The official Management Center stores connection state in browser `localStorage` for the Management Center origin. The API base URL is persisted for reconnection. The management key is persisted only when the user enables password remembering, or when an older stored session is migrated. Stored values use reversible obfuscation, not a cryptographic security boundary.
+
+When the Management Center and CLIProxyAPI are served from the same origin, plugin resource pages loaded from `/v0/resource/plugins/<pluginID>/...` run in that same origin. A trusted plugin resource page can therefore read the same `localStorage` and reuse the stored management key to call `/v0/management/...`.
+
+Treat installing and enabling a plugin with resource pages as trusting that plugin's browser code with the current management session. Plugin resource pages should bundle their own JavaScript and should not load third-party scripts, because any script running on the same origin can read the same stored management context.
+
+If you host the Management Center on a different origin from CLIProxyAPI, browser same-origin policy prevents a plugin resource iframe from reading the Management Center origin's `localStorage`. In that deployment, plugin pages should handle the missing key and ask the user to open the same-origin management page or sign in again.
+
 ## Use a custom Web UI
 
 You can point the server to your own GitHub repository for the management panel:
