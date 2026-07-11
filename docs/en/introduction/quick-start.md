@@ -12,6 +12,8 @@ brew services start cliproxyapi
 > ```bash
 > brew services stop cliproxyapi
 > mv "$(brew --prefix)/etc/cliproxyapi.conf" "$(brew --prefix)/etc/cliproxyapi.conf.bak"
+> mkdir -p ~/.cli-proxy-api
+> [ -f ~/.cli-proxy-api/config.yaml ] || cp "$(brew --prefix)/etc/cliproxyapi.conf.bak" ~/.cli-proxy-api/config.yaml
 > ln -s ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
 > brew services start cliproxyapi
 > ```
