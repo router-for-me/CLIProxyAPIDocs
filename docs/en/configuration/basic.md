@@ -9,7 +9,7 @@ The server reads a YAML configuration file (`config.yaml`) from the project root
 ```
 
 > On macOS installed via Homebrew and running with `brew services`, the default config path is `$(brew --prefix)/etc/cliproxyapi.conf` (typically `/opt/homebrew/etc/cliproxyapi.conf` on Apple Silicon and `/usr/local/etc/cliproxyapi.conf` on Intel Macs).
-> If you prefer `~/.cli-proxy-api/config.yaml`, symlink it to that default path.
+> If you prefer `~/.cli-proxy-api/config.yaml`, make the Homebrew path a symlink **to** that file, and ensure the target exists before `brew services start` (see [Quick Start — macOS](../introduction/quick-start.md)).
 
 ### Example Configuration
 

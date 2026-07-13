@@ -8,12 +8,19 @@ brew services start cliproxyapi
 ```
 
 > When installed via Homebrew and run with `brew services`, the default config path is `$(brew --prefix)/etc/cliproxyapi.conf` (typically `/opt/homebrew/etc/cliproxyapi.conf` on Apple Silicon and `/usr/local/etc/cliproxyapi.conf` on Intel Macs).
-> If you want to keep using `~/.cli-proxy-api/config.yaml` as your main config, symlink the default path to it:
+> If you want to keep using `~/.cli-proxy-api/config.yaml` as your main config, make the Homebrew path a symlink **to** that file. The symlink target **must exist** before you start the service (a dangling symlink makes the service exit immediately):
 > ```bash
 > brew services stop cliproxyapi
+> mkdir -p ~/.cli-proxy-api
+> # Create the home config only if it is missing (do not overwrite an existing file).
+> if [ ! -f ~/.cli-proxy-api/config.yaml ]; then
+>   cp "$(brew --prefix)/etc/cliproxyapi.conf" ~/.cli-proxy-api/config.yaml
+> fi
 > mv "$(brew --prefix)/etc/cliproxyapi.conf" "$(brew --prefix)/etc/cliproxyapi.conf.bak"
-> ln -s ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
-> brew services start cliproxyapi
+> # Homebrew path -> home config (not the reverse).
+> ln -sfn ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
+> # Real guard: only start when the symlink target exists.
+> test -f ~/.cli-proxy-api/config.yaml && brew services start cliproxyapi
 > ```
 
 ## Linux

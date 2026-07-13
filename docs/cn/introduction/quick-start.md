@@ -8,12 +8,19 @@ brew services start cliproxyapi
 ```
 
 > 使用 Homebrew 安装并通过 `brew services` 运行时，默认配置文件路径是 `$(brew --prefix)/etc/cliproxyapi.conf`（Apple Silicon 常见为 `/opt/homebrew/etc/cliproxyapi.conf`，Intel 常见为 `/usr/local/etc/cliproxyapi.conf`）。
-> 如果你希望继续使用 `~/.cli-proxy-api/config.yaml` 作为主配置，可将默认路径软链接到该文件：
+> 如果你希望继续使用 `~/.cli-proxy-api/config.yaml` 作为主配置，请让 Homebrew 默认路径**指向**该文件。软链目标**必须先存在**再启动服务（悬空软链会导致服务立刻退出）：
 > ```bash
 > brew services stop cliproxyapi
+> mkdir -p ~/.cli-proxy-api
+> # 仅在家目录配置不存在时复制（不覆盖已有文件）
+> if [ ! -f ~/.cli-proxy-api/config.yaml ]; then
+>   cp "$(brew --prefix)/etc/cliproxyapi.conf" ~/.cli-proxy-api/config.yaml
+> fi
 > mv "$(brew --prefix)/etc/cliproxyapi.conf" "$(brew --prefix)/etc/cliproxyapi.conf.bak"
-> ln -s ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
-> brew services start cliproxyapi
+> # Homebrew 路径 -> 家目录配置（不要反了）
+> ln -sfn ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
+> # 真正的守卫：仅当软链目标存在时才启动
+> test -f ~/.cli-proxy-api/config.yaml && brew services start cliproxyapi
 > ```
 
 ## Linux
