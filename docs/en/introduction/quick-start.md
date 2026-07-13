@@ -10,17 +10,30 @@ brew services start cliproxyapi
 > When installed via Homebrew and run with `brew services`, the default config path is `$(brew --prefix)/etc/cliproxyapi.conf` (typically `/opt/homebrew/etc/cliproxyapi.conf` on Apple Silicon and `/usr/local/etc/cliproxyapi.conf` on Intel Macs).
 > If you want to keep using `~/.cli-proxy-api/config.yaml` as your main config, make the Homebrew path a symlink **to** that file. The symlink target **must exist** before you start the service (a dangling symlink makes the service exit immediately):
 > ```bash
+> brew_conf="$(brew --prefix)/etc/cliproxyapi.conf"
+> home_conf="$HOME/.cli-proxy-api/config.yaml"
+>
 > brew services stop cliproxyapi
-> mkdir -p ~/.cli-proxy-api
-> # Create the home config only if it is missing (do not overwrite an existing file).
-> if [ ! -f ~/.cli-proxy-api/config.yaml ]; then
->   cp "$(brew --prefix)/etc/cliproxyapi.conf" ~/.cli-proxy-api/config.yaml
+> mkdir -p "$HOME/.cli-proxy-api"
+>
+> # Copy and back up only a regular file; leave symlinks alone.
+> # Timestamped backup avoids clobbering an existing .bak.
+> if [ -f "$brew_conf" ] && [ ! -L "$brew_conf" ]; then
+>   if [ -f "$home_conf" ] || cp "$brew_conf" "$home_conf"; then
+>     mv "$brew_conf" "${brew_conf}.bak.$(date +%Y%m%d-%H%M%S)"
+>   fi
 > fi
-> mv "$(brew --prefix)/etc/cliproxyapi.conf" "$(brew --prefix)/etc/cliproxyapi.conf.bak"
-> # Homebrew path -> home config (not the reverse).
-> ln -sfn ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
-> # Real guard: only start when the symlink target exists.
-> test -f ~/.cli-proxy-api/config.yaml && brew services start cliproxyapi
+>
+> # Start only after the Homebrew path safely points to an existing config.
+> if [ ! -f "$home_conf" ]; then
+>   echo "No config file found at $home_conf; service was not started." >&2
+> elif [ -e "$brew_conf" ] && [ ! -L "$brew_conf" ]; then
+>   echo "Could not safely replace $brew_conf; service was not started." >&2
+> elif ln -sfn "$home_conf" "$brew_conf"; then
+>   brew services start cliproxyapi
+> else
+>   echo "Could not create the config symlink; service was not started." >&2
+> fi
 > ```
 
 ## Linux
