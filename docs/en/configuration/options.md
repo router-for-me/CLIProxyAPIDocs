@@ -1,148 +1,179 @@
 # Configuration Options
 
-Defaults stay aligned with `config.example.yaml`.
+Defaults and available fields are aligned with `config.example.yaml`.
 
 ## Core
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `host` | string | `""` | Bind address; `""` listens on all IPv4/IPv6; use `127.0.0.1` to restrict to localhost. |
+| `host` | string | `""` | Bind address; `""` listens on all IPv4/IPv6 interfaces. Use `127.0.0.1` or `localhost` for local-only access. |
 | `port` | integer | `8317` | Server port. |
 | `tls.enable` | boolean | `false` | Enable HTTPS. |
-| `tls.cert` | string | `""` | TLS certificate path. |
-| `tls.key` | string | `""` | TLS private key path. |
-| `auth-dir` | string | `"~/.cli-proxy-api"` | Credential storage directory; `~` supported. |
-| `api-keys` | string[] | `[]` | Built-in API keys. |
-| `debug` | boolean | `false` | Verbose logging. |
-| `commercial-mode` | boolean | `false` | Disable high-overhead middleware to lower memory. |
-| `logging-to-file` | boolean | `false` | Write rotating log files instead of stdout. |
-| `logs-max-total-size-mb` | integer | `0` | Log directory size cap; 0 disables limiting. |
+| `tls.cert` / `tls.key` | string | `""` | TLS certificate and private-key paths. |
+| `auth-dir` | string | `"~/.cli-proxy-api"` | Credential directory; `~` is supported. |
+| `api-keys` | string[] | `[]` | API keys accepted by this proxy. |
+| `debug` | boolean | `false` | Enable debug logging. |
+| `request-log` | boolean | `false` | Enable detailed request and response logging. |
+| `pprof.enable` | boolean | `false` | Enable the pprof HTTP debug server. |
+| `pprof.addr` | string | `"127.0.0.1:8316"` | pprof bind address; keep it local. |
+| `commercial-mode` | boolean | `false` | Disable high-overhead request logging and middleware to reduce memory use. |
+| `logging-to-file` | boolean | `false` | Write rotating application logs instead of stdout. |
+| `logs-max-total-size-mb` | integer | `0` | Total log-directory size limit in MB; `0` disables the limit. |
+| `error-logs-max-files` | integer | `10` | Maximum retained error-log files when request logging is disabled; `0` disables cleanup. |
 | `usage-statistics-enabled` | boolean | `false` | Enable in-memory usage aggregation. |
-| `proxy-url` | string | `""` | Global proxy (socks5/http/https). |
-| `force-model-prefix` | boolean | `false` | Unprefixed model requests use only unprefixed credentials. |
-| `request-retry` | integer | `3` | Retries on 403/408/500/502/503/504. |
-| `max-retry-interval` | integer | `30` | Max wait (seconds) for cooled-down credential before retry. |
-| `disable-image-generation` | boolean \| `"chat"` | `false` | Control built-in `image_generation` tool injection/availability: `true` disables everywhere (also returns 404 for `/v1/images/generations` and `/v1/images/edits`); `"chat"` disables injection on non-images endpoints but keeps the image endpoints enabled. |
-| `routing.strategy` | string | `"round-robin"` | Credential selection when multiple match: `round-robin` or `fill-first`. |
-| `routing.session-affinity` | boolean | `false` | Enable session-sticky routing for all clients. Session IDs are extracted from `metadata.user_id` (Claude Code), `X-Session-ID`, `Session_id` (Codex), `X-Client-Request-Id` (PI), `conversation_id`, or a message hash. |
-| `routing.session-affinity-ttl` | string | `"1h"` | TTL for session-to-auth bindings. |
-| `ws-auth` | boolean | `false` | Require auth for `/v1/ws`. |
-| `nonstream-keepalive-interval` | integer | `0` | Non-SSE blank line interval (seconds) to prevent idle timeout; 0 disables. |
-| `codex-instructions-enabled` | boolean | `false` | Enable official Codex instructions injection for Codex API requests. |
-| `streaming.keepalive-seconds` | integer | `0` | SSE keep-alive interval; ≤0 disables. |
-| `streaming.bootstrap-retries` | integer | `0` | Safe retries before first byte. |
+| `redis-usage-queue-retention-seconds` | integer | `60` | Retain usage-queue items in memory for this many seconds; maximum `3600`. |
+| `proxy-url` | string | `""` | Global outbound proxy (`socks5`, `http`, or `https`). Per-credential `proxy-url` accepts `direct` or `none` to bypass it and environment proxies. |
+| `force-model-prefix` | boolean | `false` | When `true`, unprefixed model requests use only credentials without a prefix (except when the prefix equals the model name). |
+| `passthrough-headers` | boolean | `false` | Forward filtered upstream response headers to clients. |
+| `request-retry` | integer | `3` | Retry count for 403/408/500/502/503/504 responses. |
+| `max-retry-credentials` | integer | `0` | Maximum credentials tried for one failed request; `0` keeps the legacy “try all” behavior. |
+| `max-retry-interval` | integer | `30` | Maximum seconds to wait for a cooled-down credential before retrying. |
+| `disable-cooling` | boolean | `false` | Globally disable credential/model cooldown scheduling. |
+| `save-cooldown-status` | boolean | `false` | Persist credential cooldown state in `.cds` files next to auth files. |
+| `transient-error-cooldown-seconds` | integer | `0` | Cooldown for transient 408/500/502/503/504 errors; `0` uses the legacy 60 seconds and `-1` disables it. |
+| `disable-claude-cloak-mode` | boolean | `false` | Disable Claude request cloaking globally; individual credentials can override it. |
+| `disable-image-generation` | boolean \| `"chat"` \| `"passthrough"` | `false` | `true` disables image generation everywhere and makes `/v1/images/*` return 404; `"chat"` disables injection only outside image endpoints; `"passthrough"` leaves non-image client payloads unchanged and behaves as `"chat"` for image endpoints. |
+| `gpt-image-2-base-model` | string | `"gpt-5.4-mini"` | Base model for the legacy hosted image-generation path. Must start with `gpt-`. |
+| `video-result-auth-cache-ttl` | string | `"3h"` | How long video IDs remain bound to the credential that created them. |
+| `auth-auto-refresh-workers` | integer | `16` | OAuth/file-auth refresh worker count; values greater than `0` override the default. |
+| `ws-auth` | boolean | `true` | Require authentication for `/v1/ws`. |
+| `nonstream-keepalive-interval` | integer | `0` | Emit blank lines every N seconds for non-streaming responses; `0` disables it. |
+| `streaming.keepalive-seconds` | integer | `0` | SSE keep-alive interval; values ≤ `0` disable it. |
+| `streaming.bootstrap-retries` | integer | `0` | Safe streaming retries before the first byte is sent. |
+| `antigravity-signature-cache-enabled` | boolean | `true` | Prefer and validate cached thinking-block signatures; set `false` only to use bypass mode. |
+| `antigravity-signature-bypass-strict` | boolean | `false` | In bypass mode, validate the full Claude protobuf signature structure instead of only basic format. |
 
 ## Management API
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | `remote-management.allow-remote` | boolean | `false` | Permit non-localhost management access. |
-| `remote-management.secret-key` | string | `""` | Management key; plaintext is hashed on startup; empty disables all `/v0/management` (404). |
-| `remote-management.disable-control-panel` | boolean | `false` | Disable bundled management UI assets/routes. |
-| `remote-management.panel-github-repository` | string | `"https://github.com/router-for-me/Cli-Proxy-API-Management-Center"` | Repo or releases API for the management UI bundle. |
+| `remote-management.secret-key` | string | `""` | Management key; plaintext is hashed on startup. Empty disables all `/v0/management` routes (404). |
+| `remote-management.disable-control-panel` | boolean | `false` | Disable bundled management-panel assets and routes. |
+| `remote-management.disable-auto-update-panel` | boolean | `false` | Disable periodic background updates of the management panel. It is still fetched on first access when missing. |
+| `remote-management.panel-github-repository` | string | `"https://github.com/router-for-me/Cli-Proxy-API-Management-Center"` | Repository or releases API URL for the management panel bundle. |
 
-## Quota & Routing
-
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| `quota-exceeded.switch-project` | boolean | `true` | Auto-switch project on quota exhaustion. |
-| `quota-exceeded.switch-preview-model` | boolean | `true` | Auto-switch to preview model on exhaustion. |
-| `quota-exceeded.antigravity-credits` | boolean | `true` | Credits-based fallback for Claude models. When all free-tier auths are exhausted (429/503), the conductor retries using an auth with available Google One AI credits. |
-
-## Provider Credentials (arrays; default `[]`)
-
-### Gemini
+## Plugins
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `gemini-api-key.*.api-key` | string | `""` | API key. |
-| `gemini-api-key.*.prefix` | string | `""` | Optional prefix; call as `prefix/model`. |
-| `gemini-api-key.*.base-url` | string | `"https://generativelanguage.googleapis.com"` | Custom endpoint. |
-| `gemini-api-key.*.headers` | object | `{}` | Extra headers for that endpoint. |
-| `gemini-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
-| `gemini-api-key.*.models.*.name` | string | `""` | Upstream model name. |
-| `gemini-api-key.*.models.*.alias` | string | `""` | Client alias. |
-| `gemini-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards supported). |
+| `plugins.enabled` | boolean | `false` | Enable trusted in-process dynamic plugins. |
+| `plugins.dir` | string | `"plugins"` | Plugin discovery directory. |
+| `plugins.store-sources` | string[] | `[]` | Additional plugin-store registry URLs; the official registry is always included. |
+| `plugins.store-auth[].match` | string | `""` | URL prefix matched by a plugin-store authentication rule; HTTP requires `allow-insecure: true`. |
+| `plugins.store-auth[].apply-to` | string[] | `[]` | Request kinds to authenticate: `registry`, `metadata`, and/or `artifact`. |
+| `plugins.store-auth[].type` | string | `""` | Authentication type: `none`, `bearer`, `basic`, `header`, or `github-token`. |
+| `plugins.store-auth[].token-env` | string | `""` | Environment variable containing a bearer, GitHub, or other token. |
+| `plugins.store-auth[].username-env` / `password-env` | string | `""` | Environment variables for basic authentication. |
+| `plugins.store-auth[].header-name` / `header-value-env` | string | `""` | Header name and environment variable containing its value for `header` authentication. |
+| `plugins.store-auth[].allow-insecure` | boolean | `false` | Allow insecure authentication configuration where supported. |
+| `plugins.configs.<plugin-id>.enabled` | boolean | `false` | Enable one plugin instance; this does not change `plugins.enabled`. |
+| `plugins.configs.<plugin-id>.priority` | integer | `0` | Plugin startup and routing priority. |
 
-### Codex
+## Quota, Routing, and Codex
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `codex-api-key.*.api-key` | string | `""` | API key. |
-| `codex-api-key.*.prefix` | string | `""` | Optional prefix. |
-| `codex-api-key.*.base-url` | string | `""` | Custom Codex endpoint. |
-| `codex-api-key.*.headers` | object | `{}` | Extra headers. |
-| `codex-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
-| `codex-api-key.*.models.*.name` | string | `""` | Upstream model name. |
-| `codex-api-key.*.models.*.alias` | string | `""` | Client alias. |
-| `codex-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards). |
+| `quota-exceeded.switch-project` | boolean | `true` | Switch projects automatically on quota exhaustion. |
+| `quota-exceeded.switch-preview-model` | boolean | `true` | Switch automatically to a preview model on exhaustion. |
+| `quota-exceeded.antigravity-credits` | boolean | `true` | Last-resort Claude fallback: use an auth with Google One AI credits after free-tier auths are exhausted (429/503). |
+| `routing.strategy` | string | `"round-robin"` | Credential-selection strategy: `round-robin` or `fill-first`. |
+| `routing.session-affinity` | boolean | `false` | Bind sessions to credentials. IDs come from `metadata.user_id`, `X-Session-ID`, `Session_id`, `X-Client-Request-Id`, `conversation_id`, or a message hash; failover remains enabled. |
+| `routing.session-affinity-ttl` | string | `"1h"` | Session-to-credential binding TTL. |
+| `codex.identity-confuse` | boolean | `false` | With `fill-first` or session affinity, remap Codex cache and installation identifiers for the selected auth. |
+
+## Provider Credentials
+
+All provider lists default to `[]`. `priority` defaults to `0`; a higher value is preferred. `models.*.display-name` is the optional catalog label, and `models.*.force-mapping` rewrites upstream response model fields to the client alias.
+
+### Gemini and Native Interactions
+
+`gemini-api-key[]` and `interactions-api-key[]` use the same fields. The latter is used only for direct `/v1beta/interactions` execution.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `<provider>.*.api-key` | string | `""` | API key. |
+| `<provider>.*.priority` | integer | `0` | Credential selection priority. |
+| `<provider>.*.prefix` | string | `""` | Optional prefix; call as `prefix/model`. |
+| `<provider>.*.disable-cooling` | boolean | `false` | Disable cooldown scheduling for this credential. |
+| `<provider>.*.base-url` | string | `"https://generativelanguage.googleapis.com"` | Custom endpoint. |
+| `<provider>.*.headers` | object | `{}` | Extra request headers. |
+| `<provider>.*.proxy-url` | string | `""` | Per-key proxy override. |
+| `<provider>.*.models.*.name` / `alias` | string | `""` | Upstream model name and client alias. |
+| `<provider>.*.models.*.display-name` | string | `""` | Human-readable model-catalog label. |
+| `<provider>.*.models.*.force-mapping` | boolean | `false` | Return the alias in upstream response model fields. |
+| `<provider>.*.excluded-models` | string[] | `[]` | Excluded models; wildcards are supported. |
+
+### Codex and xAI
+
+`codex-api-key[]` and `xai-api-key[]` use the following fields; xAI uses the native xAI executor.
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `<provider>.*.api-key`, `priority`, `prefix`, `disable-cooling`, `headers`, `proxy-url`, `excluded-models` | mixed | — | Same meaning as the Gemini credential fields above. |
+| `<provider>.*.base-url` | string | — | Required custom endpoint; entries without a non-empty value are discarded. |
+| `<provider>.*.websockets` | boolean | `false` | Use the upstream Responses API WebSocket transport. |
+| `<provider>.*.models.*.name` / `alias` / `display-name` / `force-mapping` | mixed | — | Same model-mapping fields as above. |
 
 ### Claude
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `claude-api-key.*.api-key` | string | `""` | API key. |
-| `claude-api-key.*.prefix` | string | `""` | Optional prefix. |
-| `claude-api-key.*.base-url` | string | `""` | Custom Claude endpoint. |
-| `claude-api-key.*.headers` | object | `{}` | Extra headers. |
-| `claude-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
-| `claude-api-key.*.models.*.name` | string | `""` | Upstream model name. |
-| `claude-api-key.*.models.*.alias` | string | `""` | Client alias. |
-| `claude-api-key.*.excluded-models` | string[] | `[]` | Models to exclude (wildcards). |
-| `claude-api-key.*.cloak.mode` | string | `"auto"` | Cloaking mode: `auto` (non-Claude Code only), `always`, `never`. |
-| `claude-api-key.*.cloak.strict-mode` | boolean | `false` | `true` strips user system messages, keeps only Claude Code prompt. |
+| `claude-api-key.*.api-key`, `priority`, `prefix`, `disable-cooling`, `base-url`, `headers`, `proxy-url`, `excluded-models` | mixed | — | Same meaning as the Gemini credential fields above. |
+| `claude-api-key.*.models.*.name` / `alias` / `display-name` / `force-mapping` | mixed | — | Upstream mapping and response-model rewrite controls. |
+| `claude-api-key.*.rebuild-mid-system-message` | boolean | `false` | Move messages with role `system` into Claude's top-level system field. |
+| `claude-api-key.*.cloak.mode` | string | `"auto"` | Cloaking mode: `auto` (non-Claude Code clients), `always`, or `never`. |
+| `claude-api-key.*.cloak.strict-mode` | boolean | `false` | Strip user system messages and retain only the Claude Code prompt. |
 | `claude-api-key.*.cloak.sensitive-words` | string[] | `[]` | Words to obfuscate with zero-width characters. |
+| `claude-api-key.*.cloak.cache-user-id` | boolean | `false` | Reuse a cached `user_id` for this API key. |
+| `claude-api-key.*.experimental-cch-signing` | boolean | `false` | Sign the final cloaked `/v1/messages` body with the current Claude Code CCH algorithm. |
 
 ### OpenAI Compatibility
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `openai-compatibility.*.name` | string | `""` | Provider name (used in UA, etc.). |
-| `openai-compatibility.*.prefix` | string | `""` | Optional prefix. |
-| `openai-compatibility.*.disabled` | boolean | `false` | Disable this provider without removing it; routing/auth selection skips it. |
-| `openai-compatibility.*.base-url` | string | `""` | Provider base URL. |
-| `openai-compatibility.*.headers` | object | `{}` | Extra headers. |
-| `openai-compatibility.*.api-key-entries.*.api-key` | string | `""` | API key. |
-| `openai-compatibility.*.api-key-entries.*.proxy-url` | string | `""` | Per-key proxy override. |
-| `openai-compatibility.*.models.*.name` | string | `""` | Upstream model name. |
-| `openai-compatibility.*.models.*.alias` | string | `""` | Client alias. |
+| `openai-compatibility.*.name`, `priority`, `prefix`, `base-url`, `headers` | mixed | — | Provider identifier, selection priority, optional prefix, endpoint, and headers. |
+| `openai-compatibility.*.disabled` / `disable-cooling` | boolean | `false` | Disable this provider, or disable cooldown scheduling for it. |
+| `openai-compatibility.*.api-key-entries.*.api-key` / `proxy-url` | string | `""` | Provider API key and optional per-key proxy. |
+| `openai-compatibility.*.models.*.name` / `alias` / `display-name` / `force-mapping` | mixed | — | Upstream mapping and response-model rewrite controls. |
+| `openai-compatibility.*.models.*.image` | boolean | `false` | Allow the model on `/v1/images/generations` and `/v1/images/edits`. |
+| `openai-compatibility.*.models.*.input-modalities` / `output-modalities` | string[] | `[]` | Declared input/output capabilities, such as `text` and `image`. |
+| `openai-compatibility.*.models.*.thinking.levels` | string[] | `["low", "medium", "high"]` | Supported reasoning-effort levels. |
 
-### Vertex
+### Vertex-Compatible API Keys
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `vertex-api-key.*.api-key` | string | `""` | `x-goog-api-key` value. |
-| `vertex-api-key.*.prefix` | string | `""` | Optional prefix. |
-| `vertex-api-key.*.base-url` | string | `""` | Vertex-compatible endpoint. |
-| `vertex-api-key.*.proxy-url` | string | `""` | Per-key proxy override. |
-| `vertex-api-key.*.headers` | object | `{}` | Extra headers. |
-| `vertex-api-key.*.models.*.name` | string | `""` | Upstream model name. |
-| `vertex-api-key.*.models.*.alias` | string | `""` | Client alias. |
+| `vertex-api-key.*.api-key`, `priority`, `prefix`, `base-url`, `headers`, `proxy-url`, `excluded-models` | mixed | — | Vertex-compatible credential and routing settings. |
+| `vertex-api-key.*.models.*.name` / `alias` / `display-name` / `force-mapping` | mixed | — | Upstream mapping and response-model rewrite controls. |
 
-## OAuth Model Controls
+## OAuth Model Controls and Header Defaults
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `oauth-model-alias` | object | `{}` | Rename models per channel (vertex, aistudio, antigravity, claude, codex). |
-| `oauth-model-alias.*.*.fork` | boolean | `false` | When `true`, keep original and add alias as extra model. |
-| `oauth-excluded-models` | object | `{}` | Exclude models per channel; wildcards supported. |
+| `oauth-model-alias` | object | `{}` | Model aliases by OAuth channel: `vertex`, `aistudio`, `antigravity`, `claude`, `codex`, `kimi`, `xai`, or an OAuth plugin provider key. |
+| `oauth-model-alias.*.*.name` / `alias` | string | `""` | Upstream and client-visible model IDs. |
+| `oauth-model-alias.*.*.fork` | boolean | `false` | Keep the upstream model and expose the alias as an additional model. |
+| `oauth-model-alias.*.*.display-name` | string | `""` | Catalog label for the alias. |
+| `oauth-model-alias.*.*.force-mapping` | boolean | `false` | Return the client-visible alias in upstream response model fields. |
+| `oauth-excluded-models` | object | `{}` | Excluded OAuth models by channel; wildcards are supported. |
+| `claude-header-defaults.user-agent`, `package-version`, `runtime-version`, `timeout` | string | `""` | Fallback Claude OAuth request headers when clients omit them. |
+| `claude-header-defaults.os` / `arch` | string | `""` | Runtime-derived by default; used as the pinned platform baseline when device-profile stabilization is enabled. |
+| `claude-header-defaults.stabilize-device-profile` | boolean | `false` | Pin OS/architecture to the configured baseline for each auth. |
+| `codex-header-defaults.user-agent` / `beta-features` | string | `""` | Fallback Codex OAuth headers; `beta-features` applies only to WebSocket requests. |
 
 ## Payload Rules
 
+`payload.default`, `default-raw`, `override`, `override-raw`, and `filter` are arrays of rules. `default*` writes only missing values, `override*` always writes values, and `filter` removes paths. `*-raw` values must be valid JSON.
+
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `payload.default[].models[].name` | string | `""` | Matching model name (wildcards ok). |
-| `payload.default[].models[].protocol` | string | `""` | Restrict to protocol: `openai`/`gemini`/`claude`/`codex`/`antigravity`. |
-| `payload.default[].params` | object | `{}` | JSON path → value applied when missing. |
-| `payload.default-raw[].models[].name` | string | `""` | Matching model name (wildcards). |
-| `payload.default-raw[].models[].protocol` | string | `""` | Restrict to protocol. |
-| `payload.default-raw[].params` | object | `{}` | JSON path → raw JSON value applied when missing (must be valid JSON). |
-| `payload.override[].models[].name` | string | `""` | Matching model name (wildcards). |
-| `payload.override[].models[].protocol` | string | `""` | Restrict to protocol. |
-| `payload.override[].params` | object | `{}` | JSON path → value always overwritten. |
-| `payload.override-raw[].models[].name` | string | `""` | Matching model name (wildcards). |
-| `payload.override-raw[].models[].protocol` | string | `""` | Restrict to protocol. |
-| `payload.override-raw[].params` | object | `{}` | JSON path → raw JSON value always overwritten (must be valid JSON). |
-| `payload.filter[].models[].name` | string | `""` | Matching model name (wildcards). |
-| `payload.filter[].models[].protocol` | string | `""` | Restrict to protocol. |
-| `payload.filter[].params` | string[] | `[]` | JSON paths to remove from payload. |
+| `payload.<rule>[].models[].name` | string | `""` | Matching model name; wildcards are supported. |
+| `payload.<rule>[].models[].protocol` | string | `""` | Target protocol: `openai`, `responses`, `gemini`, `claude`, `codex`, or `antigravity`. |
+| `payload.<rule>[].models[].from-protocol` | string | `""` | Restrict the source protocol: `openai`, `responses`, `gemini`, or `claude`. |
+| `payload.<rule>[].models[].headers` | object | `{}` | Required request-header patterns; values support `*` wildcards. |
+| `payload.<rule>[].models[].match` / `not-match` | object[] | `[]` | JSON-path conditions that must equal, or must not equal, the configured values. |
+| `payload.<rule>[].models[].exist` / `not-exist` | string[] | `[]` | JSON paths that must exist and be non-null, or be missing/null. |
+| `payload.default[].params` / `payload.override[].params` | object | `{}` | JSON path → value. |
+| `payload.default-raw[].params` / `payload.override-raw[].params` | object | `{}` | JSON path → raw JSON value. |
+| `payload.filter[].params` | string[] | `[]` | JSON paths to remove. |
