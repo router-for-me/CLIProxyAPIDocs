@@ -25,7 +25,7 @@ outline: 'deep'
 其它说明：
 - 设置环境变量 `MANAGEMENT_PASSWORD` 会将其视为额外的明文管理密钥，并强制启用远程管理（即便 `remote-management.allow-remote` 为 false）。该值不会写入配置，需要通过 `Authorization` / `X-Management-Key` 头部直接发送。
 - 通过 `cliproxy run --password <pwd>` 或 SDK 的 `WithLocalManagementPassword` 启动服务后，来自 `127.0.0.1`/`::1` 的请求可使用该“本地密码”替代远程密钥，同样通过上述头部传递；该密码仅存在于运行时内存。
-- 仅当 `remote-management.secret-key` 为空且未设置 `MANAGEMENT_PASSWORD` 时，管理 API 才会整体被禁用（所有 `/v0/management` 路由均返回 404）。
+- 仅当 `remote-management.secret-key` 为空、未设置 `MANAGEMENT_PASSWORD` 且启动时未配置本地管理密码时，管理 API 路由才不会注册（所有 `/v0/management` 路由均返回 404）。
 - 对于任意客户端 IP（包括 localhost），连续 5 次认证失败会触发临时封禁（约 30 分钟）。
 
 ## 请求/响应约定
@@ -92,7 +92,7 @@ outline: 'deep'
       {"debug":true,"proxy-url":"","api-keys":["1...5","JS...W"],"quota-exceeded":{"switch-project":true,"switch-preview-model":true},"gemini-api-key":[{"api-key":"AI...01","base-url":"https://generativelanguage.googleapis.com","headers":{"X-Custom-Header":"custom-value"},"proxy-url":"","excluded-models":["gemini-1.5-pro","gemini-1.5-flash"]},{"api-key":"AI...02","proxy-url":"socks5://proxy.example.com:1080","excluded-models":["gemini-pro-vision"]}],"request-log":true,"request-retry":3,"claude-api-key":[{"api-key":"cr...56","base-url":"https://example.com/api","proxy-url":"socks5://proxy.example.com:1080","models":[{"name":"claude-3-5-sonnet-20241022","alias":"claude-sonnet-latest"}],"excluded-models":["claude-3-opus"]},{"api-key":"cr...e3","base-url":"http://example.com:3000/api","proxy-url":""},{"api-key":"sk-...q2","base-url":"https://example.com","proxy-url":""}],"codex-api-key":[{"api-key":"sk...01","base-url":"https://example/v1","proxy-url":"","excluded-models":["gpt-4o-mini"]}],"openai-compatibility":[{"name":"openrouter","base-url":"https://openrouter.ai/api/v1","api-key-entries":[{"api-key":"sk...01","proxy-url":""}],"models":[{"name":"moonshotai/kimi-k2:free","alias":"kimi-k2"}]}]}
       ```
     - 说明：
-        - 返回中不再包含 `generative-language-api-key`；若需纯字符串视图，可使用专用的 `GET /generative-language-api-key` 接口。
+        - 返回内容反映当前已加载的运行时配置。
         - 若服务尚未加载配置文件，则返回空对象 `{}`。
 
 ### 最新版本
@@ -152,7 +152,7 @@ outline: 'deep'
       { "ok": true, "changed": ["config"] }
       ```
     - 说明：
-        - 服务会先加载 YAML 验证其有效性，校验失败返回 `422` 以及 `{ "error": "invalid_config", "message": "..." }`。
+        - YAML 格式错误返回 `400` 以及 `{ "error": "invalid_yaml", "message": "..." }`；YAML 可解析但配置校验失败时返回 `422` 以及 `{ "error": "invalid_config", "message": "..." }`。
         - 写入失败会返回 `500`，格式 `{ "error": "write_failed", "message": "..." }`。
 
 ### 文件日志开关
@@ -1038,6 +1038,228 @@ outline: 'deep'
     - 说明：
         - `state` 参数必须与登录端点返回的值一致；若状态进入 `ok` 或 `error`，服务会清除该 state，再次轮询会收到 `{ "status": "ok" }` 表示流程已收尾。
         - `status: "wait"` 表示仍在等待回调或令牌交换，可按需继续轮询。
+
+### 插件
+
+- GET `/plugins` — 列出已发现、已配置和已注册的插件。响应包含全局 `plugins_enabled`、解析后的 `plugins_dir`，以及每个插件的 `id`、`path`、`configured`、`registered`、`enabled`、`effective_enabled`、OAuth 支持、元数据、配置字段和菜单等状态。
+- GET `/plugins/:id/config` — 返回保存的 `plugins.configs.<id>` 对象；已发现或已注册但未保存配置的插件返回 `{}`。
+- PUT `/plugins/:id/config` — 完整替换插件配置对象。
+- PATCH `/plugins/:id/config` — 浅合并配置对象。将字段设为 `null` 会删除该顶层字段。
+- PATCH `/plugins/:id/enabled` — 仅更新插件的启用状态。请求：`{ "enabled": true }`。
+- DELETE `/plugins/:id` — 删除本地插件文件和已保存的配置。无法卸载的已加载插件会返回 `409` 及 `restart_required: true`。
+- GET `/plugin-store` — 列出配置的插件商店源中的插件，包括源错误、安装状态、已安装来源和可更新状态。
+- POST `/plugin-store/:id/install` — 从商店源下载或更新插件、在配置中启用它，并返回安装路径和版本。若存在重复 ID，请通过 `?source=<source-id>` 选择来源；可在查询参数或请求体（`{ "version": "1.2.3" }`）中指定 `version`。
+
+插件 ID 必须符合主机插件 ID 规则。商店安装可能下载可执行插件产物；使用前请配置并信任商店源。
+
+### 其它运行时设置与日志
+
+本节中的所有 PUT/PATCH 端点均使用 `{ "value": ... }`，并返回 `{ "status": "ok" }`。
+
+- GET/PUT/PATCH `/logs-max-total-size-mb` — 日志总大小上限（MiB）。负值会按 `0` 保存。
+- GET/PUT/PATCH `/error-logs-max-files` — 保留的请求错误日志文件数量。提交负值会回退为 `10`。
+- GET/PUT/PATCH `/force-model-prefix` — 是否强制使用已配置模型前缀的布尔开关。
+- GET/PUT/PATCH `/routing/strategy` — 凭据选择策略。有效值为 `round-robin`（也可为 `roundrobin`/`rr`）与 `fill-first`（也可为 `fillfirst`/`ff`）；GET 返回 `{ "strategy": "..." }`。
+- GET `/logs` 还支持 `limit` 和不透明的 `cursor` 参数。未传 `after` 且传入 `limit` 时返回最新日志行；将响应中的 `next-cursor` 作为下一次的 `cursor` 可增量读取。游标失效时响应包含 `cursor-reset: true`。
+- GET `/request-log-by-id/:id` — 下载文件名以 `-<id>.log` 结尾的请求日志。请求 ID 不得包含路径分隔符。
+
+### 其它提供商 API Key 集合
+
+`/interactions-api-key`、`/xai-api-key` 和 `/vertex-api-key` 都是对象数组集合，均支持 GET、PUT、PATCH 和 DELETE。GET 返回以端点名为 key 的对象，并在适用时添加运行时 `auth-index`；PUT 接受原始数组或 `{ "items": [ ... ] }`；PATCH 使用 `{ "index": 0, "value": { ... } }` 或 `{ "match": "<api-key>", "value": { ... } }`；DELETE 使用 `?index=` 或 `?api-key=`（同一 key 出现多次时请附加 `&base-url=`）。
+
+- `/interactions-api-key` 配置 Google Interactions API Key。条目使用 Gemini Key 结构：`api-key`、`priority`、`prefix`、`base-url`、`proxy-url`、`models`、`headers`、`excluded-models` 和 `disable-cooling`。
+- `/xai-api-key` 配置原生 xAI API Key。条目使用 Codex Key 结构，另支持 `priority`、`websockets` 和 `disable-cooling`；保留条目必须有 `base-url`，PATCH 将 `base-url` 设为空会删除该条目。
+- `/vertex-api-key` 配置 Vertex 兼容 API Key。PUT 中每个条目必须提供 `api-key`，可选字段包括 `priority`、`prefix`、`base-url`、`proxy-url`、`headers`、`models` 和 `excluded-models`。模型条目使用 `name`、`alias`、可选的 `display-name` 和 `force-mapping`。PATCH 将 `api-key` 或 `base-url` 设为空会删除该条目。
+
+### OAuth 模型别名
+
+- GET `/oauth-model-alias` — 返回 `{ "oauth-model-alias": { "<channel>": [ ... ] } }`。
+- PUT `/oauth-model-alias` — 完整替换 channel 到别名列表的映射；请求体也可包装为 `{ "items": { ... } }`。
+- PATCH `/oauth-model-alias` — 替换单个 channel 条目。请求：`{ "channel": "codex", "aliases": [{ "name": "upstream", "alias": "client-name", "fork": false, "display-name": "Client Name", "force-mapping": true }] }`。`provider` 可作为 `channel` 的别名；空别名数组会删除已有 channel。
+- DELETE `/oauth-model-alias?channel=codex` — 删除一个 channel；查询参数也可使用 `provider`。
+
+### 认证文件扩展接口
+
+- GET `/auth-files/models?name=<name-or-auth-id>` — 返回单个凭据支持的模型定义：`{ "models": [...] }`。
+- GET `/model-definitions/:channel` — 返回静态目录元数据：`{ "channel": "...", "models": [...] }`；channel 未知时返回 `400`。省略必填的 `:channel` 路径段不会匹配此路由，返回 `404`。
+- PATCH `/auth-files/status` — 启用或禁用认证记录。请求：`{ "name": "<file-name-or-id>", "disabled": true }`。配置型 API Key 会通过其 `excluded-models` 配置禁用；插件虚拟子凭据不能单独修改。
+- PATCH `/auth-files/fields` — 更新文件名或 auth ID 对应的元数据字段。请求体包含 `name` 和至少一个字段；点路径可更新嵌套元数据，例如 `{ "name": "acc.json", "project_id": "my-project", "headers.X-Team": "prod" }`。`headers` 对象会与现有自定义请求头合并，空的头值会删除对应请求头。
+
+### 携带认证的上游调用
+
+- POST `/api-call` — 发起出站 HTTP 请求，可通过 `auth_index`（也接受 `authIndex` 或 `AuthIndex`）指定凭据。请求字段为 `method`、绝对 `url`、可选字符串映射 `header` 和可选原始字符串 `data`。
+- 在请求头值中使用 `$TOKEN$` 可替换为所选凭据的 access token 或 API Key。凭据级代理优先于全局 `proxy-url`；否则请求会直接连接。响应为 `{ "status_code": 200, "header": { ... }, "body": "..." }`，上游状态码保留在 `status_code` 中。
+
+该端点可以使用已配置凭据发起任意出站请求，请严格限制管理密钥的访问权限。
+
+### 其它 OAuth 流程与回调
+
+- GET `/kimi-auth-url` 与 GET `/xai-auth-url` 发起设备码流程。两者都会返回 `status`、`url`、`state` 和 `flow: "device"`，也可能返回 `user_code` 和 `expires_in`。
+- DELETE `/oauth-session?state=<state>` — 取消待处理的 OAuth 会话，返回 `{ "status": "ok", "cancelled": true|false }`。已取消的设备码或回调流程不会保存凭据。
+- GET/POST `/oauth-callback` 在认证路由组之外接收 OAuth 回调。GET 使用查询参数 `provider`、`state`、`code` 和 `error`/`error_description`；POST 接受 `{ "provider", "redirect_url", "code", "state", "error" }`，其中 `redirect_url` 可以提供回调查询值。只有 provider 与会话匹配且 state 有效、仍待处理时才会接受回调。
+- `GET /get-auth-status?state=...` 在会话待处理时返回 `wait`，完成后返回 `ok`，失败、取消、过期或 state 未知时返回 `error`。已完成 state 会短暂保留，以便客户端读取 `ok`。
+
+### 新增端点示例
+
+除无需认证的 `/oauth-callback` 示例外，以下所有示例均需要 `Authorization: Bearer <MANAGEMENT_KEY>`。
+
+#### 插件
+
+- 列出本地插件：
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins
+  ```
+  ```json
+  {
+    "plugins_enabled": true,
+    "plugins_dir": "/abs/path/plugins",
+    "plugins": [{
+      "id": "example-plugin", "path": "/abs/path/plugins/example-plugin.so",
+      "configured": true, "registered": true, "enabled": true,
+      "effective_enabled": true, "supports_oauth": false,
+      "oauth_provider": "", "logo": "", "config_fields": [], "menus": [],
+      "metadata": { "name": "Example", "version": "1.0.0", "author": "Example", "github_repository": "", "logo": "", "config_fields": [] }
+    }]
+  }
+  ```
+- 读取、替换、修补、启用和删除插件配置：
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"enabled":true,"priority":10,"endpoint":"https://plugin.example.com"}
+
+  curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"enabled":true,"priority":10,"endpoint":"https://plugin.example.com"}' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"status":"ok"}
+
+  curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"priority":20,"endpoint":null}' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"status":"ok"}
+
+  curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"enabled":false}' http://localhost:8317/v0/management/plugins/example-plugin/enabled
+  # {"status":"ok"}
+  ```
+  ```bash
+  curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins/example-plugin
+  ```
+  ```json
+  { "status": "deleted", "id": "example-plugin", "path": "/abs/path/plugins/example-plugin.so", "file_deleted": true, "configured_removed": true, "restart_required": false }
+  ```
+- 列出并从插件商店安装：
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/plugin-store
+  ```
+  ```json
+  { "plugins_enabled": true, "plugins_dir": "/abs/path/plugins", "sources": [{"id":"official","name":"Official","url":"https://example.com/registry.json"}], "plugins": [{"store_id":"official/example-plugin","source_id":"official","source_name":"Official","source_url":"https://example.com/registry.json","id":"example-plugin","name":"Example","description":"Example plugin","author":"Example","version":"1.2.3","repository":"example/example-plugin","install_type":"github-release","auth_required":false,"auth_configured":true,"installed":false,"installed_version":"","path":"","configured":false,"registered":false,"enabled":false,"effective_enabled":false,"update_available":false}] }
+  ```
+  ```bash
+  curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"version":"1.2.3"}' 'http://localhost:8317/v0/management/plugin-store/example-plugin/install?source=official'
+  ```
+  ```json
+  { "status": "installed", "source_id": "official", "source_name": "Official", "source_url": "https://example.com/registry.json", "id": "example-plugin", "version": "1.2.3", "install_type": "github-release", "path": "/abs/path/plugins/example-plugin.so", "plugins_enabled": true, "restart_required": false }
+  ```
+
+#### 运行时设置与日志
+
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/logs-max-total-size-mb
+# {"logs-max-total-size-mb":512}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":20}' http://localhost:8317/v0/management/error-logs-max-files
+# {"status":"ok"}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":true}' http://localhost:8317/v0/management/force-model-prefix
+# {"status":"ok"}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":"fill-first"}' http://localhost:8317/v0/management/routing/strategy
+# {"status":"ok"}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/logs?limit=2'
+```
+```json
+{ "lines": ["2026-05-05 12:00:00 info request accepted"], "line-count": 1, "latest-timestamp": 1777982400, "next-cursor": "<OPAQUE_CURSOR>" }
+```
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/logs?cursor=<OPAQUE_CURSOR>&limit=100'
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' -OJ http://localhost:8317/v0/management/request-log-by-id/req_123
+```
+
+#### 提供商 API Key 集合
+
+以下示例展示每种集合操作；请按目标提供商替换端点和 Key 结构。
+
+```bash
+# Interactions：GET、PUT、PATCH、DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/interactions-api-key
+# {"interactions-api-key":[{"api-key":"AIza...","auth-index":"a1b2","base-url":"https://generativelanguage.googleapis.com","excluded-models":[]}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"AIza...","priority":10,"prefix":"team/","base-url":"https://generativelanguage.googleapis.com","proxy-url":"","models":[],"headers":{"X-Team":"prod"},"excluded-models":["gemini-2.0-flash"],"disable-cooling":true}]' http://localhost:8317/v0/management/interactions-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"index":0,"value":{"proxy-url":"socks5://127.0.0.1:1080"}}' http://localhost:8317/v0/management/interactions-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/interactions-api-key?api-key=AIza...&base-url=https%3A%2F%2Fgenerativelanguage.googleapis.com'
+# 每次变更均返回：{"status":"ok"}
+
+# xAI：GET、PUT、PATCH、DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/xai-api-key
+# {"xai-api-key":[{"api-key":"xai...","auth-index":"c3d4","base-url":"https://api.x.ai/v1","websockets":true}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"xai...","priority":10,"prefix":"xai/","base-url":"https://api.x.ai/v1","websockets":true,"proxy-url":"","models":[{"name":"grok-3","alias":"grok"}],"headers":{},"excluded-models":[],"disable-cooling":false}]' http://localhost:8317/v0/management/xai-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"match":"xai...","value":{"websockets":false}}' http://localhost:8317/v0/management/xai-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/xai-api-key?index=0'
+# 每次变更均返回：{"status":"ok"}
+
+# Vertex 兼容：GET、PUT、PATCH、DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/vertex-api-key
+# {"vertex-api-key":[{"api-key":"vertex...","auth-index":"e5f6","base-url":"https://vertex.example.com"}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"vertex...","priority":10,"prefix":"vertex/","base-url":"https://vertex.example.com","proxy-url":"","headers":{},"models":[{"name":"gemini-2.5-pro","alias":"vertex-gemini","display-name":"Vertex Gemini","force-mapping":true}],"excluded-models":[]}]' http://localhost:8317/v0/management/vertex-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"match":"vertex...","value":{"headers":{"X-Team":"prod"}}}' http://localhost:8317/v0/management/vertex-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/vertex-api-key?index=0'
+# 每次变更均返回：{"status":"ok"}
+```
+
+#### OAuth 别名、认证文件与上游调用
+
+```bash
+# OAuth 模型别名：GET、PUT、PATCH、DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/oauth-model-alias
+# {"oauth-model-alias":{"codex":[{"name":"gpt-5","alias":"gpt-5-fast","fork":true,"display-name":"GPT-5 Fast","force-mapping":true}]}}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"codex":[{"name":"gpt-5","alias":"gpt-5-fast","fork":true,"display-name":"GPT-5 Fast","force-mapping":true}]}' http://localhost:8317/v0/management/oauth-model-alias
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"channel":"codex","aliases":[{"name":"gpt-5","alias":"gpt-5-fast"}]}' http://localhost:8317/v0/management/oauth-model-alias
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/oauth-model-alias?channel=codex'
+# 每次变更均返回：{"status":"ok"}
+
+# 凭据模型、静态定义、状态和元数据
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/auth-files/models?name=codex-user.json'
+# {"models":[{"id":"gpt-5","display_name":"GPT-5","type":"model","owned_by":"openai"}]}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/model-definitions/codex
+# {"channel":"codex","models":[...]}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"name":"codex-user.json","disabled":true}' http://localhost:8317/v0/management/auth-files/status
+# {"status":"ok","disabled":true}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"name":"codex-user.json","project_id":"my-project","headers.X-Team":"prod"}' http://localhost:8317/v0/management/auth-files/fields
+# {"status":"ok"}
+
+# 携带认证的上游请求
+curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"auth_index":"a1b2","method":"GET","url":"https://api.example.com/v1/ping","header":{"Authorization":"Bearer $TOKEN$"}}' http://localhost:8317/v0/management/api-call
+# {"status_code":200,"header":{"Content-Type":["application/json"]},"body":"{\"ok\":true}"}
+```
+
+#### 设备 OAuth 与回调
+
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/kimi-auth-url
+# {"status":"ok","url":"https://...","state":"kmi-...","flow":"device","user_code":"ABCD-EFGH","expires_in":900}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/xai-auth-url
+# {"status":"ok","url":"https://...","state":"xai-...","flow":"device","user_code":"ABCD-EFGH","expires_in":1800}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/get-auth-status?state=xai-...'
+# {"status":"wait"}
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/oauth-session?state=xai-...'
+# {"status":"ok","cancelled":true}
+
+# 回调路由不使用管理密钥中间件；由 state 校验保护。
+curl 'http://localhost:8317/v0/management/oauth-callback?provider=codex&state=codex-...&code=AUTHORIZATION_CODE'
+# {"status":"ok"}
+curl -X POST -H 'Content-Type: application/json' -d '{"provider":"codex","state":"codex-...","code":"AUTHORIZATION_CODE"}' http://localhost:8317/v0/management/oauth-callback
+# {"status":"ok"}
+```
 
 ## 错误响应
 

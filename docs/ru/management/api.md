@@ -23,7 +23,7 @@ outline: 'deep'
 Дополнительные примечания:
 - Установка переменной окружения `MANAGEMENT_PASSWORD` регистрирует дополнительный секрет управления в открытом виде и принудительно оставляет удаленное управление включенным, даже если `remote-management.allow-remote` имеет значение false. Значение никогда не сохраняется на диске и должно передаваться через те же заголовки `Authorization`/`X-Management-Key`.
 - Когда прокси запускается с помощью `cliproxy run --password <pwd>` или через `WithLocalManagementPassword` в SDK, клиенты localhost (`127.0.0.1`/`::1`) могут предоставлять этот локальный пароль через те же заголовки; он хранится только в памяти и не записывается на диск.
-- Management API возвращает 404 только в том случае, если `remote-management.secret-key` пуст и `MANAGEMENT_PASSWORD` не задан.
+- Маршруты Management API не регистрируются (и возвращают 404) только когда `remote-management.secret-key` пуст, `MANAGEMENT_PASSWORD` не задан и при запуске не был настроен локальный пароль управления.
 - Для любого IP клиента (включая localhost) 5 последовательных неудачных попыток аутентификации вызывают временную блокировку (~30 минут), прежде чем будут разрешены дальнейшие попытки.
 
 Если при запуске в конфигурации обнаруживается ключ в открытом виде, он будет автоматически захеширован с помощью bcrypt и перезаписан в файл конфигурации.
@@ -92,7 +92,7 @@ outline: 'deep'
       ```
 ```
     - Примечания:
-        - Ответ больше не содержит `generative-language-api-key`; используйте `GET /generative-language-api-key`, если вам нужно представление в виде чистой строки.
+        - Ответ отражает текущую загруженную конфигурацию среды выполнения.
         - Если конфигурация еще не загружена, обработчик возвращает `{}`.
 
 ### Latest Version
@@ -151,7 +151,7 @@ outline: 'deep'
       { "ok": true, "changed": ["config"] }
       ```
     - Примечания:
-        - Сервер валидирует YAML, загружая его перед сохранением; невалидные конфигурации возвращают `422` с `{ "error": "invalid_config", "message": "..." }`.
+        - Некорректный YAML возвращает `400` с `{ "error": "invalid_yaml", "message": "..." }`; YAML, который разбирается, но не проходит валидацию конфигурации, возвращает `422` с `{ "error": "invalid_config", "message": "..." }`.
         - Ошибки записи возвращают `500` с `{ "error": "write_failed", "message": "..." }`.
 
 ### Логирование в файл
@@ -1030,6 +1030,228 @@ outline: 'deep'
     - Примечания:
         - Параметр запроса `state` должен соответствовать значению, возвращенному эндпоинтом login. Как только поток достигает `status: "ok"` или `status: "error"`, сервер удаляет state; последующие опросы получают `{ "status": "ok" }` для сигнализации о завершении.
         - `status: "wait"` указывает на то, что поток все еще ожидает callback или обмен токенами — продолжайте опрос по мере необходимости.
+
+### Плагины
+
+- GET `/plugins` — Список обнаруженных, настроенных и зарегистрированных плагинов. Ответ содержит `plugins_enabled`, `plugins_dir` и состояние каждого плагина: `id`, `path`, `configured`, `registered`, `enabled`, `effective_enabled`, OAuth-поддержку, метаданные, поля конфигурации и меню.
+- GET `/plugins/:id/config` — Возвращает сохраненный объект `plugins.configs.<id>`; для плагина без сохраненной конфигурации возвращается `{}`.
+- PUT `/plugins/:id/config` — Полностью заменяет объект конфигурации.
+- PATCH `/plugins/:id/config` — Выполняет неглубокое слияние; поле со значением `null` удаляет поле верхнего уровня.
+- PATCH `/plugins/:id/enabled` — Изменяет только флаг включения. Запрос: `{ "enabled": true }`.
+- DELETE `/plugins/:id` — Удаляет локальный файл и сохраненную конфигурацию. Для загруженного плагина, который нельзя выгрузить, возвращается `409` с `restart_required: true`.
+- GET `/plugin-store` — Список плагинов из настроенных источников магазина, включая ошибки источников, состояние установки, источник установленного плагина и наличие обновления.
+- POST `/plugin-store/:id/install` — Загружает или обновляет плагин, включает его в конфигурации и возвращает путь и версию. При одинаковых ID укажите источник через `?source=<source-id>`; `version` можно передать в query или в теле (`{ "version": "1.2.3" }`).
+
+ID плагина должен соответствовать правилам хоста. Установка из магазина может загрузить исполняемые артефакты; используйте только доверенные источники.
+
+### Дополнительные настройки среды выполнения и логи
+
+Все PUT/PATCH-эндпоинты этого раздела используют `{ "value": ... }` и возвращают `{ "status": "ok" }`.
+
+- GET/PUT/PATCH `/logs-max-total-size-mb` — Максимальный суммарный размер логов в MiB; отрицательное значение сохраняется как `0`.
+- GET/PUT/PATCH `/error-logs-max-files` — Количество сохраняемых файлов логов ошибок запросов; отрицательное значение заменяется на `10`.
+- GET/PUT/PATCH `/force-model-prefix` — Логический переключатель принудительного использования настроенных префиксов моделей.
+- GET/PUT/PATCH `/routing/strategy` — Стратегия выбора учетных данных: `round-robin` (также `roundrobin`/`rr`) или `fill-first` (также `fillfirst`/`ff`). GET возвращает `{ "strategy": "..." }`.
+- GET `/logs` также поддерживает `limit` и непрозрачный `cursor`. При `limit` без `after` возвращаются последние строки; передайте `next-cursor` как `cursor` для инкрементального чтения. При сбросе курсора ответ содержит `cursor-reset: true`.
+- GET `/request-log-by-id/:id` — Скачивает лог запроса, имя которого заканчивается на `-<id>.log`. ID не должен содержать разделителей пути.
+
+### Дополнительные коллекции API Key провайдеров
+
+`/interactions-api-key`, `/xai-api-key` и `/vertex-api-key` поддерживают GET, PUT, PATCH и DELETE. GET возвращает объект с ключом, равным имени эндпоинта, и runtime `auth-index`, когда это применимо. PUT принимает массив или `{ "items": [ ... ] }`; PATCH использует `{ "index": 0, "value": { ... } }` или `{ "match": "<api-key>", "value": { ... } }`; DELETE принимает `?index=` или `?api-key=` (для повторяющегося ключа добавьте `&base-url=`).
+
+- `/interactions-api-key` настраивает Google Interactions API key. Поля записи: `api-key`, `priority`, `prefix`, `base-url`, `proxy-url`, `models`, `headers`, `excluded-models`, `disable-cooling`.
+- `/xai-api-key` настраивает нативные xAI API key. Используется структура Codex key, также поддерживаются `priority`, `websockets` и `disable-cooling`; для сохраняемых записей нужен `base-url`, а пустой `base-url` в PATCH удаляет запись.
+- `/vertex-api-key` настраивает Vertex-совместимые API key. PUT требует `api-key`; необязательны `priority`, `prefix`, `base-url`, `proxy-url`, `headers`, `models`, `excluded-models`. Модели используют `name`, `alias`, необязательные `display-name` и `force-mapping`. Пустой `api-key` или `base-url` в PATCH удаляет запись.
+
+### OAuth-псевдонимы моделей
+
+- GET `/oauth-model-alias` — Возвращает `{ "oauth-model-alias": { "<channel>": [ ... ] } }`.
+- PUT `/oauth-model-alias` — Полностью заменяет карту channel-to-alias; тело можно обернуть в `{ "items": { ... } }`.
+- PATCH `/oauth-model-alias` — Заменяет один channel: `{ "channel": "codex", "aliases": [{ "name": "upstream", "alias": "client-name", "fork": false, "display-name": "Client Name", "force-mapping": true }] }`. `provider` принимается вместо `channel`; пустой список удаляет существующий channel.
+- DELETE `/oauth-model-alias?channel=codex` — Удаляет один channel; в query также допустимо имя `provider`.
+
+### Расширения управления файлами аутентификации
+
+- GET `/auth-files/models?name=<name-or-auth-id>` — Возвращает поддерживаемые учетными данными модели: `{ "models": [...] }`.
+- GET `/model-definitions/:channel` — Возвращает статические метаданные каталога: `{ "channel": "...", "models": [...] }`; неизвестный channel возвращает `400`. Без обязательного сегмента пути `:channel` маршрут не совпадает и возвращает `404`.
+- PATCH `/auth-files/status` — Включает или отключает запись: `{ "name": "<file-name-or-id>", "disabled": true }`. Настроенные API key отключаются через `excluded-models`; виртуальные дочерние учетные записи плагинов нельзя менять независимо.
+- PATCH `/auth-files/fields` — Обновляет метаданные по имени файла или auth ID. Передайте `name` и хотя бы одно поле; точечные пути обновляют вложенные значения, например `{ "name": "acc.json", "project_id": "my-project", "headers.X-Team": "prod" }`. Объект `headers` объединяется с существующими заголовками, а пустое значение удаляет заголовок.
+
+### Исходящие вызовы с учетными данными
+
+- POST `/api-call` — Выполняет исходящий HTTP-запрос и при необходимости использует учетные данные из `auth_index` (также принимаются `authIndex` и `AuthIndex`). Поля: `method`, абсолютный `url`, необязательная строковая карта `header` и необязательный raw-строковый `data`.
+- Используйте `$TOKEN$` в заголовке для подстановки access token или API key выбранных учетных данных. Прокси конкретных учетных данных имеет приоритет над глобальным `proxy-url`; иначе используется прямое подключение. Ответ: `{ "status_code": 200, "header": { ... }, "body": "..." }`, а статус upstream сохраняется в `status_code`.
+
+Этот эндпоинт может выполнять произвольные исходящие запросы с настроенными учетными данными. Строго ограничьте доступ к ключу управления.
+
+### Дополнительные OAuth-потоки и callback
+
+- GET `/kimi-auth-url` и GET `/xai-auth-url` запускают device-code потоки. Оба возвращают `status`, `url`, `state`, `flow: "device"` и при необходимости `user_code`/`expires_in`.
+- DELETE `/oauth-session?state=<state>` отменяет ожидающий OAuth-сеанс: `{ "status": "ok", "cancelled": true|false }`. Отмененный поток не сохраняет учетные данные.
+- GET/POST `/oauth-callback` принимает OAuth callback вне группы маршрутов с аутентификацией. GET использует `provider`, `state`, `code`, `error`/`error_description`; POST принимает `{ "provider", "redirect_url", "code", "state", "error" }`. `redirect_url` может передать query callback. Callback принимается только для валидного ожидающего state с совпадающим provider.
+- `GET /get-auth-status?state=...` возвращает `wait` для ожидающего сеанса, `ok` после завершения и `error` при сбое, отмене, истечении или неизвестном state. Завершенные state короткое время сохраняются, чтобы клиент мог получить `ok`.
+
+### Примеры новых эндпоинтов
+
+Во всех примерах ниже, кроме неаутентифицированных примеров `/oauth-callback`, требуется `Authorization: Bearer <MANAGEMENT_KEY>`.
+
+#### Плагины
+
+- Список локальных плагинов:
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins
+  ```
+  ```json
+  {
+    "plugins_enabled": true,
+    "plugins_dir": "/abs/path/plugins",
+    "plugins": [{
+      "id": "example-plugin", "path": "/abs/path/plugins/example-plugin.so",
+      "configured": true, "registered": true, "enabled": true,
+      "effective_enabled": true, "supports_oauth": false,
+      "oauth_provider": "", "logo": "", "config_fields": [], "menus": [],
+      "metadata": { "name": "Example", "version": "1.0.0", "author": "Example", "github_repository": "", "logo": "", "config_fields": [] }
+    }]
+  }
+  ```
+- Чтение, замена, patch, включение и удаление конфигурации плагина:
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"enabled":true,"priority":10,"endpoint":"https://plugin.example.com"}
+
+  curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"enabled":true,"priority":10,"endpoint":"https://plugin.example.com"}' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"status":"ok"}
+
+  curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"priority":20,"endpoint":null}' \
+    http://localhost:8317/v0/management/plugins/example-plugin/config
+  # {"status":"ok"}
+
+  curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"enabled":false}' http://localhost:8317/v0/management/plugins/example-plugin/enabled
+  # {"status":"ok"}
+  ```
+  ```bash
+  curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
+    http://localhost:8317/v0/management/plugins/example-plugin
+  ```
+  ```json
+  { "status": "deleted", "id": "example-plugin", "path": "/abs/path/plugins/example-plugin.so", "file_deleted": true, "configured_removed": true, "restart_required": false }
+  ```
+- Список и установка из магазина плагинов:
+  ```bash
+  curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/plugin-store
+  ```
+  ```json
+  { "plugins_enabled": true, "plugins_dir": "/abs/path/plugins", "sources": [{"id":"official","name":"Official","url":"https://example.com/registry.json"}], "plugins": [{"store_id":"official/example-plugin","source_id":"official","source_name":"Official","source_url":"https://example.com/registry.json","id":"example-plugin","name":"Example","description":"Example plugin","author":"Example","version":"1.2.3","repository":"example/example-plugin","install_type":"github-release","auth_required":false,"auth_configured":true,"installed":false,"installed_version":"","path":"","configured":false,"registered":false,"enabled":false,"effective_enabled":false,"update_available":false}] }
+  ```
+  ```bash
+  curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' \
+    -d '{"version":"1.2.3"}' 'http://localhost:8317/v0/management/plugin-store/example-plugin/install?source=official'
+  ```
+  ```json
+  { "status": "installed", "source_id": "official", "source_name": "Official", "source_url": "https://example.com/registry.json", "id": "example-plugin", "version": "1.2.3", "install_type": "github-release", "path": "/abs/path/plugins/example-plugin.so", "plugins_enabled": true, "restart_required": false }
+  ```
+
+#### Настройки среды выполнения и логи
+
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/logs-max-total-size-mb
+# {"logs-max-total-size-mb":512}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":20}' http://localhost:8317/v0/management/error-logs-max-files
+# {"status":"ok"}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":true}' http://localhost:8317/v0/management/force-model-prefix
+# {"status":"ok"}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"value":"fill-first"}' http://localhost:8317/v0/management/routing/strategy
+# {"status":"ok"}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/logs?limit=2'
+```
+```json
+{ "lines": ["2026-05-05 12:00:00 info request accepted"], "line-count": 1, "latest-timestamp": 1777982400, "next-cursor": "<OPAQUE_CURSOR>" }
+```
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/logs?cursor=<OPAQUE_CURSOR>&limit=100'
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' -OJ http://localhost:8317/v0/management/request-log-by-id/req_123
+```
+
+#### Коллекции API Key провайдеров
+
+Следующие примеры показывают все методы коллекций. Подставьте эндпоинт и структуру key нужного провайдера.
+
+```bash
+# Interactions: GET, PUT, PATCH, DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/interactions-api-key
+# {"interactions-api-key":[{"api-key":"AIza...","auth-index":"a1b2","base-url":"https://generativelanguage.googleapis.com","excluded-models":[]}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"AIza...","priority":10,"prefix":"team/","base-url":"https://generativelanguage.googleapis.com","proxy-url":"","models":[],"headers":{"X-Team":"prod"},"excluded-models":["gemini-2.0-flash"],"disable-cooling":true}]' http://localhost:8317/v0/management/interactions-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"index":0,"value":{"proxy-url":"socks5://127.0.0.1:1080"}}' http://localhost:8317/v0/management/interactions-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/interactions-api-key?api-key=AIza...&base-url=https%3A%2F%2Fgenerativelanguage.googleapis.com'
+# Каждое изменение возвращает: {"status":"ok"}
+
+# xAI: GET, PUT, PATCH, DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/xai-api-key
+# {"xai-api-key":[{"api-key":"xai...","auth-index":"c3d4","base-url":"https://api.x.ai/v1","websockets":true}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"xai...","priority":10,"prefix":"xai/","base-url":"https://api.x.ai/v1","websockets":true,"proxy-url":"","models":[{"name":"grok-3","alias":"grok"}],"headers":{},"excluded-models":[],"disable-cooling":false}]' http://localhost:8317/v0/management/xai-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"match":"xai...","value":{"websockets":false}}' http://localhost:8317/v0/management/xai-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/xai-api-key?index=0'
+# Каждое изменение возвращает: {"status":"ok"}
+
+# Vertex-совместимый: GET, PUT, PATCH, DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/vertex-api-key
+# {"vertex-api-key":[{"api-key":"vertex...","auth-index":"e5f6","base-url":"https://vertex.example.com"}]}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '[{"api-key":"vertex...","priority":10,"prefix":"vertex/","base-url":"https://vertex.example.com","proxy-url":"","headers":{},"models":[{"name":"gemini-2.5-pro","alias":"vertex-gemini","display-name":"Vertex Gemini","force-mapping":true}],"excluded-models":[]}]' http://localhost:8317/v0/management/vertex-api-key
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"match":"vertex...","value":{"headers":{"X-Team":"prod"}}}' http://localhost:8317/v0/management/vertex-api-key
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/vertex-api-key?index=0'
+# Каждое изменение возвращает: {"status":"ok"}
+```
+
+#### OAuth-псевдонимы, файлы аутентификации и исходящие вызовы
+
+```bash
+# OAuth-псевдонимы моделей: GET, PUT, PATCH, DELETE
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/oauth-model-alias
+# {"oauth-model-alias":{"codex":[{"name":"gpt-5","alias":"gpt-5-fast","fork":true,"display-name":"GPT-5 Fast","force-mapping":true}]}}
+curl -X PUT -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"codex":[{"name":"gpt-5","alias":"gpt-5-fast","fork":true,"display-name":"GPT-5 Fast","force-mapping":true}]}' http://localhost:8317/v0/management/oauth-model-alias
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"channel":"codex","aliases":[{"name":"gpt-5","alias":"gpt-5-fast"}]}' http://localhost:8317/v0/management/oauth-model-alias
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/oauth-model-alias?channel=codex'
+# Каждое изменение возвращает: {"status":"ok"}
+
+# Модели учетных данных, статические определения, статус и метаданные
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/auth-files/models?name=codex-user.json'
+# {"models":[{"id":"gpt-5","display_name":"GPT-5","type":"model","owned_by":"openai"}]}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/model-definitions/codex
+# {"channel":"codex","models":[...]}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"name":"codex-user.json","disabled":true}' http://localhost:8317/v0/management/auth-files/status
+# {"status":"ok","disabled":true}
+curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"name":"codex-user.json","project_id":"my-project","headers.X-Team":"prod"}' http://localhost:8317/v0/management/auth-files/fields
+# {"status":"ok"}
+
+# Исходящий запрос с учетными данными
+curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' -H 'Content-Type: application/json' -d '{"auth_index":"a1b2","method":"GET","url":"https://api.example.com/v1/ping","header":{"Authorization":"Bearer $TOKEN$"}}' http://localhost:8317/v0/management/api-call
+# {"status_code":200,"header":{"Content-Type":["application/json"]},"body":"{\"ok\":true}"}
+```
+
+#### Device OAuth и callback
+
+```bash
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/kimi-auth-url
+# {"status":"ok","url":"https://...","state":"kmi-...","flow":"device","user_code":"ABCD-EFGH","expires_in":900}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' http://localhost:8317/v0/management/xai-auth-url
+# {"status":"ok","url":"https://...","state":"xai-...","flow":"device","user_code":"ABCD-EFGH","expires_in":1800}
+curl -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/get-auth-status?state=xai-...'
+# {"status":"wait"}
+curl -X DELETE -H 'Authorization: Bearer <MANAGEMENT_KEY>' 'http://localhost:8317/v0/management/oauth-session?state=xai-...'
+# {"status":"ok","cancelled":true}
+
+# Callback-маршруты не используют middleware ключа управления; их защищает проверка state.
+curl 'http://localhost:8317/v0/management/oauth-callback?provider=codex&state=codex-...&code=AUTHORIZATION_CODE'
+# {"status":"ok"}
+curl -X POST -H 'Content-Type: application/json' -d '{"provider":"codex","state":"codex-...","code":"AUTHORIZATION_CODE"}' http://localhost:8317/v0/management/oauth-callback
+# {"status":"ok"}
+```
 
 ## Ответы об ошибках
 
