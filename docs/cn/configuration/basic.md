@@ -9,7 +9,7 @@
 ```
 
 > macOS 通过 Homebrew 安装并以 `brew services` 运行时，默认读取 `$(brew --prefix)/etc/cliproxyapi.conf`（Apple Silicon 常见为 `/opt/homebrew/etc/cliproxyapi.conf`，Intel 常见为 `/usr/local/etc/cliproxyapi.conf`）。
-> 若希望沿用 `~/.cli-proxy-api/config.yaml`，可将其软链接到该默认路径。
+> 若希望沿用 `~/.cli-proxy-api/config.yaml`，请让 Homebrew 默认路径**指向**该文件，并在 `brew services start` 前确保软链目标已存在（完整步骤见 [快速开始 — macOS](../introduction/quick-start.md)）。
 
 ### 配置文件示例
 

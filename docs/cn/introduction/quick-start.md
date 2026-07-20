@@ -8,12 +8,31 @@ brew services start cliproxyapi
 ```
 
 > 使用 Homebrew 安装并通过 `brew services` 运行时，默认配置文件路径是 `$(brew --prefix)/etc/cliproxyapi.conf`（Apple Silicon 常见为 `/opt/homebrew/etc/cliproxyapi.conf`，Intel 常见为 `/usr/local/etc/cliproxyapi.conf`）。
-> 如果你希望继续使用 `~/.cli-proxy-api/config.yaml` 作为主配置，可将默认路径软链接到该文件：
+> 如果你希望继续使用 `~/.cli-proxy-api/config.yaml` 作为主配置，请让 Homebrew 默认路径**指向**该文件。软链目标**必须先存在**再启动服务（悬空软链会导致服务立刻退出）：
 > ```bash
+> brew_conf="$(brew --prefix)/etc/cliproxyapi.conf"
+> home_conf="$HOME/.cli-proxy-api/config.yaml"
+>
 > brew services stop cliproxyapi
-> mv "$(brew --prefix)/etc/cliproxyapi.conf" "$(brew --prefix)/etc/cliproxyapi.conf.bak"
-> ln -s ~/.cli-proxy-api/config.yaml "$(brew --prefix)/etc/cliproxyapi.conf"
-> brew services start cliproxyapi
+> mkdir -p "$HOME/.cli-proxy-api"
+>
+> # 仅复制和备份普通文件；不要操作软链。带时间戳备份，避免覆盖已有 .bak。
+> if [ -f "$brew_conf" ] && [ ! -L "$brew_conf" ]; then
+>   if [ -f "$home_conf" ] || cp "$brew_conf" "$home_conf"; then
+>     mv "$brew_conf" "${brew_conf}.bak.$(date +%Y%m%d-%H%M%S)"
+>   fi
+> fi
+>
+> # 仅在 Homebrew 路径安全指向现有配置后启动服务
+> if [ ! -f "$home_conf" ]; then
+>   echo "未找到配置文件 $home_conf；服务未启动。" >&2
+> elif [ -e "$brew_conf" ] && [ ! -L "$brew_conf" ]; then
+>   echo "无法安全替换 $brew_conf；服务未启动。" >&2
+> elif ln -sfn "$home_conf" "$brew_conf"; then
+>   brew services start cliproxyapi
+> else
+>   echo "无法创建配置软链；服务未启动。" >&2
+> fi
 > ```
 
 ## Linux
