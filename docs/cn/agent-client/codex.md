@@ -50,6 +50,7 @@ model_reasoning_effort = "high"
 name = "cliproxyapi"
 base_url = "http://127.0.0.1:8317/v1"
 wire_api = "responses"
+http_headers = { "X-OpenAI-Actor-Authorization" = "local-proxy" }
 ```
 
 auth.json:
