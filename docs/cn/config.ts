@@ -67,7 +67,9 @@ export default defineConfig({
                     {text: 'Claude Code', link: '/cn/agent-client/claude-code'},
                     {text: 'Codex', link: '/cn/agent-client/codex'},
                     {text: 'Factory Droid', link: '/cn/agent-client/droid'},
-                    {text: 'OpenCode', link: '/cn/agent-client/opencode'}
+                    {text: 'OpenCode', link: '/cn/agent-client/opencode'},
+                    {text: 'Grok Build', link: '/cn/agent-client/grok-build'},
+                    {text: 'PI', link: '/cn/agent-client/pi'}
                 ]
             },
             {
