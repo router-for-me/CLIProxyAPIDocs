@@ -19,6 +19,9 @@ model_provider = "cliproxyapi"
 model_reasoning_effort = "xhigh"
 plan_mode_reasoning_effort = "xhigh"
 
+experimental_realtime_webrtc_call_base_url = "http://127.0.0.1:8317/v1" # Codex App 语音聊天功能需要使用 WebRTC，若不使用语音聊天功能，可不配置此项
+experimental_realtime_ws_base_url = "http://127.0.0.1:8317/v1" # Codex App 语音聊天功能需要使用 WebRTC，若不使用语音聊天功能，可不配置此项
+
 [model_providers.cliproxyapi]
 base_url = "http://127.0.0.1:8317/v1"
 experimental_bearer_token = "sk-dummy" # 这里修改为你在 CLIProxyAPI 中为 Codex 创建的 API Key
