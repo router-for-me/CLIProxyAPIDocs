@@ -36,3 +36,18 @@
   "autoCompactEnabled": true
 }
 ```
+
+## Remote Control(手机接管)
+
+Claude Code v2.1.196 起,只要 `ANTHROPIC_BASE_URL` 不是 `api.anthropic.com`,Remote Control
+(以及 `/schedule`、claude.ai MCP connectors)就会被直接关闭 —— 与上面的标准接法冲突。
+
+两种选择:
+
+- **不需要 Remote Control** —— 维持上面的配置即可。
+- **需要 Remote Control** —— 不要设 `ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN`,
+  改用本地**正向代理**:让 Claude Code 以为直连 `api.anthropic.com`,
+  在网络层把 `/v1/messages*` 改道给 CLIProxyAPI(`HTTPS_PROXY` +
+  经 `NODE_EXTRA_CA_CERTS` 信任的 MITM 证书)。参考实现:
+  [dthinkr/claude-rc-proxy](https://github.com/dthinkr/claude-rc-proxy)。
+  注意:若 Anthropic 未来加证书钉扎,此路线会失效。
