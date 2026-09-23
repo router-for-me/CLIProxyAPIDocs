@@ -24,11 +24,15 @@ experimental_realtime_ws_base_url = "http://127.0.0.1:8317/v1" # Codex App voice
 
 [model_providers.cliproxyapi]
 base_url = "http://127.0.0.1:8317/v1"
+model_catalog_url = "http://127.0.0.1:8317/v1/models"
 experimental_bearer_token = "sk-dummy" # Replace with the API Key you created for Codex in CLIProxyAPI
 name = "OpenAI"
 wire_api = "responses"
 requires_openai_auth = true
 supports_websockets = true # Choose whether to enable websockets as needed
+
+[features]
+api_key_model_discovery = true
 ```
 
 No need to edit the `auth.json` file.
