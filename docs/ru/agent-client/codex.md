@@ -24,7 +24,7 @@ experimental_realtime_ws_base_url = "http://127.0.0.1:8317/v1" # Для голо
 
 [model_providers.cliproxyapi]
 base_url = "http://127.0.0.1:8317/v1"
-model_catalog_url = "http://127.0.0.1:8317/v1/models"
+model_catalog_url = "http://127.0.0.1:8317/v1/models" # Требуется для Codex v0.156.0 и выше
 experimental_bearer_token = "sk-dummy" # Замените на API-ключ, созданный для Codex в CLIProxyAPI
 name = "OpenAI"
 wire_api = "responses"
@@ -32,7 +32,7 @@ requires_openai_auth = true
 supports_websockets = true # При необходимости выберите, включать ли websockets
 
 [features]
-api_key_model_discovery = true
+api_key_model_discovery = true # Требуется для Codex v0.156.0 и выше
 ```
 
 Редактировать файл `auth.json` не требуется.
