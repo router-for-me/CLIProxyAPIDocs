@@ -90,6 +90,7 @@ export default defineConfig({
 				items: [
 					{ text: 'Web UI', link: '/management/webui' },
 					{ text: 'Desktop GUI', link: '/management/gui' },
+					{ text: 'Management API v8', link: '/management/apiv8' },
 					{ text: 'Management API', link: '/management/api' },
 					{
 						text: 'Redis Usage Queue',
@@ -342,6 +343,7 @@ export default defineConfig({
 						items: [
 							{ text: 'Web UI', link: '/ru/management/webui' },
 							{ text: 'Desktop GUI', link: '/ru/management/gui' },
+							{ text: 'Management API v8', link: '/ru/management/apiv8' },
 							{ text: 'Management API', link: '/ru/management/api' },
 							{
 								text: 'Redis Usage Queue',

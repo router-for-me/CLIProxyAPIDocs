@@ -4,6 +4,10 @@ outline: 'deep'
 
 # Management API
 
+::: warning Near deprecation
+`/v0/management` is near deprecation. Do not build new functionality from this document. Use the [Management API v8](./apiv8) instead.
+:::
+
 Base path: `http://localhost:8317/v0/management`
 
 This API manages the CLI Proxy API’s runtime configuration and authentication files. All changes are persisted to the YAML config file and hot‑reloaded by the service.
