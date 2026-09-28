@@ -165,7 +165,6 @@ auth JSON 中的单个凭据 `model_aliases` 数组只作用于该凭据，并�
 | 参数 | 类型 | 默认值 | 描述 |
 | --- | --- | --- | --- |
 | `oauth.providers.codex.response-steering` | boolean | `false` | 实验性的全双工 Responses WebSocket steering。一个 socket 固定一个账号和模型，已接受的输入不会重放。 |
-| `oauth.providers.codex.identity-confuse` | boolean | `false` | 使用 `fill-first` 或会话粘性时，按选定凭据重映射 Codex `prompt_cache_key` 和安装标识。 |
 | `oauth.providers.codex.disable-codex-cloaking` | boolean | `false` | 不在 HTTP、SSE 或 WebSocket 请求上强制官方 Codex User-Agent 和 Originator 头。 |
 | `oauth.providers.codex.stream-bootstrap-buffering` | boolean | `false` | 暂存握手、心跳和空的 `*.added` 帧，直到第一个生成事件，以便流内过载或限流失败能在响应头提交前故障转移。上限是 48 帧和 1 MiB，而不是时间。 |
 | `oauth.providers.codex.stream-bootstrap-timeout` | string | `"0"` | 可选时间上限，例如 `"20s"`。`0`、`0s`、`none`、`unlimited`、`disabled`、`off` 和 `never` 表示没有上限。这不会中断上游连接。 |

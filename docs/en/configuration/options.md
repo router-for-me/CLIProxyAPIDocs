@@ -165,7 +165,6 @@ These fields do not apply to `api-keys.codex`. API-key cloaking uses `keys[].dis
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
 | `oauth.providers.codex.response-steering` | boolean | `false` | Experimental full-duplex Responses WebSocket steering. One socket stays on one account and model, and accepted input is not replayed. |
-| `oauth.providers.codex.identity-confuse` | boolean | `false` | With `fill-first` or session affinity, remap Codex `prompt_cache_key` and installation identity for the selected auth. |
 | `oauth.providers.codex.disable-codex-cloaking` | boolean | `false` | Do not force the official Codex User-Agent and Originator headers on HTTP, SSE, or WebSocket requests. |
 | `oauth.providers.codex.stream-bootstrap-buffering` | boolean | `false` | Hold handshake, heartbeat, and empty `*.added` frames until the first generated event, so in-stream overload or rate-limit failures can fail over before response headers are committed. Bounded by 48 frames and 1 MiB, not by time. |
 | `oauth.providers.codex.stream-bootstrap-timeout` | string | `"0"` | Optional time ceiling, such as `"20s"`. `0`, `0s`, `none`, `unlimited`, `disabled`, `off`, and `never` mean no ceiling. This does not abort the upstream connection. |

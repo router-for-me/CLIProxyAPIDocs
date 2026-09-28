@@ -165,7 +165,6 @@
 | Параметр | Тип | По умолчанию | Описание |
 | --- | --- | --- | --- |
 | `oauth.providers.codex.response-steering` | boolean | `false` | Экспериментальное полнодуплексное Responses WebSocket steering. Один socket остается на одном аккаунте и модели, а принятый ввод не воспроизводится повторно. |
-| `oauth.providers.codex.identity-confuse` | boolean | `false` | При `fill-first` или session affinity переназначать Codex `prompt_cache_key` и installation identity для выбранной auth. |
 | `oauth.providers.codex.disable-codex-cloaking` | boolean | `false` | Не принуждать официальные заголовки Codex User-Agent и Originator в запросах HTTP, SSE или WebSocket. |
 | `oauth.providers.codex.stream-bootstrap-buffering` | boolean | `false` | Удерживать handshake, heartbeat и пустые кадры `*.added` до первого сгенерированного события, чтобы отказы перегрузки или rate limit внутри потока могли выполнить failover до фиксации заголовков ответа. Предел — 48 кадров и 1 MiB, а не время. |
 | `oauth.providers.codex.stream-bootstrap-timeout` | string | `"0"` | Необязательный предел времени, например `"20s"`. `0`, `0s`, `none`, `unlimited`, `disabled`, `off` и `never` означают отсутствие предела. Это не прерывает upstream-соединение. |
