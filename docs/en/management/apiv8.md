@@ -353,21 +353,6 @@ curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
   http://localhost:8317/v8/management/credentials/status
 ```
 
-### Quota
-
-- `GET /credentials/quota/providers` — registered quota providers. The response is `{ "providers": [ ... ] }`.
-- `POST /credentials/quota/fetch` — fetch quota for one credential.
-- `POST /credentials/quota/reset` — reset quota for one credential through its provider.
-
-```bash
-curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-  -H 'Content-Type: application/json' \
-  -d '{"auth_index":"a1b2","provider":"codex"}' \
-  http://localhost:8317/v8/management/credentials/quota/fetch
-```
-
-`auth_index` is required and is also accepted as `authIndex` or `AuthIndex`. Optional `plugin_id` selects one plugin provider; optional `provider` overrides the credential provider. No available provider returns `501`. Fetch and reset failures return `502`.
-
 ## OAuth
 
 ### Start a login
@@ -489,7 +474,6 @@ Configuration and operation handlers use their own error strings. Common results
 - `409` plugin unload or restart required
 - `422` `{ "error": "invalid_config", "message": "..." }` when the document parses but fails configuration validation
 - `500` `{ "error": "write_failed", "message": "..." }` or `{ "error": "read_failed" }`
-- `501` no quota provider is available
 - `502` quota provider failure
 - `503` `{ "error": "core auth manager unavailable" }`
 

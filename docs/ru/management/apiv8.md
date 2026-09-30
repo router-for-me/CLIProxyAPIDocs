@@ -353,21 +353,6 @@ curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
   http://localhost:8317/v8/management/credentials/status
 ```
 
-### Квота
-
-- `GET /credentials/quota/providers` — зарегистрированные провайдеры квоты. Ответ: `{ "providers": [ ... ] }`.
-- `POST /credentials/quota/fetch` — получить квоту одних учетных данных.
-- `POST /credentials/quota/reset` — сбросить квоту одних учетных данных через их провайдера.
-
-```bash
-curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-  -H 'Content-Type: application/json' \
-  -d '{"auth_index":"a1b2","provider":"codex"}' \
-  http://localhost:8317/v8/management/credentials/quota/fetch
-```
-
-`auth_index` обязателен и также принимается как `authIndex` или `AuthIndex`. Необязательный `plugin_id` выбирает провайдера плагина; необязательный `provider` заменяет провайдера учетных данных. При отсутствии провайдера возвращается `501`. Ошибки получения и сброса возвращают `502`.
-
 ## OAuth
 
 ### Начало входа
@@ -489,7 +474,6 @@ curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
 - `409`: плагин нельзя выгрузить или требуется перезапуск
 - `422`: `{ "error": "invalid_config", "message": "..." }`, когда документ разбирается, но не проходит проверку конфигурации
 - `500`: `{ "error": "write_failed", "message": "..." }` или `{ "error": "read_failed" }`
-- `501`: провайдер квоты недоступен
 - `502`: ошибка провайдера квоты
 - `503`: `{ "error": "core auth manager unavailable" }`
 

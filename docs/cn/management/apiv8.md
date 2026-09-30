@@ -353,21 +353,6 @@ curl -X PATCH -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
   http://localhost:8317/v8/management/credentials/status
 ```
 
-### 配额
-
-- `GET /credentials/quota/providers`：已注册的配额提供方。响应为 `{ "providers": [ ... ] }`。
-- `POST /credentials/quota/fetch`：获取一个凭据的配额。
-- `POST /credentials/quota/reset`：通过其提供方重置一个凭据的配额。
-
-```bash
-curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
-  -H 'Content-Type: application/json' \
-  -d '{"auth_index":"a1b2","provider":"codex"}' \
-  http://localhost:8317/v8/management/credentials/quota/fetch
-```
-
-`auth_index` 必填，也接受 `authIndex` 或 `AuthIndex`。可选的 `plugin_id` 用于选择一个插件提供方；可选的 `provider` 会覆盖凭据提供商。没有可用提供方时返回 `501`。获取和重置失败返回 `502`。
-
 ## OAuth
 
 ### 开始登录
@@ -489,7 +474,6 @@ curl -X POST -H 'Authorization: Bearer <MANAGEMENT_KEY>' \
 - `409`：插件无法卸载或需要重启
 - `422`：文档可以解析但配置验证失败时返回 `{ "error": "invalid_config", "message": "..." }`
 - `500`：`{ "error": "write_failed", "message": "..." }` 或 `{ "error": "read_failed" }`
-- `501`：没有可用的配额提供方
 - `502`：配额提供方失败
 - `503`：`{ "error": "core auth manager unavailable" }`
 
