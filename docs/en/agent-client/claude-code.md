@@ -36,3 +36,12 @@ Edit the `~/.claude/settings.json` file and add the following content:
   "autoCompactEnabled": true
 }
 ```
+
+## Remote Control
+
+Claude Code v2.1.196+ disables Remote Control (and `/schedule`, claude.ai MCP connectors) whenever `ANTHROPIC_BASE_URL` points anywhere other than `api.anthropic.com`. The standard setup above therefore conflicts with it.
+
+Options:
+
+- **Don't need Remote Control** — keep the setup above, nothing to do.
+- **Need Remote Control** — don't set `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`. Instead run a local **forward proxy** that keeps the base URL at `api.anthropic.com` and reroutes `/v1/messages*` to CLIProxyAPI at the network layer (`HTTPS_PROXY` + a MITM cert trusted via `NODE_EXTRA_CA_CERTS`). Reference implementation: [dthinkr/claude-rc-proxy](https://github.com/dthinkr/claude-rc-proxy). Note this breaks if Anthropic ever adds certificate pinning.
