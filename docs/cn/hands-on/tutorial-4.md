@@ -88,9 +88,9 @@ api-keys:
 claude-api-key:
   - api-key: "88_XXXXXXXXXXXXXXXXXXXXXXXXX"
     base-url: "https://www.88code.org/api"
-  - api-key: "sk-4cXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://api.packycode.com"
-  - api-key: "sk-HpYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://api.packycode.com"
 
 codex-api-key:
@@ -98,9 +98,9 @@ codex-api-key:
     base-url: "https://www.88code.org/openai/v1"
   - api-key: "fk-4cXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     base-url: "https://oai-api.fkclaude.com/v1"
-  - api-key: "sk-amXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://codex-api.packycode.com/v1"
-  - api-key: "sk-sTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://codex-api.packycode.com/v1"
 ```
 
@@ -127,17 +127,17 @@ codex-api-key:
     base-url: "https://www.88code.org/openai/v1"
   - api-key: "fk-4cXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
     base-url: "https://oai-api.fkclaude.com/v1"
-  - api-key: "sk-amXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://codex-api.packycode.com/v1"
-  - api-key: "sk-sTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  - api-key: "YOUR_API_KEY"
     base-url: "https://codex-api.packycode.com/v1"
 
 openai-compatibility:
   - name: "openrouter"
     base-url: "https://openrouter.ai/api/v1"
     api-keys:
-      - "sk-or-v1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
-      - "sk-or-v1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      - "YOUR_API_KEY"
+      - "YOUR_API_KEY"
     models:
       - name: "deepseek/deepseek-chat-v3.1:free"
         alias: "deepseek-v3.1"
