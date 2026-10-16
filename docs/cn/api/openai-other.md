@@ -62,7 +62,7 @@ curl -I https://example.invalid/management.html
 
 ## 5. 常见错误与边界
 
-单条模型在目录不是合法 JSON，或读不出 `data` 与 `models` 数组时返回 502，正文为 `{"error":{"message":"Invalid model catalog","type":"api_error"}}`。没有 `id` 或 `slug` 与路径相同的条目时返回 404，正文为 `{"error":{"message":"Model not found","type":"invalid_request_error","code":"model_not_found"}}`。
+单条模型只在整份目录 `json.Unmarshal` 失败时返回 502，正文为 `{"error":{"message":"Invalid model catalog","type":"api_error"}}`。目录是合法 JSON 但没有 `data` 或 `models` 数组，以及没有 `id` 或 `slug` 与路径相同的条目时，都返回 404，正文为 `{"error":{"message":"Model not found","type":"invalid_request_error","code":"model_not_found"}}`。
 
 列表格式的选择和 Home 失败状态与 `GET /v1/models` 相同，见 [OpenAI Chat](/cn/api/openai-chat)。Home 或 Grok Shell 目录同样先形成列表，再按 `id` 或 `slug` 取一条。
 

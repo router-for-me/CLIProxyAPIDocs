@@ -58,7 +58,7 @@ curl https://example.invalid/v1/completions \
 | 字段 | 含义 | 默认值 | 约束 |
 | --- | --- | --- | --- |
 | route.v1.get-models | `GET /v1/models`，返回当前可见模型。 |  | 见第 5 节的格式选择。普通 OpenAI 列表只保留 `id`、`object`、`created` 和 `owned_by`，外层是 `{"object":"list","data":[...]}`。 |
-| route.v1.post-chat-completions | `POST /v1/chat/completions`。 |  | JSON 布尔 `stream: true` 走 SSE，否则走一份 JSON。没有 `messages` 但有 `input` 或 `instructions` 时，先按 Responses 体转换后再执行。 |
+| route.v1.post-chat-completions | `POST /v1/chat/completions`。 |  | JSON 布尔 `stream: true` 走 SSE，否则走一份 JSON。没有 `messages` 但有 `input` 或 `instructions` 时，先把 Responses 体转换成 Chat Completions 再执行。 |
 | route.v1.post-completions | `POST /v1/completions`。 |  | JSON 布尔 `stream: true` 走 SSE。空 `prompt` 变成用户文本 `Complete this:`。非流式响应的 `object` 为 `text_completion`。 |
 
 `POST /v1/completions` 会把请求里已经存在的 `model`、`max_tokens`、`temperature`、`top_p`、`frequency_penalty`、`presence_penalty`、`stop`、`stream`、`logprobs`、`top_logprobs` 和 `echo` 带入执行。没有出现的字段不会被本路由补上。
@@ -76,7 +76,7 @@ curl https://example.invalid/v1/completions \
 
 启用 Home 时，`client_version` 改用 Home 的 Codex 客户端目录，其他列表改用 Home 模型目录。控制中心不可用返回 503，`error.type` 为 `server_error`，`error.message` 为 `home control center unavailable`。向 Home 取目录失败返回 502，`error.type` 为 `server_error`。Home 把结果标成认证失败时，状态沿用该结果，`error.type` 为 `authentication_error`。
 
-模型列表最终不是合法 JSON，或无法读出 `data` 与 `models` 时，返回 502，正文为 `{"error":{"message":"Invalid model catalog","type":"api_error"}}`。这只发生在要求返回单条模型的路径；本页的列表路径直接写出目录。
+要求返回单条模型时，只有整份目录 `json.Unmarshal` 失败才返回 502，正文为 `{"error":{"message":"Invalid model catalog","type":"api_error"}}`。目录是合法 JSON、但没有 `data` 或 `models` 数组时，返回 404，正文为 `{"error":{"message":"Model not found","type":"invalid_request_error","code":"model_not_found"}}`。本页的列表路径不走这条选择，直接写出目录。
 
 ## 6. 相关功能
 
