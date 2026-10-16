@@ -23,6 +23,19 @@ export default defineConfig({
                 ]
             },
             {
+                text: '接入 API',
+                items: [
+                    {text: '客户端密钥', link: '/cn/api/access'},
+                    {text: 'OpenAI Chat', link: '/cn/api/openai-chat'},
+                    {text: 'Responses', link: '/cn/api/responses'},
+                    {text: 'Claude Messages', link: '/cn/api/claude-messages'},
+                    {text: 'Gemini', link: '/cn/api/gemini'},
+                    {text: '图像、语音与视频', link: '/cn/api/media'},
+                    {text: '实时会话', link: '/cn/api/realtime'},
+                    {text: '其他入口', link: '/cn/api/openai-other'},
+                ]
+            },
+            {
                 text: '配置',
                 items: [
                     {text: '基础配置', link: '/cn/configuration/basic'},

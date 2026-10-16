@@ -35,6 +35,19 @@ export default defineConfig({
 				],
 			},
 			{
+				text: 'API',
+				items: [
+					{ text: 'Client API keys', link: '/api/access' },
+					{ text: 'OpenAI Chat', link: '/api/openai-chat' },
+					{ text: 'Responses', link: '/api/responses' },
+					{ text: 'Claude Messages', link: '/api/claude-messages' },
+					{ text: 'Gemini', link: '/api/gemini' },
+					{ text: 'Images, speech, and video', link: '/api/media' },
+					{ text: 'Realtime sessions', link: '/api/realtime' },
+					{ text: 'Other endpoints', link: '/api/openai-other' },
+				],
+			},
+			{
 				text: 'Configuration',
 				items: [
 					{ text: 'Basic Configuration', link: '/configuration/basic' },
@@ -272,6 +285,19 @@ export default defineConfig({
 								text: 'GitHub',
 								link: 'https://github.com/router-for-me/CLIProxyAPI',
 							},
+						],
+					},
+					{
+						text: 'API',
+						items: [
+							{ text: 'Клиентские ключи', link: '/ru/api/access' },
+							{ text: 'OpenAI Chat', link: '/ru/api/openai-chat' },
+							{ text: 'Responses', link: '/ru/api/responses' },
+							{ text: 'Claude Messages', link: '/ru/api/claude-messages' },
+							{ text: 'Gemini', link: '/ru/api/gemini' },
+							{ text: 'Изображения, речь и видео', link: '/ru/api/media' },
+							{ text: 'Сеансы реального времени', link: '/ru/api/realtime' },
+							{ text: 'Прочие конечные точки', link: '/ru/api/openai-other' },
 						],
 					},
 					{
