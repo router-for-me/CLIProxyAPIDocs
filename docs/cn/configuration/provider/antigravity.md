@@ -45,7 +45,7 @@ oauth:
 
 | 字段 | 含义 | 默认值 | 约束 |
 | --- | --- | --- | --- |
-| oauth.providers.antigravity.antigravity-credits | oauth.providers.antigravity.antigravity-credits | false | oauth.providers.antigravity.antigravity-credits |
+| oauth.providers.antigravity.antigravity-credits | 免费层用尽后，是否改用带 Google One AI credits 的凭证。 | false | 只作用于 Claude 模型。全部免费层凭证因 429 或 503 用尽后，才用仍有 credits 的凭证做最后回退。false 或不写则不做这次回退。 |
 | oauth.providers.antigravity.connection-pool.enabled | oauth.providers.antigravity.connection-pool.enabled | Defaults to false (short-lived connection mode). | oauth.providers.antigravity.connection-pool.enabled |
 | oauth.providers.antigravity.connection-pool.idle-conn-timeout | oauth.providers.antigravity.connection-pool.idle-conn-timeout | Defaults to "30s". | oauth.providers.antigravity.connection-pool.idle-conn-timeout |
 | oauth.providers.antigravity.connection-pool.max-idle-conns-per-host | oauth.providers.antigravity.connection-pool.max-idle-conns-per-host | Defaults to 2. | oauth.providers.antigravity.connection-pool.max-idle-conns-per-host |
@@ -55,7 +55,7 @@ oauth:
 
 ## 5. 常见错误与边界
 
-连接池只有 enabled 为 true 才启用。idle-conn-timeout 无法解析时警告并使用 30s；超过 210s 时截断为 210s；小于等于 0 时改为短连接。max-idle-conns-per-host 大于 100 时截断为 100，小于 0 时改为短连接。签名缓存省略时为 true。signature-bypass-strict 只在缓存关闭后起作用。
+连接池只有 enabled 为 true 才启用。idle-conn-timeout 无法解析时警告并使用 30s；超过 210s 时截断为 210s；小于等于 0 时改为短连接。max-idle-conns-per-host 大于 100 时截断为 100，小于 0 时改为短连接。签名缓存省略时为 true。signature-bypass-strict 只在缓存关闭后起作用。antigravity-credits 为 true 时，只有 Claude 模型的免费层凭证都因 429 或 503 用尽后，才改用仍有 Google One AI credits 的凭证。false 或不写时没有这次回退。
 
 ## 6. 相关功能
 
