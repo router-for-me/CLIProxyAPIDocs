@@ -125,11 +125,32 @@ export default defineConfig({
                 ]
             },
             {
+                text: '运行',
+                items: [
+                    {text: '监听与进程', link: '/cn/operations/server'},
+                    {text: 'TLS', link: '/cn/operations/tls'},
+                    {text: '局域网发现', link: '/cn/operations/discovery'},
+                    {text: '健康检查', link: '/cn/operations/health'},
+                    {text: '日志与用量', link: '/cn/operations/observability'},
+                    {text: '管理端设置', link: '/cn/operations/management-settings'},
+                    {text: '终端界面', link: '/cn/operations/tui'},
+                    {text: 'CLIProxyAPI Home', link: '/cn/operations/home'},
+                    {text: '插件加载与商店', link: '/cn/operations/plugins'},
+                ]
+            },
+            {
                 text: '管理',
                 items: [
                     {text: 'Web UI', link: '/cn/management/webui'},
                     {text: '桌面客户端', link: '/cn/management/gui'},
                     {text: '管理 API v8', link: '/cn/management/apiv8'},
+                    {text: '凭证', link: '/cn/management/v8-credentials'},
+                    {text: 'OAuth', link: '/cn/management/v8-oauth'},
+                    {text: '日志与用量', link: '/cn/management/v8-observability'},
+                    {text: '插件', link: '/cn/management/v8-plugins'},
+                    {text: '路由操作', link: '/cn/management/v8-routing'},
+                    {text: '最新版本', link: '/cn/management/v8-server'},
+                    {text: '代发请求', link: '/cn/management/v8-requests'},
                     {text: '管理 API', link: '/cn/management/api'},
                     {text: 'Redis 用量队列', link: '/cn/management/redis-usage-queue'},
                 ]
