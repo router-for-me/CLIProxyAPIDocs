@@ -312,7 +312,7 @@ function matchPage(id) {
     // These areas are real top-level ids. They stay after the broader
     // contains-rules so thinking, storage, and route rows still win.
     if (id.startsWith("api-keys.")) {
-        return "docs/cn/configuration/api-keys.md";
+        return "docs/cn/accounts/api-keys.md";
     }
     if (id.startsWith("credentials.")) {
         return "docs/cn/accounts/credentials.md";
