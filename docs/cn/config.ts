@@ -105,6 +105,23 @@ export default defineConfig({
                         ]
                     },
                     {text: '思考量设置', link: '/cn/configuration/thinking'},
+                    {text: '模型思考能力', link: '/cn/configuration/thinking-models'},
+                ]
+            },
+            {
+                text: '路由与请求',
+                items: [
+                    {text: '路由策略', link: '/cn/routing/strategy'},
+                    {text: '冷却', link: '/cn/routing/cooldown'},
+                    {text: '配额兼容开关', link: '/cn/routing/quota-exceeded'},
+                    {text: 'Codex 客户端目录', link: '/cn/routing/client'},
+                    {text: '出站请求', link: '/cn/routing/requests-value'},
+                    {text: '流式保活', link: '/cn/routing/requests-keepalive'},
+                    {text: '首字节前重试', link: '/cn/routing/requests-bootstrap'},
+                    {text: '首个 token 前保活', link: '/cn/routing/requests-send'},
+                    {text: '默认载荷规则', link: '/cn/routing/requests-default'},
+                    {text: '覆盖载荷规则', link: '/cn/routing/requests-override'},
+                    {text: '过滤载荷规则', link: '/cn/routing/requests-filter'},
                 ]
             },
             {
