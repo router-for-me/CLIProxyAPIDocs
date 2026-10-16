@@ -64,7 +64,7 @@ models_list_url = "https://example.invalid/v1/models"
 | `endpoints.models_list_url` | 模型目录的完整 URL。 |  | 必须是 `https://example.invalid/v1/models`，对应 `route.v1.get-models`。 |
 | `endpoints.models_base_url` | Responses 的基址。 |  | 写 `https://example.invalid/v1`。客户端接上 `/responses`，对应 `route.v1.post-responses`。 |
 
-比较 `grok-shell` 时不区分大小写。这个目录格式不要求查询参数 `client_version`；那个参数会改走 Codex 客户端目录。
+比较 `grok-shell` 时不区分大小写，并且先于查询参数 `client_version`。`User-Agent` 包含 `grok-shell` 时，即使请求带有 `client_version`，`GET /v1/models` 仍返回 Grok Shell 目录，每条模型的 `api_backend` 仍是 `responses`。只有请求不是 Grok Shell 时，出现 `client_version` 才会改走 Codex 客户端目录。
 
 ## 5. 常见错误与边界
 
