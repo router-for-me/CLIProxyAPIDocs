@@ -1,11 +1,8 @@
-# PI Agent
+---
+title: PI
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: true
+---
 
-Запустите сервер CLIProxyAPI, затем выполните следующую команду, чтобы установить официальный плагин провайдера PI.
-
-```bash
-pi install npm:@router-for-me/pi-cliproxyapi-provider
-```
-
-Затем войдите в PI, выполните `/login CLIProxyAPI` и укажите Base URL и API Key для входа.
-
-Наконец, выполните в PI команду `/settings`, откройте настройки и установите для `Transport` значение `websocket-cached`.
+正文以中文页为准，翻译尚未完成。

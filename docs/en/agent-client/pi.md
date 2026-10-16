@@ -1,11 +1,8 @@
-# PI Agent
+---
+title: PI
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: true
+---
 
-Start the CLIProxyAPI server, then run the following command to install the official PI provider plugin.
-
-```bash
-pi install npm:@router-for-me/pi-cliproxyapi-provider
-```
-
-Then enter PI, run `/login CLIProxyAPI`, and log in by providing the Base URL and API key.
-
-Finally, run `/settings` in PI, open the settings, and set `Transport` to `websocket-cached`.
+正文以中文页为准，翻译尚未完成。
