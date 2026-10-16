@@ -4,13 +4,13 @@
 
 ## 场景
 
-数据库连接由环境变量打开。变量名、是否必填和启动顺序只写在 [PostgreSQL 存储](/cn/configuration/storage/pgsql)。本页不复制那张表，也不新增变量。
+数据库连接由环境变量打开。远程存储没有已覆盖功能页。本页不列出变量名、是否必填或启动顺序，也不把尚未覆盖的旧页当作清单。
 
 ## 步骤
 
-1. 按 PostgreSQL 存储页准备环境变量。连接串里的口令不要写进教程或仓库。
+1. 连接串里的口令不要写进教程或仓库。准备变量时不要以本页或尚未覆盖的旧存储页为清单。
 2. 仍用[使用 Docker Compose](/cn/docker/docker)启动进程。该页说明只有 `DEPLOY` 为 `cloud` 时才会进入云部署等待。除此之外不要在本页解释等待。
-3. 存储页提到的管理口令，其访问规则以[管理端设置](/cn/operations/management-settings)为准。
+3. 管理口令的访问规则以[管理端设置](/cn/operations/management-settings)为准。
 4. 数据库里的配置内容仍是普通配置。客户端密钥见[客户端密钥](/cn/api/access)，上游密钥见[上游 API 密钥](/cn/accounts/api-keys-api)，凭证目录见[OAuth 目录、别名与排除](/cn/accounts/oauth)。
 5. 进程监听见[监听与进程](/cn/operations/server)。起来之后用[健康检查](/cn/operations/health)。
 

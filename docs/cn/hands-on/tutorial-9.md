@@ -4,13 +4,13 @@
 
 ## 场景
 
-对象存储由环境变量打开。端点、桶和访问密钥的名称与约束只写在[对象存储](/cn/configuration/storage/s3)。本页不复制那张表，也不新增变量。访问密钥不要写成真实值，文档示例继续使用 `YOUR_API_KEY` 只表示占位，不表示这里有另一套键。
+对象存储由环境变量打开。远程存储没有已覆盖功能页。本页不列出端点、桶、访问密钥或其约束，也不把尚未覆盖的旧页当作清单。访问密钥不要写成真实值。
 
 ## 步骤
 
-1. 按对象存储页准备环境变量。不要把访问密钥写进教程或仓库。
+1. 不要把访问密钥写进教程或仓库。准备变量时不要以本页或尚未覆盖的旧存储页为清单。
 2. 仍用[使用 Docker Compose](/cn/docker/docker)启动进程。该页说明只有 `DEPLOY` 为 `cloud` 时才会进入云部署等待。除此之外不要在本页解释等待。
-3. 存储页提到的管理口令，其访问规则以[管理端设置](/cn/operations/management-settings)为准。
+3. 管理口令的访问规则以[管理端设置](/cn/operations/management-settings)为准。
 4. 对象里的配置内容仍是普通配置。客户端密钥见[客户端密钥](/cn/api/access)，上游密钥见[上游 API 密钥](/cn/accounts/api-keys-api)，凭证目录见[OAuth 目录、别名与排除](/cn/accounts/oauth)。
 5. 进程监听见[监听与进程](/cn/operations/server)。起来之后用[健康检查](/cn/operations/health)。
 
