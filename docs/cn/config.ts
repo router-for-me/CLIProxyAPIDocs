@@ -17,6 +17,8 @@ export default defineConfig({
                 items: [
                     {text: 'CLIProxyAPI是什么？', link: '/cn/introduction/what-is-cliproxyapi'},
                     {text: '快速开始', link: '/cn/introduction/quick-start'},
+                    {text: '命令行参数', link: '/cn/introduction/install'},
+                    {text: '模型目录', link: '/cn/introduction/models'},
                     {text: 'GitHub', link: 'https://github.com/router-for-me/CLIProxyAPI'}
                 ]
             },
@@ -123,8 +125,8 @@ export default defineConfig({
             {
                 text: 'Docker',
                 items: [
-                    {text: '使用 Docker', link: '/cn/docker/docker'},
-                    {text: '使用 Docker Compose', link: '/cn/docker/docker-compose'},
+                    {text: '使用 Docker Compose', link: '/cn/docker/docker'},
+                    {text: 'Docker Compose 导读', link: '/cn/docker/docker-compose'},
                 ]
             },
             {

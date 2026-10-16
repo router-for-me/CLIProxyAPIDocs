@@ -1,27 +1,10 @@
-# Run with Docker
+---
+title: 使用 Docker Compose
+feature_ids:
+  - mode.docker.compose
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: true
+---
 
-Mount your plugins directory to `/CLIProxyAPI/plugins` so plugin installations persist across container restarts.
-
-Run the following command to login (OpenAI OAuth on port 1455):
-
-```bash
-docker run --rm -p 1455:1455 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api -v /path/to/your/plugins-dir:/CLIProxyAPI/plugins eceasy/cli-proxy-api:latest /CLIProxyAPI/CLIProxyAPI --codex-login
-```
-
-Run the following command to logi (Claude OAuth on port 54545):
-
-```bash
-docker run --rm -p 54545:54545 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api -v /path/to/your/plugins-dir:/CLIProxyAPI/plugins eceasy/cli-proxy-api:latest /CLIProxyAPI/CLIProxyAPI --claude-login
-```
-
-Run the following command to login (Antigravity OAuth on port 51121):
-
-```bash
-docker run --rm -p 51121:51121 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api -v /path/to/your/plugins-dir:/CLIProxyAPI/plugins eceasy/cli-proxy-api:latest /CLIProxyAPI/CLIProxyAPI --antigravity-login
-```
-
-Run the following command to start the server:
-
-```bash
-docker run --rm -p 8317:8317 -v /path/to/your/config.yaml:/CLIProxyAPI/config.yaml -v /path/to/your/auth-dir:/root/.cli-proxy-api -v /path/to/your/plugins-dir:/CLIProxyAPI/plugins eceasy/cli-proxy-api:latest
-```
+正文以中文页为准，翻译尚未完成。

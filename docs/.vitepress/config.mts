@@ -26,6 +26,8 @@ export default defineConfig({
 						link: '/introduction/what-is-cliproxyapi',
 					},
 					{ text: 'Quick Start', link: '/introduction/quick-start' },
+					{ text: 'Command-line flags', link: '/introduction/install' },
+					{ text: 'Model catalogs', link: '/introduction/models' },
 					{
 						text: 'GitHub',
 						link: 'https://github.com/router-for-me/CLIProxyAPI',
@@ -177,8 +179,8 @@ export default defineConfig({
 			{
 				text: 'Docker',
 				items: [
-					{ text: 'Run with Docker', link: '/docker/docker' },
-					{ text: 'Run with Docker Compose', link: '/docker/docker-compose' },
+					{ text: 'Docker Compose', link: '/docker/docker' },
+					{ text: 'Docker Compose guide', link: '/docker/docker-compose' },
 				],
 			},
 			{
@@ -264,6 +266,8 @@ export default defineConfig({
 								link: '/ru/introduction/what-is-cliproxyapi',
 							},
 							{ text: 'Быстрый старт', link: '/ru/introduction/quick-start' },
+							{ text: 'Параметры командной строки', link: '/ru/introduction/install' },
+							{ text: 'Каталоги моделей', link: '/ru/introduction/models' },
 							{
 								text: 'GitHub',
 								link: 'https://github.com/router-for-me/CLIProxyAPI',
@@ -460,9 +464,9 @@ export default defineConfig({
 					{
 						text: 'Docker',
 						items: [
-							{ text: 'Запуск с Docker', link: '/ru/docker/docker' },
+							{ text: 'Docker Compose', link: '/ru/docker/docker' },
 							{
-								text: 'Запуск с Docker Compose',
+								text: 'Обзор Docker Compose',
 								link: '/ru/docker/docker-compose',
 							},
 						],
