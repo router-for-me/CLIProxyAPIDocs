@@ -1235,11 +1235,10 @@ function formatDefault(value, env) {
 }
 
 function extractFlags(root, pinned) {
-    const directory = path.join(root, "cmd", "server");
-    const files = listGoFiles(directory);
+    const file = path.join(root, "cmd", "server", "main.go");
     const env = new Map();
     const found = [];
-    for (const file of files) {
+    if (exists(file)) {
         const masked = maskComments(readText(file));
         const local = collectStringEnv(masked);
         for (const [key, value] of local) {
