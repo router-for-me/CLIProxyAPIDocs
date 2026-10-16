@@ -96,7 +96,7 @@ CLIProxyAPI --vertex-import /path/to/service-account.json --vertex-import-prefix
 | cli.server.local-model | 对应目录来源为空时使用内置模型目录。`models.catalog`、`models.codex-catalog` 或 `models.devin-catalog` 非空时，该项仍以显式来源为准。 | false | 普通启动和 TUI standalone 会采用它。只作为 TUI 客户端连接已有服务时不会调用。 |
 | cli.server.no-browser | OAuth 登录不自动打开浏览器，改为打印授权地址。 | false | Devin 登录会打印授权地址，并提示粘贴授权码或会话令牌。命令行会装上默认的交互提示。 |
 | cli.server.oauth-callback-port | 大于 0 时覆盖登录命令和 `--siwc-bind` 的本地回调端口。 | 0 | 0 表示保留提供商自己的端口。Devin 未覆盖时使用临时端口。 |
-| cli.server.password | 传给服务的本地管理密码。帮助文本不显示这项。 | empty string | 非空时同时提供 `GET /keep-alive`。普通启动留空则不设置该密码，也不启用这段空闲退出。TUI standalone 仅在本参数留空时自行生成密码。 |
+| cli.server.password | 传给服务的本地管理密码。帮助文本不显示这项。 | empty string | 只有普通启动且本参数非空时才注册 `GET /keep-alive`，并从端点启用起计算 10 秒空闲。TUI standalone 即使本参数非空，或在留空时自动生成了密码，也不注册该端点，也不会因此退出。普通启动留空则不设置该密码。TUI standalone 仅在本参数留空时自行生成密码。 |
 | cli.server.service-type | `discover` 子命令的 `--service-type`。 | empty string | 空值使用 `_ai-gateway._tcp`。 |
 | cli.server.siwc-bind | 指定已有 Codex 凭证文件，执行 Sign in with ChatGPT，写入 SIWC 段和 `use_siwc=true`，然后结束，不启动代理。 | empty string | 只能是认证目录中的绝对路径或纯文件名。`--no-browser` 和 `--oauth-callback-port` 对它生效。 |
 | cli.server.timeout | `discover` 子命令的 `--timeout`，单位秒。 | 3 | 小于或等于 0 按 3 秒；大于 60 秒按 60 秒。 |
@@ -112,7 +112,7 @@ CLIProxyAPI --vertex-import /path/to/service-account.json --vertex-import-prefix
 
 `--vertex-import-prefix` 含有斜杠时记录错误 `vertex-import: prefix must be a single segment (no '/' allowed)`，不保存凭证。
 
-`--password` 非空时，`GET /keep-alive` 从 `Authorization: Bearer` 或 `X-Local-Password` 读取密码。缺失或不匹配返回 401，正文为 `invalid password`。成功调用中断达 10 秒后进程退出。管理接口仍先要求已配置管理密钥或 `MANAGEMENT_PASSWORD`；两者都为空时返回 403 `remote management key not set`，不会改用本参数。本机请求在已有上述密钥时可以用本参数通过校验。
+只有普通启动并且 `--password` 非空时才注册 `GET /keep-alive`。该端点从 `Authorization: Bearer` 或 `X-Local-Password` 读取密码。缺失或不匹配返回 401，正文为 `invalid password`。计时从端点启用时开始：从未成功调用，或距离上一次成功调用已满 10 秒，进程都会退出。TUI standalone 即使密码非空或由程序自动生成，也不注册该端点，也不会因此在 10 秒后退出。管理接口仍先要求已配置管理密钥或 `MANAGEMENT_PASSWORD`；两者都为空时返回 403 `remote management key not set`，不会改用本参数。本机请求在已有上述密钥时可以用本参数通过校验。
 
 `--config` 不能覆盖已经启用的 Postgres、对象存储、Git 或 Home 配置来源。
 
