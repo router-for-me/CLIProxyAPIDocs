@@ -57,7 +57,7 @@ observability:
 | observability.logs.request-log | 是否记录详细的代理请求日志。 | false | 管理请求不记入该日志。`commercial-mode` 为 true 时请求日志中间件不挂上。 |
 | observability.pprof.addr | pprof HTTP 服务器的 host:port。 | empty string | 空值在加载和运行时使用 `127.0.0.1:8316`。 |
 | observability.pprof.enable | 是否启动 pprof HTTP 调试服务器。 | false | false 时不监听。改为 true 或更换地址会重启该调试服务器。 |
-| observability.usage.redis-usage-queue-retention-seconds | 用量队列条目在内存中为管理 API 保留的秒数。 | Default: 60. | 最大 3600。小于等于 0 时加载为 60。大于 3600 时夹紧到 3600 并写警告。本地 Redis RESP 用量输出是关闭的。 |
+| observability.usage.redis-usage-queue-retention-seconds | 用量队列条目在内存中为管理 API 保留的秒数。 | Default: 60. | 最大 3600。小于等于 0 时加载为 60。大于 3600 时夹紧到 3600 并写警告。Redis RESP 用量输出仅在 Home 模式禁用。 |
 | observability.usage.usage-statistics-enabled | 是否在内存中汇总用量。 | false | false 时丢弃用量数据。Home 模式会把它强制设为 true。 |
 
 ## 5. 常见错误与边界
