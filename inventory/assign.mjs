@@ -309,6 +309,17 @@ function matchPage(id) {
     if (id.startsWith("mode.docker.")) {
         return "docs/cn/docker/docker.md";
     }
+    // These areas are real top-level ids. They stay after the broader
+    // contains-rules so thinking, storage, and route rows still win.
+    if (id.startsWith("api-keys.")) {
+        return "docs/cn/configuration/api-keys.md";
+    }
+    if (id.startsWith("credentials.")) {
+        return "docs/cn/accounts/credentials.md";
+    }
+    if (id.startsWith("quota-exceeded.")) {
+        return "docs/cn/routing/quota-exceeded.md";
+    }
     if (id.startsWith("cli.server.")) {
         return "docs/cn/introduction/install.md";
     }
