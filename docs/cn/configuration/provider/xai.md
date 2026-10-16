@@ -1,50 +1,45 @@
-# xAI / Grok（OAuth 登录）
+---
+title: xAI 搜索工具
+feature_ids:
+  - upstream.xai.inject-x-search
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+---
 
-CLIProxyAPI 支持通过 xAI OAuth 登录 Grok Build 账户。登录后，该账户会作为 `xai` 提供商使用，默认上游 API 地址为 `https://api.x.ai/v1`。
+# xAI 搜索工具
 
-## 登录
+## 1. 这段解决什么问题
 
-```bash
-./cli-proxy-api --xai-login
-```
+在请求没有声明 x_search 时，由代理补上 xAI 的原生搜索工具。
 
-选项：加上 `--no-browser` 可打印登录地址而不自动打开浏览器。默认本地 OAuth 回调监听 `127.0.0.1:56121/callback`。
+## 2. 适用条件与不做的事
 
-如果默认回调端口不可用，可以指定端口：
+登录和 API 密钥不在本页。注入后，适用时也会把它加入 tool_choice.allowed_tools。
 
-```bash
-./cli-proxy-api --xai-login --oauth-callback-port <port>
-```
-
-在远程或无浏览器环境中，请按命令输出的 SSH 隧道提示操作。如果 CLI 要求手动粘贴 callback token，请只粘贴 token 本身，不要粘贴完整回调 URL。
-
-## 支持的 API
-
-- 文本模型会路由到 xAI Responses API，可通过 `/v1/responses`、`/v1/chat/completions` 等 OpenAI 兼容端点调用。
-- 图片请求使用 `/v1/images/generations` 和 `/v1/images/edits`，模型为 `grok-imagine-image` 或 `grok-imagine-image-quality`。
-- 视频请求使用 `/v1/videos`、`/v1/videos/generations`、`/v1/videos/edits`、`/v1/videos/extensions` 和 `/v1/videos/{request_id}`，模型为 `grok-imagine-video`。
-
-xAI 图片和视频模型可以直接使用模型名，也可以使用 `xai/`、`x-ai/` 或 `grok/` 前缀。
-
-## 模型控制
-
-在 `oauth-model-alias` 中使用 `xai` 渠道，可以为模型暴露新的客户端可见名称：
+## 3. 怎么配置或怎么调用
 
 ```yaml
-oauth-model-alias:
+upstream:
   xai:
-    - name: "grok-4.3"
-      alias: "grok-latest"
+    inject-x-search: false
 ```
 
-在 `oauth-excluded-models` 中使用同一渠道，可以从模型列表和路由中隐藏模型：
+## 4. 细项说明
 
-```yaml
-oauth-excluded-models:
-  xai:
-    - "grok-3-mini"
-```
+「默认值」与台账 defaults 逐字相同。
 
-## 请求说明
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| upstream.xai.inject-x-search | 请求没声明时是否注入 xAI 的 x_search。 | false | true 时，只在请求没有声明 x_search 时注入，适用时也加入 tool_choice.allowed_tools。 |
 
-CLIProxyAPI 会在发送到 xAI 上游前规范化 Responses 请求：移除不支持的续接/缓存字段，调整工具定义以兼容 xAI，并且只为支持 reasoning effort 的 Grok 模型保留 reasoning 设置。
+## 5. 常见错误与边界
+
+false 或不写都不会注入。true 只在请求自己没有声明该工具时注入。
+
+## 6. 相关功能
+
+登录见 [xAI 登录](/cn/accounts/xai)。
+
+## 7. 使用经验
+
+暂无

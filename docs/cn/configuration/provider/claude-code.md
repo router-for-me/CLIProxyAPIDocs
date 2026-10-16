@@ -1,7 +1,10 @@
-# Claude Code (Anthropic OAuth 登录):
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+---
 
-  ```bash
-  ./cli-proxy-api --claude-login
-  ```
+# 导读
 
-选项：加上 `--no-browser` 可打印登录地址而不自动打开浏览器。本地 OAuth 回调端口为 `54545`。
+Claude OAuth 登录已移到 [Claude 登录](/cn/accounts/claude)。上游密钥、地址和模型别名见 [上游 API 密钥](/cn/accounts/api-keys-api)、[上游基础地址](/cn/accounts/api-keys-base) 和 [上游模型别名](/cn/accounts/api-keys-models)。本页不再登记功能。

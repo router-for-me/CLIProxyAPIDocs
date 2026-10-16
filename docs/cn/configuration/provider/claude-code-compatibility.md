@@ -1,24 +1,10 @@
-# Claude Code 兼容供应商
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+---
 
-通过 `claude-api-key` 配置上游 Claude Code 兼容供应商。
+# 导读
 
-- api-key: 上游供应商的API key
-- base-url: 上游供应商的端点覆盖地址
-- proxy-url: 代理服务器地址（可选）
-- models: 从上游供应商模型 `名称` 映射到本地 `别名` 的列表
-
-Example:
-```yaml
-claude-api-key:
-  - api-key: "sk-atSM..." # 如果是使用官方 Claude API,无需设置 base-url
-  - api-key: "sk-atSM..."
-    base-url: "https://www.example.com" # 使用第三方 Claude API 中转服务端点
-    proxy-url: "socks5://proxy.example.com:1080" # 可选：针对该密钥的代理设置
-    models:
-      - name: "claude-3-5-sonnet-20241022" # 上游模型名称
-        alias: "claude-sonnet-latest" # 上游模型的本地别名
-```
-
-> [!NOTE]  
-> 如果您只设置了 `api-key`，则 `base-url` 将自动设置为 `https://api.anthropic.com`。    
-> `base-url` 仅仅在您使用第三方 Claude Code 兼容供应商时才需要设置。
+Claude 兼容上游现在写在 `api-keys.claude`。请从 [上游 API 密钥](/cn/accounts/api-keys-api) 进入，并按任务查看地址、模型、请求头和伪装。本页不再登记功能。

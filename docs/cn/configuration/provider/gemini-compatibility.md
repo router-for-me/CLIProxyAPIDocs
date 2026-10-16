@@ -1,23 +1,10 @@
-# Gemini 兼容供应商
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+---
 
-通过 `gemini-api-key` 配置上游 Gemini 兼容供应商。
+# 导读
 
-- api-key: 上游供应商的API key
-- base-url: 上游供应商的端点覆盖地址
-- proxy-url: 代理服务器地址（可选）
-- headers: 可选的额外 HTTP 头部，仅在访问覆盖后的 Gemini 端点时发送。
-
-Example:
-```yaml
-gemini-api-key:
-  - api-key: "AIzaSy...01"
-    base-url: "https://generativelanguage.googleapis.com"
-    headers:
-      X-Custom-Header: "custom-value"
-    proxy-url: "socks5://proxy.example.com:1080"
-  - api-key: "AIzaSy...02" # 如果是使用官方 Gemini API,无需设置 base-url
-```
-
-> [!NOTE]
-> 如果您只设置了 `api-key`，则 `base-url` 将自动设置为 `https://generativelanguage.googleapis.com`。    
-> `base-url` 仅仅在您使用第三方 Gemini 兼容供应商时才需要设置。
+Gemini 兼容地址、请求头和代理现在写在 `api-keys.gemini` 组上。请从 [上游基础地址](/cn/accounts/api-keys-base) 和 [上游请求头](/cn/accounts/api-keys-headers) 进入。本页不再登记功能。

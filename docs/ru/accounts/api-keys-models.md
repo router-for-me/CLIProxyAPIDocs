@@ -1,0 +1,61 @@
+---
+title: 上游模型别名
+feature_ids:
+  - api-keys.claude.models-alias
+  - api-keys.claude.models-display-name
+  - api-keys.claude.models-force-mapping
+  - api-keys.claude.models-is-compat
+  - api-keys.claude.models-max-context-length
+  - api-keys.claude.models-name
+  - api-keys.codex.models-alias
+  - api-keys.codex.models-display-name
+  - api-keys.codex.models-force-mapping
+  - api-keys.codex.models-is-compat
+  - api-keys.codex.models-max-context-length
+  - api-keys.codex.models-name
+  - api-keys.codex.models-support-configuration-update
+  - api-keys.gemini.models-alias
+  - api-keys.gemini.models-display-name
+  - api-keys.gemini.models-force-mapping
+  - api-keys.gemini.models-is-compat
+  - api-keys.gemini.models-max-context-length
+  - api-keys.gemini.models-name
+  - api-keys.interactions.models-alias
+  - api-keys.interactions.models-display-name
+  - api-keys.interactions.models-force-mapping
+  - api-keys.interactions.models-is-compat
+  - api-keys.interactions.models-max-context-length
+  - api-keys.interactions.models-name
+  - api-keys.meta.models-alias
+  - api-keys.meta.models-display-name
+  - api-keys.meta.models-force-mapping
+  - api-keys.meta.models-is-compat
+  - api-keys.meta.models-max-context-length
+  - api-keys.meta.models-name
+  - api-keys.meta.models-support-configuration-update
+  - api-keys.openai-compatibility.models-alias
+  - api-keys.openai-compatibility.models-display-name
+  - api-keys.openai-compatibility.models-force-mapping
+  - api-keys.openai-compatibility.models-image
+  - api-keys.openai-compatibility.models-input-modalities
+  - api-keys.openai-compatibility.models-is-compat
+  - api-keys.openai-compatibility.models-max-context-length
+  - api-keys.openai-compatibility.models-name
+  - api-keys.openai-compatibility.models-output-modalities
+  - api-keys.openai-compatibility.models-use-max-completion-tokens
+  - api-keys.vertex.models-alias
+  - api-keys.vertex.models-display-name
+  - api-keys.vertex.models-force-mapping
+  - api-keys.vertex.models-name
+  - api-keys.xai.models-alias
+  - api-keys.xai.models-display-name
+  - api-keys.xai.models-force-mapping
+  - api-keys.xai.models-is-compat
+  - api-keys.xai.models-max-context-length
+  - api-keys.xai.models-name
+  - api-keys.xai.models-support-configuration-update
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: true
+---
+正文以中文页为准，翻译尚未完成。

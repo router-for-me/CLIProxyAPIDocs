@@ -1,15 +1,9 @@
-# Codex Compatibility Providers
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+translation_pending: true
+---
 
-Configure upstream Codex compatible providers via `codex-api-key`.
-
-- api-key: API key for the provider
-- base-url: provider base URL
-- proxy-url: optional proxy URL for the provider
-
-Example:
-```yaml
-codex-api-key:
-  - api-key: "sk-atSM..."
-    base-url: "https://www.example.com" # use the custom codex API endpoint
-    proxy-url: "socks5://proxy.example.com:1080" # optional: per-key proxy override
-```
+正文以中文页为准，翻译尚未完成。

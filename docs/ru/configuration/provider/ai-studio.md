@@ -1,27 +1,9 @@
-# Инструкции AI Studio
-
-Вы можете использовать этот сервис в качестве backend для [этого AI Studio App](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL). Выполните следующие шаги для его настройки:
-
-1.  **Запустите сервис CLIProxyAPI**: Убедитесь, что ваш экземпляр CLIProxyAPI запущен локально или удаленно.
-2.  **Доступ к AI Studio App**: Войдите в свой аккаунт Google в браузере, затем откройте следующую ссылку:
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
-  
-**Примечание**: Если вы используете браузер Brave, вам может потребоваться отключить функцию shields, так как она может блокировать WebSocket соединение. Эта проблема также может возникать с другими блокировщиками рекламы.
-
-## Конфигурация соединения
-
-По умолчанию AI Studio App пытается подключиться к локальному экземпляру CLIProxyAPI по адресу `ws://127.0.0.1:8317`.
-
--   **Подключение к удаленному сервису**:
-    Если вам нужно подключиться к удаленно развернутому CLIProxyAPI, измените файл `config.ts` в AI Studio App, чтобы обновить значение `WEBSOCKET_PROXY_URL`.
-    -   Используйте протокол `wss://`, если на вашем удаленном сервисе включен SSL.
-    -   Используйте протокол `ws://`, если SSL не включен.
-
-## Конфигурация аутентификации
-
-По умолчанию WebSocket соединения с CLIProxyAPI не требуют аутентификации.
-
--   **Включите аутентификацию на сервере CLIProxyAPI**:
-    В файле `config.yaml` установите `ws_auth` в значение `true`.
--   **Настройте аутентификацию в клиенте AI Studio**:
-    В файле `config.ts` приложения AI Studio App установите значение `JWT_TOKEN` равным вашему токену аутентификации.
+---
+title: AI Studio WebSocket 认证
+feature_ids:
+  - oauth.providers.aistudio-ws-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: true
+---
+正文以中文页为准，翻译尚未完成。

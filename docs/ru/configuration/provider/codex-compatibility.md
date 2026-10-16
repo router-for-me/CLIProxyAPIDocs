@@ -1,15 +1,9 @@
-# Провайдеры, совместимые с Codex
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+translation_pending: true
+---
 
-Настройте вышестоящие провайдеры, совместимые с Codex, через `codex-api-key`.
-
-- api-key: API-ключ для провайдера
-- base-url: базовый URL провайдера
-- proxy-url: необязательный URL прокси для провайдера
-
-Пример:
-```yaml
-codex-api-key:
-  - api-key: "sk-atSM..."
-    base-url: "https://www.example.com" # используйте кастомную конечную точку Codex API
-    proxy-url: "socks5://proxy.example.com:1080" # необязательно: переопределение прокси для конкретного ключа
-```
+正文以中文页为准，翻译尚未完成。
