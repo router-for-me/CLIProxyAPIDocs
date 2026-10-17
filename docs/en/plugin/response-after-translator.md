@@ -1,9 +1,13 @@
 ---
-title: 响应转换后规整
+title: After-translation response cleanup
 feature_ids: []
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# After-translation response cleanup
+
+This slot no longer has its own interface. Both before and after translation implement the same `ResponseNormalizer.NormalizeResponse`. See [Response normalization](/plugin/response-normalizer).
+
+The registration switch is still `response_after_translator`. The matching ABI method name is `response.normalize_after`.

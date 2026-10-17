@@ -1,9 +1,13 @@
 ---
-title: 响应转换后规整
+title: Приведение ответа после преобразования
 feature_ids: []
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# Приведение ответа после преобразования
+
+У этого слота больше нет отдельного интерфейса. И до, и после преобразования реализуется один и тот же `ResponseNormalizer.NormalizeResponse`. См. [Приведение ответа](/ru/plugin/response-normalizer).
+
+Переключатель регистрации по-прежнему `response_after_translator`. Соответствующее имя метода ABI — `response.normalize_after`.
