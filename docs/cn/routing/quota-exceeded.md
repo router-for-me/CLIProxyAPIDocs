@@ -51,4 +51,4 @@ quota-exceeded:
 
 ## 7. 使用经验
 
-暂无
+- [别名要和请求的模型名一致才参与轮询](/cn/experience/accounts#exp-accounts-alias-matches-request)

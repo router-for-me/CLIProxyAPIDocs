@@ -45,4 +45,6 @@ oauth:
 
 ## 7. 使用经验
 
-暂无
+- [图像改走 AI Studio](/cn/experience/accounts#exp-accounts-aistudio-for-images)
+- [HTTPS 页面使用 wss](/cn/experience/accounts#exp-accounts-aistudio-wss)
+- [Gemini 图像和结构化输出走原生路由](/cn/experience/api#exp-api-gemini-native-route)

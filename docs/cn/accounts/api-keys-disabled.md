@@ -46,4 +46,4 @@ true 只是不参与路由，不会在载入时报错。false 或省略表示可
 
 ## 7. 使用经验
 
-暂无
+- [用 disabled 停用兼容提供商](/cn/experience/accounts#exp-accounts-disable-compat-provider)

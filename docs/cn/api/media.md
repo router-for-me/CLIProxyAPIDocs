@@ -168,4 +168,7 @@ curl https://example.invalid/v1/videos/<request_id> \
 
 ## 7. 使用经验
 
-暂无
+- [内置图像使用 Codex OAuth](/cn/experience/accounts#exp-accounts-codex-oauth-for-images)
+- [停止注入图像工具](/cn/experience/api#exp-api-disable-image-tool-injection)
+- [图像调用记在基础聊天模型上](/cn/experience/api#exp-api-image-base-model)
+- [gpt-image-2 通过覆盖后的聊天补全调用](/cn/experience/routing#exp-routing-gpt-image-override)

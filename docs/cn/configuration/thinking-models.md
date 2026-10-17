@@ -147,4 +147,14 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [聊天补全要带 reasoning effort 才流出思考](/cn/experience/api#exp-api-chat-reasoning-effort)
+- [第三方 DeepSeek 不会填 OpenAI 思考字段](/cn/experience/api#exp-api-deepseek-no-openai-thinking)
+- [按上游字段转发 AI Studio 思考](/cn/experience/api#exp-api-gemini-thinking-field)
+- [Opus 努力值来自 output_config.effort](/cn/experience/api#exp-api-opus-effort-field)
+- [在模型条目上声明思考档位](/cn/experience/configuration#exp-configuration-declare-thinking-levels)
+- [思考档位不能靠过滤来声明](/cn/experience/configuration#exp-configuration-levels-before-filter)
+- [档位不允许时就过滤该字段](/cn/experience/configuration#exp-configuration-levels-or-filter)
+- [不要发送模型拒绝的思考档](/cn/experience/configuration#exp-configuration-reject-minimal-effort)
+- [用括号后缀选择思考档位](/cn/experience/configuration#exp-configuration-thinking-suffix)
+- [用覆盖规则增加 extra_body](/cn/experience/routing#exp-routing-override-extra-body)
+- [不同模型使用不同的覆盖规则](/cn/experience/routing#exp-routing-separate-payload-by-model)

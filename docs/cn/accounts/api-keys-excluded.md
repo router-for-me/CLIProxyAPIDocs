@@ -64,4 +64,4 @@ OAuth 排除见 [OAuth 目录、别名与排除](/cn/accounts/oauth)。
 
 ## 7. 使用经验
 
-暂无
+- [在单份凭证上排除模型](/cn/experience/accounts#exp-accounts-exclude-model)

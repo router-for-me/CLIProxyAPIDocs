@@ -71,4 +71,6 @@ curl "https://example.invalid/v1/models?key=YOUR_API_KEY"
 
 ## 7. 使用经验
 
-暂无
+- [客户端密钥共用一个代理入口](/cn/experience/api#exp-api-one-client-key-endpoint)
+- [换掉示例客户端密钥](/cn/experience/api#exp-api-replace-example-client-keys)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)

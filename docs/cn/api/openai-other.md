@@ -76,4 +76,7 @@ curl -I https://example.invalid/management.html
 
 ## 7. 使用经验
 
-暂无
+- [在管理页重置 Codex 账号](/cn/experience/management#exp-management-reset-codex-from-panel)
+- [管理登录使用 secret-key](/cn/experience/operations#exp-operations-management-secret)
+- [关闭面板后没有哈希管理地址](/cn/experience/operations#exp-operations-panel-route-is-html)
+- [让管理页文件能够下载](/cn/experience/routing#exp-routing-management-page-download)

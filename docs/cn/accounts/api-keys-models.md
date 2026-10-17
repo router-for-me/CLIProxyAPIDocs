@@ -167,4 +167,14 @@ OAuth 别名见 [OAuth 目录、别名与排除](/cn/accounts/oauth)。
 
 ## 7. 使用经验
 
-暂无
+- [别名要和请求的模型名一致才参与轮询](/cn/experience/accounts#exp-accounts-alias-matches-request)
+- [兼容提供商要同时有基址和别名](/cn/experience/accounts#exp-accounts-compat-base-and-alias)
+- [兼容模型保留签名思考](/cn/experience/accounts#exp-accounts-compat-preserves-signed-thinking)
+- [展示名和别名是两个字段](/cn/experience/accounts#exp-accounts-display-name-field)
+- [force-mapping 把响应模型改成别名](/cn/experience/accounts#exp-accounts-force-mapping-alias)
+- [兼容模型要写入配置才出现在列表](/cn/experience/accounts#exp-accounts-list-compat-models)
+- [用 OpenAI 兼容段接入第三方](/cn/experience/accounts#exp-accounts-openai-compatible-provider)
+- [压缩需要上游提供压缩模型](/cn/experience/api#exp-api-compaction-needs-model)
+- [用 max-context-length 改广告窗口](/cn/experience/configuration#exp-configuration-advertise-context-length)
+- [用 fork 别名区分图像尺寸](/cn/experience/routing#exp-routing-fork-alias-for-image-size)
+- [同名模型共用路由策略](/cn/experience/routing#exp-routing-same-model-name)

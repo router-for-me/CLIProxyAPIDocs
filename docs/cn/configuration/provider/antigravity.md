@@ -63,4 +63,4 @@ oauth:
 
 ## 7. 使用经验
 
-暂无
+- [额度切换前先走积分回退](/cn/experience/configuration#exp-configuration-antigravity-credits)

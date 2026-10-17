@@ -98,4 +98,5 @@ requests:
 
 ## 7. 使用经验
 
-暂无
+- [用 fork 别名区分图像尺寸](/cn/experience/routing#exp-routing-fork-alias-for-image-size)
+- [图像尺寸写在 imageConfig](/cn/experience/routing#exp-routing-gemini-image-config-path)

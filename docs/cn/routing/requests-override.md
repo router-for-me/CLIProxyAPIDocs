@@ -87,4 +87,10 @@ requests:
 
 ## 7. 使用经验
 
-暂无
+- [第三方 DeepSeek 不会填 OpenAI 思考字段](/cn/experience/api#exp-api-deepseek-no-openai-thinking)
+- [别名加覆盖表达 Opus 努力值](/cn/experience/routing#exp-routing-alias-and-override-effort)
+- [gpt-image-2 通过覆盖后的聊天补全调用](/cn/experience/routing#exp-routing-gpt-image-override)
+- [用覆盖规则增加 extra_body](/cn/experience/routing#exp-routing-override-extra-body)
+- [用载荷覆盖修补 Grok 子代理](/cn/experience/routing#exp-routing-override-grok-subagent)
+- [载荷覆盖在思考后缀之后仍生效](/cn/experience/routing#exp-routing-override-is-final)
+- [不同模型使用不同的覆盖规则](/cn/experience/routing#exp-routing-separate-payload-by-model)

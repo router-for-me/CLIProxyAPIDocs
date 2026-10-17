@@ -60,4 +60,5 @@ Claude 指纹基线里的头见 [Claude 上游行为](/cn/accounts/upstream)，�
 
 ## 7. 使用经验
 
-暂无
+- [Kimi 兼容调用需要 User-Agent](/cn/experience/accounts#exp-accounts-kimi-user-agent)
+- [兼容提供商的头只作用于该提供商](/cn/experience/accounts#exp-accounts-provider-headers)

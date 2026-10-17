@@ -56,4 +56,4 @@ cli-proxy-api --tui --standalone
 
 ## 7. 使用经验
 
-暂无
+- [TUI 默认只是管理客户端](/cn/experience/operations#exp-operations-tui-is-client)

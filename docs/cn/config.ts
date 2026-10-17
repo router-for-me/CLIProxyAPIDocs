@@ -240,6 +240,21 @@ export default defineConfig({
                 ]
             },
 
+            {
+                text: '使用经验',
+                items: [
+                    {text: "总索引", link: "/cn/experience/index"},
+                    {text: "账号与上游", link: "/cn/experience/accounts"},
+                    {text: "接入 API", link: "/cn/experience/api"},
+                    {text: "配置", link: "/cn/experience/configuration"},
+                    {text: "Docker", link: "/cn/experience/docker"},
+                    {text: "介绍", link: "/cn/experience/introduction"},
+                    {text: "管理", link: "/cn/experience/management"},
+                    {text: "运行", link: "/cn/experience/operations"},
+                    {text: "路由与请求", link: "/cn/experience/routing"},
+                ]
+            },
+
         ],
  
         socialLinks: [

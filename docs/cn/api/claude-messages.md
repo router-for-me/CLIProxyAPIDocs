@@ -74,4 +74,18 @@ curl https://example.invalid/v1/messages/count_tokens \
 
 ## 7. 使用经验
 
-暂无
+- [用别名把客户端模型名映射到真实模型](/cn/experience/accounts#exp-accounts-alias-client-model)
+- [Claude Code 使用 Codex 登录而不是原始令牌](/cn/experience/accounts#exp-accounts-codex-login-for-claude-code)
+- [兼容模型保留签名思考](/cn/experience/accounts#exp-accounts-compat-preserves-signed-thinking)
+- [Antigravity Claude 走 messages](/cn/experience/api#exp-api-antigravity-claude-messages)
+- [Claude Code 必须调用 messages](/cn/experience/api#exp-api-claude-code-messages)
+- [计数接口按上游方式计算工具](/cn/experience/api#exp-api-count-tokens-tool-shape)
+- [DeepSeek 需要客户端降低 max token](/cn/experience/api#exp-api-deepseek-max-tokens)
+- [发往 Codex 前丢掉不支持的 Claude 字段](/cn/experience/api#exp-api-drop-unsupported-claude-fields)
+- [非 Claude 上游在消息末尾才给用量](/cn/experience/api#exp-api-messages-usage-at-end)
+- [Opus 努力值来自 output_config.effort](/cn/experience/api#exp-api-opus-effort-field)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [工具往返必须带上 id](/cn/experience/api#exp-api-tool-call-ids)
+- [在模型条目上声明思考档位](/cn/experience/configuration#exp-configuration-declare-thinking-levels)
+- [用括号后缀选择思考档位](/cn/experience/configuration#exp-configuration-thinking-suffix)
+- [别名加覆盖表达 Opus 努力值](/cn/experience/routing#exp-routing-alias-and-override-effort)

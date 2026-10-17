@@ -68,4 +68,18 @@ routing:
 
 ## 7. 使用经验
 
-暂无
+- [用别名把客户端模型名映射到真实模型](/cn/experience/accounts#exp-accounts-alias-client-model)
+- [别名要和请求的模型名一致才参与轮询](/cn/experience/accounts#exp-accounts-alias-matches-request)
+- [Codex goal 模式要同时设置三项](/cn/experience/accounts#exp-accounts-codex-goal-mode)
+- [兼容提供商共用同一路由策略](/cn/experience/routing#exp-routing-compat-shares-strategy)
+- [429 后按恢复时间跳过该模型](/cn/experience/routing#exp-routing-cooldown-until-reset)
+- [用 fill-first 用满一个凭证](/cn/experience/routing#exp-routing-fill-first)
+- [fill-first 会在额度恢复后回到先前账号](/cn/experience/routing#exp-routing-fill-first-recovers)
+- [无前缀请求失败时检查强制前缀](/cn/experience/routing#exp-routing-force-prefix-off)
+- [优先级耗尽后才轮询](/cn/experience/routing#exp-routing-priority-before-strategy)
+- [responses 靠共享缓存键轮换](/cn/experience/routing#exp-routing-responses-cache-key)
+- [503 按重试轮次处理](/cn/experience/routing#exp-routing-retry-503)
+- [轮询会跳过不能服务的凭证](/cn/experience/routing#exp-routing-round-robin-skip)
+- [同名模型共用路由策略](/cn/experience/routing#exp-routing-same-model-name)
+- [打开会话粘性保住加密推理](/cn/experience/routing#exp-routing-session-affinity)
+- [429 重试用现有重试和冷却](/cn/experience/routing#exp-routing-tune-retry-and-cooling)

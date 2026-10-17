@@ -49,4 +49,5 @@ false 保持不启用。它不会打开媒体中继。
 
 ## 7. 使用经验
 
-暂无
+- [Codex goal 模式要同时设置三项](/cn/experience/accounts#exp-accounts-codex-goal-mode)
+- [Codex 可用客户端或代理的 WebSocket](/cn/experience/accounts#exp-accounts-codex-websocket-or-http)

@@ -69,4 +69,7 @@ stub: false
 
 ## 7. 使用经验
 
-暂无
+- [用管理接口暂停凭证](/cn/experience/management#exp-management-disable-credential)
+- [禁用的 OAuth 凭证仍会刷新](/cn/experience/management#exp-management-disabled-oauth-still-refreshes)
+- [在凭证字段上设置优先级](/cn/experience/management#exp-management-set-credential-priority)
+- [fill-first 会在额度恢复后回到先前账号](/cn/experience/routing#exp-routing-fill-first-recovers)

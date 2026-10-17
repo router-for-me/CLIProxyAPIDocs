@@ -95,4 +95,22 @@ WebSocket 上的 `response.interrupt` 转给当前上游套接字，不因此新
 
 ## 7. 使用经验
 
-暂无
+- [Antigravity 会隐藏账号不能用的模型](/cn/experience/accounts#exp-accounts-antigravity-hides-unusable-models)
+- [responses 上游写到 Codex API key](/cn/experience/accounts#exp-accounts-codex-api-key-base-url)
+- [Codex 客户端要匹配 User-Agent 默认值](/cn/experience/accounts#exp-accounts-codex-client-user-agent)
+- [内置图像使用 Codex OAuth](/cn/experience/accounts#exp-accounts-codex-oauth-for-images)
+- [Codex 可用客户端或代理的 WebSocket](/cn/experience/accounts#exp-accounts-codex-websocket-or-http)
+- [OpenAI 兼容基址带上版本段](/cn/experience/accounts#exp-accounts-openai-base-url-v1)
+- [Codex 客户端调用 responses 路由](/cn/experience/api#exp-api-call-responses)
+- [压缩需要上游提供压缩模型](/cn/experience/api#exp-api-compaction-needs-model)
+- [停止注入图像工具](/cn/experience/api#exp-api-disable-image-tool-injection)
+- [图像模型走 Gemini 协议](/cn/experience/api#exp-api-gemini-for-images)
+- [Kimi responses 保持 Kimi 自己的工具](/cn/experience/api#exp-api-kimi-native-responses)
+- [推理摘要只在请求要求时出现](/cn/experience/api#exp-api-reasoning-summary-vs-effort)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [responses 用 instructions 代替 system](/cn/experience/api#exp-api-responses-instructions)
+- [responses 流不使用 DONE 作为结束](/cn/experience/api#exp-api-responses-stream-shape)
+- [用括号后缀选择思考档位](/cn/experience/configuration#exp-configuration-thinking-suffix)
+- [用载荷过滤去掉上游拒绝的字段](/cn/experience/routing#exp-routing-filter-rejected-fields)
+- [responses 靠共享缓存键轮换](/cn/experience/routing#exp-routing-responses-cache-key)
+- [打开会话粘性保住加密推理](/cn/experience/routing#exp-routing-session-affinity)

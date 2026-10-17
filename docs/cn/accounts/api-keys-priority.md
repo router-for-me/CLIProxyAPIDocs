@@ -60,4 +60,6 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [Codex goal 模式要同时设置三项](/cn/experience/accounts#exp-accounts-codex-goal-mode)
+- [在凭证字段上设置优先级](/cn/experience/management#exp-management-set-credential-priority)
+- [优先级耗尽后才轮询](/cn/experience/routing#exp-routing-priority-before-strategy)

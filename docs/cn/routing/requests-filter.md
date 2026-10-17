@@ -64,4 +64,7 @@ requests:
 
 ## 7. 使用经验
 
-暂无
+- [思考档位不能靠过滤来声明](/cn/experience/configuration#exp-configuration-levels-before-filter)
+- [档位不允许时就过滤该字段](/cn/experience/configuration#exp-configuration-levels-or-filter)
+- [过滤 reasoning_effort 时不要同时给预算](/cn/experience/routing#exp-routing-filter-effort-without-budget)
+- [用载荷过滤去掉上游拒绝的字段](/cn/experience/routing#exp-routing-filter-rejected-fields)

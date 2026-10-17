@@ -99,4 +99,26 @@ oauth:
 
 ## 7. 使用经验
 
-暂无
+- [用别名把客户端模型名映射到真实模型](/cn/experience/accounts#exp-accounts-alias-client-model)
+- [Antigravity 凭证失效后重新登录](/cn/experience/accounts#exp-accounts-antigravity-login-again)
+- [同一 Codex 账号保留两份工作区](/cn/experience/accounts#exp-accounts-codex-keep-workspaces)
+- [套餐或令牌变化后重新登录 Codex](/cn/experience/accounts#exp-accounts-codex-login-again)
+- [整目录复制凭证](/cn/experience/accounts#exp-accounts-copy-auth-dir)
+- [把凭证目录指到专用路径](/cn/experience/accounts#exp-accounts-dedicated-auth-dir)
+- [在单份凭证上排除模型](/cn/experience/accounts#exp-accounts-exclude-model)
+- [移出目录来停用凭证](/cn/experience/accounts#exp-accounts-move-auth-file)
+- [刷新线程数为 0 时仍使用默认值](/cn/experience/accounts#exp-accounts-refresh-workers-zero)
+- [用请求级错误规则处理特定 429](/cn/experience/accounts#exp-accounts-request-scoped-error-action)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [删除凭证后重启才更新模型列表](/cn/experience/api#exp-api-restart-after-auth-removal)
+- [用 max-context-length 改广告窗口](/cn/experience/configuration#exp-configuration-advertise-context-length)
+- [启动前准备好配置和凭证目录](/cn/experience/docker#exp-docker-prepare-auth-dir)
+- [在凭证字段上设置优先级](/cn/experience/management#exp-management-set-credential-priority)
+- [日志写在可写的 logs 目录](/cn/experience/operations#exp-operations-log-directory)
+- [管理登录使用 secret-key](/cn/experience/operations#exp-operations-management-secret)
+- [别名加覆盖表达 Opus 努力值](/cn/experience/routing#exp-routing-alias-and-override-effort)
+- [429 后按恢复时间跳过该模型](/cn/experience/routing#exp-routing-cooldown-until-reset)
+- [关闭冷却以保持凭证可选](/cn/experience/routing#exp-routing-disable-cooling)
+- [用 fork 别名区分图像尺寸](/cn/experience/routing#exp-routing-fork-alias-for-image-size)
+- [图像尺寸写在 imageConfig](/cn/experience/routing#exp-routing-gemini-image-config-path)
+- [同名模型共用路由策略](/cn/experience/routing#exp-routing-same-model-name)

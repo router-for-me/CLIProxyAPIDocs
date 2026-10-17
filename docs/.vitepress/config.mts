@@ -320,6 +320,21 @@ export default defineConfig({
 					},
 				],
 			},
+			{
+				text: 'Usage notes',
+				items: [
+					{ text: "Index", link: "/experience/index" },
+					{ text: "Accounts and upstreams", link: "/experience/accounts" },
+					{ text: "API", link: "/experience/api" },
+					{ text: "Configuration", link: "/experience/configuration" },
+					{ text: "Docker", link: "/experience/docker" },
+					{ text: "Introduction", link: "/experience/introduction" },
+					{ text: "Management", link: "/experience/management" },
+					{ text: "Operations", link: "/experience/operations" },
+					{ text: "Routing and requests", link: "/experience/routing" },
+				],
+			},
+
 		],
 
 		socialLinks: [
@@ -715,6 +730,21 @@ export default defineConfig({
 							},
 						],
 					},
+					{
+						text: 'Практические заметки',
+						items: [
+							{ text: "Оглавление", link: "/ru/experience/index" },
+							{ text: "Аккаунты и апстримы", link: "/ru/experience/accounts" },
+							{ text: "API", link: "/ru/experience/api" },
+							{ text: "Конфигурация", link: "/ru/experience/configuration" },
+							{ text: "Docker", link: "/ru/experience/docker" },
+							{ text: "Введение", link: "/ru/experience/introduction" },
+							{ text: "Управление", link: "/ru/experience/management" },
+							{ text: "Эксплуатация", link: "/ru/experience/operations" },
+							{ text: "Маршрутизация", link: "/ru/experience/routing" },
+						],
+					},
+
 				],
 				docFooter: {
 					prev: 'Предыдущая страница',

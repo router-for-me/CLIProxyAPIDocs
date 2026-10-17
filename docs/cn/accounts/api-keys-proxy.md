@@ -60,4 +60,4 @@ OpenAI 兼容条目的代理和权重一起登记在 [凭证权重](/cn/accounts
 
 ## 7. 使用经验
 
-暂无
+- [为单个凭证指定代理](/cn/experience/routing#exp-routing-per-credential-proxy)

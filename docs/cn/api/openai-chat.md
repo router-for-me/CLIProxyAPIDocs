@@ -84,4 +84,25 @@ curl https://example.invalid/v1/completions \
 
 ## 7. 使用经验
 
-暂无
+- [用别名把客户端模型名映射到真实模型](/cn/experience/accounts#exp-accounts-alias-client-model)
+- [在单份凭证上排除模型](/cn/experience/accounts#exp-accounts-exclude-model)
+- [兼容模型要写入配置才出现在列表](/cn/experience/accounts#exp-accounts-list-compat-models)
+- [Antigravity 图像走聊天补全](/cn/experience/api#exp-api-antigravity-image-chat)
+- [能直连上游协议时不要经聊天补全转换](/cn/experience/api#exp-api-avoid-chat-translation)
+- [聊天补全流以 DONE 结束](/cn/experience/api#exp-api-chat-done-marker)
+- [图像对话模型仍走聊天补全](/cn/experience/api#exp-api-chat-image-model)
+- [聊天补全要带 reasoning effort 才流出思考](/cn/experience/api#exp-api-chat-reasoning-effort)
+- [兼容凭证固定调用聊天补全](/cn/experience/api#exp-api-compat-always-chat)
+- [Copilot 走 /v1 时省略 top_p](/cn/experience/api#exp-api-copilot-chat-sampling)
+- [第三方 DeepSeek 不会填 OpenAI 思考字段](/cn/experience/api#exp-api-deepseek-no-openai-thinking)
+- [Gemini 音频走聊天补全](/cn/experience/api#exp-api-gemini-audio-chat)
+- [目录不返回思考文本时不要期待代理补写](/cn/experience/api#exp-api-no-synthetic-reasoning)
+- [推理摘要只在请求要求时出现](/cn/experience/api#exp-api-reasoning-summary-vs-effort)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [删除凭证后重启才更新模型列表](/cn/experience/api#exp-api-restart-after-auth-removal)
+- [客户端使用目录中的模型 id](/cn/experience/api#exp-api-use-listed-model-id)
+- [不要发送模型拒绝的思考档](/cn/experience/configuration#exp-configuration-reject-minimal-effort)
+- [用括号后缀选择思考档位](/cn/experience/configuration#exp-configuration-thinking-suffix)
+- [可见模型以钉住目录为准](/cn/experience/introduction#exp-introduction-catalog-is-authoritative)
+- [关闭冷却以保持凭证可选](/cn/experience/routing#exp-routing-disable-cooling)
+- [gpt-image-2 通过覆盖后的聊天补全调用](/cn/experience/routing#exp-routing-gpt-image-override)

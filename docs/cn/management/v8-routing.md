@@ -61,4 +61,4 @@ Content-Type: application/json
 
 ## 7. 使用经验
 
-暂无
+- [用管理路由清除冷却](/cn/experience/management#exp-management-reset-cooldown)

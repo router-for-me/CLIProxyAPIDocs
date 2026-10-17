@@ -93,4 +93,4 @@ upstream:
 
 ## 7. 使用经验
 
-暂无
+- [不需要伪装时关闭 Claude cloak](/cn/experience/accounts#exp-accounts-claude-cloak-off)

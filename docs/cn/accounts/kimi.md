@@ -45,4 +45,7 @@ Kimi.ai 见 [Kimi.ai 登录](/cn/accounts/kimi-ai)。
 
 ## 7. 使用经验
 
-暂无
+- [Kimi 使用国际站登录](/cn/experience/accounts#exp-accounts-kimi-international-login)
+- [失效的 Kimi 密钥改走 OAuth](/cn/experience/accounts#exp-accounts-kimi-oauth-instead-of-broken-key)
+- [Kimi responses 保持 Kimi 自己的工具](/cn/experience/api#exp-api-kimi-native-responses)
+- [可见模型以钉住目录为准](/cn/experience/introduction#exp-introduction-catalog-is-authoritative)

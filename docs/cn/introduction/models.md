@@ -70,4 +70,13 @@ CLIProxyAPI --local-model --config /path/to/config.yaml
 
 ## 7. 使用经验
 
-暂无
+- [Antigravity 会隐藏账号不能用的模型](/cn/experience/accounts#exp-accounts-antigravity-hides-unusable-models)
+- [套餐或令牌变化后重新登录 Codex](/cn/experience/accounts#exp-accounts-codex-login-again)
+- [在单份凭证上排除模型](/cn/experience/accounts#exp-accounts-exclude-model)
+- [停止注入图像工具](/cn/experience/api#exp-api-disable-image-tool-injection)
+- [目录不返回思考文本时不要期待代理补写](/cn/experience/api#exp-api-no-synthetic-reasoning)
+- [用 max-context-length 改广告窗口](/cn/experience/configuration#exp-configuration-advertise-context-length)
+- [可见模型以钉住目录为准](/cn/experience/introduction#exp-introduction-catalog-is-authoritative)
+- [本地模型开关跳过远程刷新](/cn/experience/introduction#exp-introduction-local-model-catalog)
+- [auth_unavailable 表示没有可用凭证](/cn/experience/operations#exp-operations-auth-unavailable-means-no-credential)
+- [429 后按恢复时间跳过该模型](/cn/experience/routing#exp-routing-cooldown-until-reset)

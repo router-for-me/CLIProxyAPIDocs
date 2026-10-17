@@ -48,4 +48,8 @@ routing:
 
 ## 7. 使用经验
 
-暂无
+- [用管理接口暂停凭证](/cn/experience/management#exp-management-disable-credential)
+- [用管理路由清除冷却](/cn/experience/management#exp-management-reset-cooldown)
+- [429 后按恢复时间跳过该模型](/cn/experience/routing#exp-routing-cooldown-until-reset)
+- [关闭冷却以保持凭证可选](/cn/experience/routing#exp-routing-disable-cooling)
+- [429 重试用现有重试和冷却](/cn/experience/routing#exp-routing-tune-retry-and-cooling)

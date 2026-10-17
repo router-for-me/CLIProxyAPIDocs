@@ -60,4 +60,6 @@ server:
 
 ## 7. 使用经验
 
-暂无
+- [空 host 会监听所有接口](/cn/experience/operations#exp-operations-bind-host-port)
+- [端口已被占用时先停掉旧进程](/cn/experience/operations#exp-operations-port-already-bound)
+- [关掉高开销日志降低内存](/cn/experience/operations#exp-operations-reduce-memory)

@@ -122,4 +122,13 @@ CLIProxyAPI --vertex-import /path/to/service-account.json --vertex-import-prefix
 
 ## 7. 使用经验
 
-暂无
+- [没有浏览器时使用手动登录](/cn/experience/accounts#exp-accounts-claude-manual-login)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [用环境变量启用 Git 存储](/cn/experience/configuration#exp-configuration-git-storage-env)
+- [Git 和对象存储不是实时多机同步](/cn/experience/configuration#exp-configuration-storage-is-not-live-sync)
+- [迁移时未知键会变成注释](/cn/experience/configuration#exp-configuration-unknown-keys-on-migrate)
+- [容器挂载真实的配置文件](/cn/experience/docker#exp-docker-mount-real-config)
+- [用示例文件作为配置起点](/cn/experience/introduction#exp-introduction-copy-example-config)
+- [本地模型开关跳过远程刷新](/cn/experience/introduction#exp-introduction-local-model-catalog)
+- [启动前提供配置或登录](/cn/experience/introduction#exp-introduction-start-with-config-or-login)
+- [管理登录使用 secret-key](/cn/experience/operations#exp-operations-management-secret)

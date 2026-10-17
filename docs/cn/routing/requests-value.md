@@ -52,4 +52,8 @@ requests:
 
 ## 7. 使用经验
 
-暂无
+- [畸形响应先检查密钥上的代理](/cn/experience/accounts#exp-accounts-trace-key-proxy)
+- [管理代发请求仍会使用全局代理](/cn/experience/management#exp-management-api-call-proxy-order)
+- [让管理页文件能够下载](/cn/experience/routing#exp-routing-management-page-download)
+- [为单个凭证指定代理](/cn/experience/routing#exp-routing-per-credential-proxy)
+- [让服务器自己经代理完成登录](/cn/experience/routing#exp-routing-proxy-for-token-exchange)

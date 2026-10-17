@@ -46,4 +46,20 @@ cli-proxy-api --antigravity-login --oauth-callback-port 51121
 
 ## 7. 使用经验
 
-暂无
+- [用别名把客户端模型名映射到真实模型](/cn/experience/accounts#exp-accounts-alias-client-model)
+- [Antigravity 会隐藏账号不能用的模型](/cn/experience/accounts#exp-accounts-antigravity-hides-unusable-models)
+- [Google 账号改用 Antigravity 登录](/cn/experience/accounts#exp-accounts-antigravity-instead-of-gemini-cli)
+- [Antigravity 凭证失效后重新登录](/cn/experience/accounts#exp-accounts-antigravity-login-again)
+- [在 Antigravity 凭证上设置 User-Agent](/cn/experience/accounts#exp-accounts-antigravity-user-agent)
+- [Antigravity 登录时继续等待回调](/cn/experience/accounts#exp-accounts-antigravity-wait-for-callback)
+- [刷新线程数为 0 时仍使用默认值](/cn/experience/accounts#exp-accounts-refresh-workers-zero)
+- [Antigravity Claude 走 messages](/cn/experience/api#exp-api-antigravity-claude-messages)
+- [Antigravity 图像走聊天补全](/cn/experience/api#exp-api-antigravity-image-chat)
+- [计数接口按上游方式计算工具](/cn/experience/api#exp-api-count-tokens-tool-shape)
+- [目录不返回思考文本时不要期待代理补写](/cn/experience/api#exp-api-no-synthetic-reasoning)
+- [客户端使用目录中的模型 id](/cn/experience/api#exp-api-use-listed-model-id)
+- [在模型条目上声明思考档位](/cn/experience/configuration#exp-configuration-declare-thinking-levels)
+- [可见模型以钉住目录为准](/cn/experience/introduction#exp-introduction-catalog-is-authoritative)
+- [auth_unavailable 表示没有可用凭证](/cn/experience/operations#exp-operations-auth-unavailable-means-no-credential)
+- [429 后按恢复时间跳过该模型](/cn/experience/routing#exp-routing-cooldown-until-reset)
+- [让服务器自己经代理完成登录](/cn/experience/routing#exp-routing-proxy-for-token-exchange)

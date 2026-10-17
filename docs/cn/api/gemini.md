@@ -108,4 +108,6 @@ Interactions 的 JSON 不合法时返回 400，消息为 `invalid JSON body`。`
 
 ## 7. 使用经验
 
-暂无
+- [图像模型走 Gemini 协议](/cn/experience/api#exp-api-gemini-for-images)
+- [Gemini 图像和结构化输出走原生路由](/cn/experience/api#exp-api-gemini-native-route)
+- [按上游字段转发 AI Studio 思考](/cn/experience/api#exp-api-gemini-thinking-field)

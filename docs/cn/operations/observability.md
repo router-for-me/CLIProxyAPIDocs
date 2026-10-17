@@ -70,4 +70,13 @@ observability:
 
 ## 7. 使用经验
 
-暂无
+- [非 Claude 上游在消息末尾才给用量](/cn/experience/api#exp-api-messages-usage-at-end)
+- [调用公开路由时带上客户端密钥](/cn/experience/api#exp-api-require-client-key)
+- [auth_unavailable 表示没有可用凭证](/cn/experience/operations#exp-operations-auth-unavailable-means-no-credential)
+- [限制请求日志总大小](/cn/experience/operations#exp-operations-cap-request-logs)
+- [关掉请求日志止住刷屏](/cn/experience/operations#exp-operations-disable-request-log)
+- [客户端断开后没有最终用量](/cn/experience/operations#exp-operations-disconnect-drops-usage)
+- [日志写在可写的 logs 目录](/cn/experience/operations#exp-operations-log-directory)
+- [关掉高开销日志降低内存](/cn/experience/operations#exp-operations-reduce-memory)
+- [用请求日志查看文本原文](/cn/experience/operations#exp-operations-request-log-text)
+- [用量只留在内存里](/cn/experience/operations#exp-operations-usage-stays-in-memory)

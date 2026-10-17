@@ -61,4 +61,5 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [兼容模型要写入配置才出现在列表](/cn/experience/accounts#exp-accounts-list-compat-models)
+- [无前缀请求失败时检查强制前缀](/cn/experience/routing#exp-routing-force-prefix-off)

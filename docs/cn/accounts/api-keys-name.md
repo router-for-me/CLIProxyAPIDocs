@@ -45,4 +45,4 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [兼容提供商共用同一路由策略](/cn/experience/routing#exp-routing-compat-shares-strategy)

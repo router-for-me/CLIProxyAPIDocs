@@ -98,4 +98,9 @@ services:
 
 ## 7. 使用经验
 
-暂无
+- [换掉示例客户端密钥](/cn/experience/api#exp-api-replace-example-client-keys)
+- [容器挂载真实的配置文件](/cn/experience/docker#exp-docker-mount-real-config)
+- [启动前准备好配置和凭证目录](/cn/experience/docker#exp-docker-prepare-auth-dir)
+- [容器继续使用现有存储方式](/cn/experience/docker#exp-docker-same-storage-backends)
+- [让管理页文件能够下载](/cn/experience/routing#exp-routing-management-page-download)
+- [让服务器自己经代理完成登录](/cn/experience/routing#exp-routing-proxy-for-token-exchange)

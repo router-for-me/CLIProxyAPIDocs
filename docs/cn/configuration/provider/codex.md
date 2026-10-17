@@ -95,4 +95,5 @@ upstream:
 
 ## 7. 使用经验
 
-暂无
+- [Codex 客户端要匹配 User-Agent 默认值](/cn/experience/accounts#exp-accounts-codex-client-user-agent)
+- [503 时同时检查 Codex 伪装和 User-Agent](/cn/experience/accounts#exp-accounts-codex-cloak-and-user-agent)

@@ -45,4 +45,4 @@ client:
 
 ## 7. 使用经验
 
-暂无
+- [打开多智能体兼容开关](/cn/experience/configuration#exp-configuration-optimize-multi-agent)

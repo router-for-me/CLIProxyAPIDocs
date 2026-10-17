@@ -68,4 +68,8 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [responses 上游写到 Codex API key](/cn/experience/accounts#exp-accounts-codex-api-key-base-url)
+- [同一基址下增加多把密钥](/cn/experience/accounts#exp-accounts-multiple-keys-one-provider)
+- [用 OpenAI 兼容段接入第三方](/cn/experience/accounts#exp-accounts-openai-compatible-provider)
+- [畸形响应先检查密钥上的代理](/cn/experience/accounts#exp-accounts-trace-key-proxy)
+- [同名模型共用路由策略](/cn/experience/routing#exp-routing-same-model-name)

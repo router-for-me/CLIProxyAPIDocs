@@ -123,4 +123,4 @@ OAuth 规则见 [OAuth 目录、别名与排除](/cn/accounts/oauth)。
 
 ## 7. 使用经验
 
-暂无
+- [用请求级错误规则处理特定 429](/cn/experience/accounts#exp-accounts-request-scoped-error-action)

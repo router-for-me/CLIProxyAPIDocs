@@ -64,4 +64,23 @@ api-keys:
 
 ## 7. 使用经验
 
-暂无
+- [基址不要在版本段后再加斜杠](/cn/experience/accounts#exp-accounts-base-url-no-extra-slash)
+- [Claude 基址不要重复 /v1](/cn/experience/accounts#exp-accounts-claude-base-url-host-only)
+- [responses 上游写到 Codex API key](/cn/experience/accounts#exp-accounts-codex-api-key-base-url)
+- [兼容提供商要同时有基址和别名](/cn/experience/accounts#exp-accounts-compat-base-and-alias)
+- [自定义 Gemini 地址有两种写法](/cn/experience/accounts#exp-accounts-gemini-custom-base-url)
+- [Kimi 兼容调用需要 User-Agent](/cn/experience/accounts#exp-accounts-kimi-user-agent)
+- [OpenAI 兼容基址带上版本段](/cn/experience/accounts#exp-accounts-openai-base-url-v1)
+- [用 OpenAI 兼容段接入第三方](/cn/experience/accounts#exp-accounts-openai-compatible-provider)
+- [轮换被上游判定违规的 Vertex 凭证](/cn/experience/accounts#exp-accounts-rotate-vertex-key)
+- [xAI 403 时改用 API key](/cn/experience/accounts#exp-accounts-xai-api-key-fallback)
+- [Codex 客户端调用 responses 路由](/cn/experience/api#exp-api-call-responses)
+- [兼容凭证固定调用聊天补全](/cn/experience/api#exp-api-compat-always-chat)
+- [DeepSeek 需要客户端降低 max token](/cn/experience/api#exp-api-deepseek-max-tokens)
+- [第三方 DeepSeek 不会填 OpenAI 思考字段](/cn/experience/api#exp-api-deepseek-no-openai-thinking)
+- [图像调用记在基础聊天模型上](/cn/experience/api#exp-api-image-base-model)
+- [非 Claude 上游在消息末尾才给用量](/cn/experience/api#exp-api-messages-usage-at-end)
+- [用载荷过滤去掉上游拒绝的字段](/cn/experience/routing#exp-routing-filter-rejected-fields)
+- [保活标记不是 JSON 响应](/cn/experience/routing#exp-routing-keepalive-is-not-json)
+- [用覆盖规则增加 extra_body](/cn/experience/routing#exp-routing-override-extra-body)
+- [载荷覆盖在思考后缀之后仍生效](/cn/experience/routing#exp-routing-override-is-final)

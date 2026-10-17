@@ -62,4 +62,4 @@ stub: false
 
 ## 7. 使用经验
 
-暂无
+- [用量只留在内存里](/cn/experience/operations#exp-operations-usage-stays-in-memory)

@@ -50,4 +50,4 @@ server:
 
 ## 7. 使用经验
 
-暂无
+- [启用 TLS 时必须提供证书](/cn/experience/operations#exp-operations-tls-needs-cert)

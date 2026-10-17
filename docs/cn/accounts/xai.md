@@ -45,4 +45,8 @@ cli-proxy-api --xai-login --no-browser
 
 ## 7. 使用经验
 
-暂无
+- [xAI 403 时改用 API key](/cn/experience/accounts#exp-accounts-xai-api-key-fallback)
+- [用设备码登录 xAI](/cn/experience/accounts#exp-accounts-xai-device-login)
+- [打开多智能体兼容开关](/cn/experience/configuration#exp-configuration-optimize-multi-agent)
+- [用载荷过滤去掉上游拒绝的字段](/cn/experience/routing#exp-routing-filter-rejected-fields)
+- [用载荷覆盖修补 Grok 子代理](/cn/experience/routing#exp-routing-override-grok-subagent)
