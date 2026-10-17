@@ -1,72 +1,66 @@
 ---
-outline: 'deep'
+title: 响应拦截
+feature_ids:
+  - plugin.response-interceptor.intercept-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 响应拦截能力
+# 响应拦截
 
-响应拦截能力用于在成功的非流式 HTTP 执行响应返回给客户端前，改写响应头或响应体。
+`ResponseInterceptor` 在成功的非流式 HTTP 执行结果交给下游之前改写它。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "response_interceptor": true
-  }
-}
+插件可以替换同名响应头、删除指定头，或在正文非空时替换正文。
+
+## 2. 适用条件与不做的事
+
+只处理成功的非流式响应。流式块见 [流式响应拦截](/cn/plugin/response-stream-interceptor)。它不观察 WebSocket 帧。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.response_interceptor` 设为 true。
+
+```go
+InterceptResponse(context.Context, ResponseInterceptRequest) (ResponseInterceptResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `response.intercept_after`。
 
-- `sdk/pluginapi/types.go`：`ResponseInterceptor`、`ResponseInterceptRequest`、`ResponseInterceptResponse`
-- `sdk/pluginabi/types.go`：`response.intercept_after`
-- `internal/pluginhost/adapters.go`：`InterceptResponse`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `internal/pluginhost/adapters_test.go`：响应拦截链、header 清理和错误处理测试
-- `examples/plugin/antigravity-web-search/go/main.go`：基于响应拦截的真实迁移示例
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.response-interceptor.intercept-response | `InterceptResponse`，ABI `response.intercept_after`。 |  | 参数 `ResponseInterceptRequest`，返回 `ResponseInterceptResponse`。 |
+| ResponseInterceptRequest.RequestID | 执行 ID。 |  | 字符串。 |
+| ResponseInterceptRequest.SourceFormat | 客户端协议。 |  | 字符串。 |
+| ResponseInterceptRequest.Model | 执行模型。 |  | 字符串。 |
+| ResponseInterceptRequest.RequestedModel | 客户端请求的模型。 |  | 字符串。 |
+| ResponseInterceptRequest.Stream | 请求是否标记为流式。 |  | 本接口仍只改写成功的非流式结果。 |
+| ResponseInterceptRequest.RequestHeaders | 请求头。 |  | `http.Header`。 |
+| ResponseInterceptRequest.ResponseHeaders | 当前响应头。 |  | `http.Header`。 |
+| ResponseInterceptRequest.OriginalRequest | 原始客户端正文。 |  | `[]byte`。 |
+| ResponseInterceptRequest.RequestBody | 实际执行的请求载荷。 |  | `[]byte`。 |
+| ResponseInterceptRequest.Body | 当前响应正文。 |  | `[]byte`。 |
+| ResponseInterceptRequest.StatusCode | 当前状态码。 |  | 整数。本返回值不能改状态码。 |
+| ResponseInterceptRequest.Metadata | 上下文快照。 |  | 只读，按 JSON 值理解。 |
+| ResponseInterceptResponse.Headers | 替换同名响应头。 |  | 未提到的头保留。 |
+| ResponseInterceptResponse.Body | 替换正文。 |  | 只有非空时才替换。 |
+| ResponseInterceptResponse.ClearHeaders | 先删除的响应头。 |  | 在 `Headers` 应用之前删除。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `response.intercept_after` | 改写成功的非流式响应。 |
+返回 `error` 时 ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
-## 请求
+空 `Body` 不替换现有正文。返回值没有状态码字段。
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "Stream": false,
-  "RequestHeaders": {},
-  "ResponseHeaders": {},
-  "OriginalRequest": "base64-client-body",
-  "RequestBody": "base64-upstream-request",
-  "Body": "base64-response-body",
-  "StatusCode": 200,
-  "Metadata": {}
-}
-```
+## 6. 相关功能
 
-## 响应
+流式块见 [流式响应拦截](/cn/plugin/response-stream-interceptor)。协议转换见 [响应转换](/cn/plugin/response-translator)。
 
-```json
-{
-  "Headers": {
-    "X-Plugin": ["example"]
-  },
-  "Body": "base64-new-response-body",
-  "ClearHeaders": ["X-Old-Header"]
-}
-```
+## 7. 使用经验
 
-## 开发注意
-
-- 只处理成功的非流式响应；流式响应使用 [流式响应拦截能力](./response-stream-interceptor)。
-- `Headers` 会覆盖同名响应头，但保留未提到的 header。
-- `Body` 非空时替换响应体。
-- 通过 `host_callback_id` 发起的宿主模型回调会跳过来源插件自己的响应拦截器。
-
+暂无

@@ -1,86 +1,93 @@
 ---
-outline: 'deep'
+title: 模型注册器
+feature_ids:
+  - plugin.model-registrar.register-models
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 模型注册器能力
+# 模型注册器
 
-模型注册器能力用于把插件提供的静态模型元数据注册到 CLIProxyAPI 的模型注册表中。它适合模型集合固定、无需按凭证动态发现模型的插件。
+`ModelRegistrar` 在登记时提交一组开发期模型元数据。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-在 `plugin.register` 或 `plugin.reconfigure` 的注册结果中声明：
+插件用一次调用声明自己的 provider 键和完整模型列表，供宿主登记这些模型。
 
-```json
-{
-  "capabilities": {
-    "model_registrar": true
-  }
-}
-```
+## 2. 适用条件与不做的事
 
-源码参考：
+只有 `RegisterModels`。它不按单条凭证发现模型，那是 [模型提供方](/cn/plugin/model-provider) 的 `ModelsForAuth`。它也不执行请求。
 
-- `sdk/pluginapi/types.go`：`ModelRegistrar`、`ModelRegistrationRequest`、`ModelRegistrationResponse`、`ModelInfo`
-- `sdk/pluginabi/types.go`：`model.register`
-- `internal/pluginhost/adapters.go`：`RegisterModels`、`callModelRegistrar`
+登记元数据 `Name`、`Version`、`Author`、`GitHubRepository` 不能为空白。加载开关见 [插件加载与商店](/cn/operations/plugins)。
 
-示例参考：
+## 3. 怎么配置或怎么调用
 
-- `examples/plugin/simple/go/main.go`：`MethodModelRegister`
-
-## 调用时机
-
-宿主加载或重新配置插件后，会在注册模型阶段调用 `model.register`。返回的模型会进入模型列表和路由匹配流程。
-
-如果同一个插件同时声明了 [执行器能力](./executor)，这些模型会与该插件执行器关联；如果没有执行器，宿主会把它们作为插件提供的普通模型客户端注册。
-
-## 请求
-
-`model.register` 的请求对应 `ModelRegistrationRequest`：
+`capabilities.model_registrar` 设为 true。当前契约版本是 6。
 
 ```json
 {
-  "Plugin": {
-    "Name": "example",
-    "Version": "0.1.0",
-    "Author": "router-for-me"
-  }
-}
-```
-
-`Plugin` 是当前插件的元数据，供插件按自身版本或配置决定返回哪些模型。
-
-## 响应
-
-返回 `ModelRegistrationResponse`：
-
-```json
-{
-  "Provider": "plugin-example",
-  "Models": [
-    {
-      "ID": "plugin-example-model",
-      "Object": "model",
-      "OwnedBy": "plugin-example",
-      "DisplayName": "Plugin Example Model",
-      "SupportedGenerationMethods": ["chat"],
-      "ContextLength": 8192,
-      "MaxCompletionTokens": 1024,
-      "UserDefined": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-models",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-models"
+    },
+    "capabilities": {
+      "model_registrar": true
     }
-  ]
+  }
 }
 ```
 
-关键点：
+```go
+RegisterModels(context.Context, ModelRegistrationRequest) (ModelRegistrationResponse, error)
+```
 
-- `Provider` 必须是稳定的提供方标识。
-- `Models` 必须是完整模型集合，而不是增量。
-- `ID` 是客户端请求使用的模型名。
-- `Thinking` 可声明模型支持的 thinking 范围，供 thinking 配置校验和后续 [Thinking 处理能力](./thinking-applier) 使用。
+ABI 方法名是 `model.register`。无 `json` 标签的字段用 Go 导出名。
 
-## 开发注意
+## 4. 细项说明
 
-- 不要返回空 `Provider` 或空模型 ID；宿主会跳过无效模型。
-- 模型注册器只负责静态模型；需要按每个 OAuth 或文件凭证动态发现模型时，使用 [模型提供方能力](./model-provider)。
-- 如果模型只应由插件执行器处理，应同时声明执行器能力，并设置合适的 `executor_model_scope`。
+「默认值」与台账 defaults 逐字相同。
+
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.model-registrar.register-models | `RegisterModels`，ABI `model.register`。 |  | 参数 `ModelRegistrationRequest`，返回 `ModelRegistrationResponse`。 |
+| ModelRegistrationRequest.Plugin | 正在登记的插件元数据。 |  | `Metadata`：`Name`、`Version`、`Author`、`GitHubRepository`、`Logo`、`ConfigFields`。 |
+| ModelRegistrationResponse.Provider | 这组模型的 provider 键。 |  | 字符串。 |
+| ModelRegistrationResponse.Models | 插件提供的完整模型集。 |  | `[]ModelInfo`。 |
+| ModelInfo.ID | 请求里使用的稳定模型 ID。 |  | 字符串。 |
+| ModelInfo.Object | API 对象类型，通常是 `model`。 |  | 字符串。 |
+| ModelInfo.Created | 元数据创建时间。 |  | Unix 秒，`int64`。 |
+| ModelInfo.OwnedBy | 所有者或提供方。 |  | 字符串。 |
+| ModelInfo.Type | 能力族分类。 |  | 字符串。 |
+| ModelInfo.DisplayName | 展示名。 |  | 字符串。 |
+| ModelInfo.Name | 提供方原生模型名。 |  | 字符串。 |
+| ModelInfo.Version | 修订版本，可空。 |  | 字符串。 |
+| ModelInfo.Description | 简短说明。 |  | 字符串。 |
+| ModelInfo.InputTokenLimit | 可接受的最大输入 token。 |  | `int64`。 |
+| ModelInfo.OutputTokenLimit | 最大输出 token。 |  | `int64`。 |
+| ModelInfo.SupportedGenerationMethods | 支持的生成方法名。 |  | `[]string`。 |
+| ModelInfo.ContextLength | 上下文总长度上限。 |  | `int64`。 |
+| ModelInfo.MaxCompletionTokens | 最大补全 token。 |  | `int64`。 |
+| ModelInfo.SupportedParameters | 支持的请求参数名。 |  | `[]string`。 |
+| ModelInfo.SupportedInputModalities | 输入模态。 |  | `[]string`。 |
+| ModelInfo.SupportedOutputModalities | 输出模态。 |  | `[]string`。 |
+| ModelInfo.Thinking | 可选的推理预算。 |  | `ThinkingSupport`：`Min`、`Max`、`ZeroAllowed`、`DynamicAllowed`、`Levels`。 |
+| ModelInfo.UserDefined | 是否来自用户配置。 |  | 布尔。 |
+
+## 5. 常见错误与边界
+
+方法返回 `error` 时，ABI 信封 `ok` 为 false。`error.code` 与 `error.message` 必填。`http_status` 省略或为 0 时按 HTTP 500 处理。
+
+`Models` 表示完整集合，不是增量补丁。
+
+## 6. 相关功能
+
+按凭证发现模型见 [模型提供方](/cn/plugin/model-provider)。真正发送请求见 [执行器](/cn/plugin/executor)。
+
+## 7. 使用经验
+
+暂无

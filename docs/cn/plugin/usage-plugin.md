@@ -1,85 +1,85 @@
 ---
-outline: 'deep'
+title: 用量观察
+feature_ids:
+  - plugin.usage-plugin.handle-usage
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 用量观察能力
+# 用量观察
 
-用量观察能力用于在请求完成后接收用量、延迟、失败和计费相关信息。它适合接入外部统计、审计、计费或监控系统。
+`UsagePlugin` 在请求完成后接收一条用量记录。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "usage_plugin": true
-  }
-}
+插件拿到本次执行的模型、凭证、延迟、失败信息和 token 计数，用于自己的统计。
+
+## 2. 适用条件与不做的事
+
+`HandleUsage` 没有 `error` 返回值，不能用返回错误拒绝记录。它也不改写已经产生的响应。终态通知见 [请求生命周期](/cn/plugin/request-lifecycle)，那是另一个接口。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.usage_plugin` 设为 true。
+
+```go
+HandleUsage(context.Context, UsageRecord)
 ```
 
-源码参考：
+ABI 方法名是 `usage.handle`。无标签字段用 Go 导出名。`time.Time` 为 RFC3339，`time.Duration` 为纳秒整数。
 
-- `sdk/pluginapi/types.go`：`UsagePlugin`、`UsageRecord`、`UsageDetail`、`UsageFailure`
-- `sdk/pluginabi/types.go`：`usage.handle`
-- `internal/pluginhost/adapters.go`：`RegisterUsagePlugins`、`HandleUsage`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `examples/plugin/usage/go/main.go`
-- `examples/plugin/simple/go/main.go`：`MethodUsageHandle`
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.usage-plugin.handle-usage | `HandleUsage`，ABI `usage.handle`。 |  | 参数 `UsageRecord`。无返回值。 |
+| UsageRecord.RequestID | 这一次模型执行的 ID。 |  | UUID v4 字符串。 |
+| UsageRecord.TraceID | 入站 HTTP 追踪 ID。 |  | 8 位十六进制，可空。 |
+| UsageRecord.Provider | 上游提供方。 |  | 字符串。 |
+| UsageRecord.BaseURL | 该次请求或凭证上的上游基址。 |  | 可空。 |
+| UsageRecord.ExecutorType | 执行器实现名。 |  | 字符串。 |
+| UsageRecord.Model | 实际使用的模型。 |  | 字符串。 |
+| UsageRecord.Alias | 用户侧别名。 |  | 未使用别名时可空。 |
+| UsageRecord.APIKey | 客户端密钥标识。 |  | 可空。不是密钥原文的保证字段，按宿主给出的标识理解。 |
+| UsageRecord.IsNativeKey | 是否由本代理原生配置提供方认证。 |  | 布尔。 |
+| UsageRecord.AccessProvider | 客户端认证提供方。 |  | 例如 `config-inline` 或插件 ID。 |
+| UsageRecord.SessionID | 会话 ID。 |  | 可空。 |
+| UsageRecord.ParentSessionID | 父会话 ID。 |  | 可空。 |
+| UsageRecord.AuthID | 选中的凭证 ID。 |  | 字符串。 |
+| UsageRecord.AuthIndex | 凭证索引。 |  | 可空。 |
+| UsageRecord.AuthType | 凭证类型。 |  | 字符串。 |
+| UsageRecord.Source | 请求来源。 |  | 字符串。 |
+| UsageRecord.ReasoningEffort | 请求的推理力度。 |  | 字符串。 |
+| UsageRecord.ServiceTier | 请求或报告的服务档。 |  | 字符串。 |
+| UsageRecord.ResponseServiceTier | 上游响应最终档。 |  | 字符串。 |
+| UsageRecord.ResponseModel | 上游响应里的模型名。 |  | 未知时为空。 |
+| UsageRecord.Generate | 客户端是否要求实际生成。 |  | 宿主在交付前把省略值规范为 true。 |
+| UsageRecord.Stream | 是否流式执行。 |  | 布尔。 |
+| UsageRecord.RequestedAt | 收到请求的时间。 |  | `time.Time`。 |
+| UsageRecord.Latency | 总延迟。 |  | `time.Duration`。 |
+| UsageRecord.TTFT | 流式首 token 时间。 |  | `time.Duration`。 |
+| UsageRecord.Failed | 是否失败。 |  | 布尔。 |
+| UsageRecord.Failure | 失败细节。 |  | `StatusCode` 与 `Body`。 |
+| UsageRecord.Detail | token 计数。 |  | 见下方各计数字段，类型都是 `int64`。 |
+| UsageRecord.ResponseHeaders | 选中的上游响应头。 |  | `http.Header`。 |
+| UsageDetail.InputTokens | 输入 token。 |  | `int64`。 |
+| UsageDetail.OutputTokens | 输出 token。 |  | `int64`。 |
+| UsageDetail.ReasoningTokens | 推理 token。 |  | `int64`。 |
+| UsageDetail.CachedTokens | 缓存 token 合计。 |  | `int64`。 |
+| UsageDetail.CacheReadTokens | 缓存读取。 |  | `int64`。 |
+| UsageDetail.CacheCreationTokens | 缓存创建。 |  | `int64`。 |
+| UsageDetail.TotalTokens | 合计。 |  | `int64`。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `usage.handle` | 接收一次完成请求的用量记录。 |
+本方法没有错误返回。ABI 失败信封不用于拒绝一条用量。`Generate` 被省略时，到达插件之前已经是 true。失败正文在 `Failure.Body`，状态码在 `Failure.StatusCode`。
 
-## 记录内容
+## 6. 相关功能
 
-`UsageRecord` 包含：
+终态见 [请求生命周期](/cn/plugin/request-lifecycle)。
 
-```json
-{
-  "Provider": "codex",
-  "ExecutorType": "codex",
-  "Model": "gpt-5.5",
-  "Alias": "gpt-5.5",
-  "APIKey": "client-key-id",
-  "AuthID": "auth-1",
-  "AuthIndex": "0",
-  "AuthType": "oauth",
-  "Source": "openai",
-  "ReasoningEffort": "high",
-  "ServiceTier": "priority",
-  "RequestedAt": "2026-06-15T12:00:00Z",
-  "Latency": 1234567890,
-  "TTFT": 120000000,
-  "Failed": false,
-  "Detail": {
-    "InputTokens": 10,
-    "OutputTokens": 20,
-    "ReasoningTokens": 0,
-    "CachedTokens": 0,
-    "TotalTokens": 30
-  },
-  "ResponseHeaders": {}
-}
-```
+## 7. 使用经验
 
-失败请求会带有 `Failed: true` 和 `Failure`：
-
-```json
-{
-  "Failure": {
-    "StatusCode": 429,
-    "Body": "rate limited"
-  }
-}
-```
-
-## 开发注意
-
-- 用量插件应快速返回，避免阻塞请求完成路径。
-- 如果要写外部系统，建议内部做缓冲或异步发送。
-- 不要泄露客户端 API key、上游 token 或完整敏感响应体。
-- 用量观察是旁路能力，不应改变请求或响应。
-
+暂无

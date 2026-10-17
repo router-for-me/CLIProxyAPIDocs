@@ -231,12 +231,14 @@ export default defineConfig({
 							{ text: 'Request Translator', link: '/plugin/request-translator' },
 							{ text: 'Request Normalizer', link: '/plugin/request-normalizer' },
 							{ text: 'Request Interceptor', link: '/plugin/request-interceptor' },
+							{ text: 'Request Lifecycle', link: '/plugin/request-lifecycle' },
 						],
 					},
 					{
 						text: 'Response Processing',
 						items: [
 							{ text: 'Response Translator', link: '/plugin/response-translator' },
+							{ text: 'Response Normalizer', link: '/plugin/response-normalizer' },
 							{
 								text: 'Response Pre-Translation Normalizer',
 								link: '/plugin/response-before-translator',
@@ -250,6 +252,7 @@ export default defineConfig({
 								text: 'Streaming Response Interceptor',
 								link: '/plugin/response-stream-interceptor',
 							},
+							{ text: 'WebSocket Response Observer', link: '/plugin/websocket-observer' },
 						],
 					},
 					{
@@ -262,6 +265,7 @@ export default defineConfig({
 								link: '/plugin/command-line-plugin',
 							},
 							{ text: 'Management API', link: '/plugin/management-api' },
+							{ text: 'Quota Provider', link: '/plugin/quota-provider' },
 							{ text: 'Host Callbacks', link: '/plugin/host-callbacks' },
 						],
 					},
@@ -598,6 +602,10 @@ export default defineConfig({
 										text: 'Перехват запросов',
 										link: '/ru/plugin/request-interceptor',
 									},
+									{
+										text: 'Жизненный цикл запроса',
+										link: '/ru/plugin/request-lifecycle',
+									},
 								],
 							},
 							{
@@ -606,6 +614,10 @@ export default defineConfig({
 									{
 										text: 'Преобразование ответов',
 										link: '/ru/plugin/response-translator',
+									},
+									{
+										text: 'Нормализация ответа',
+										link: '/ru/plugin/response-normalizer',
 									},
 									{
 										text: 'Нормализация ответа перед преобразованием',
@@ -623,6 +635,10 @@ export default defineConfig({
 										text: 'Перехват стриминговых ответов',
 										link: '/ru/plugin/response-stream-interceptor',
 									},
+									{
+										text: 'Наблюдатель WebSocket-ответа',
+										link: '/ru/plugin/websocket-observer',
+									},
 								],
 							},
 							{
@@ -638,6 +654,7 @@ export default defineConfig({
 										link: '/ru/plugin/command-line-plugin',
 									},
 									{ text: 'Management API', link: '/ru/plugin/management-api' },
+									{ text: 'Провайдер квоты', link: '/ru/plugin/quota-provider' },
 									{ text: 'Callback хоста', link: '/ru/plugin/host-callbacks' },
 								],
 							},

@@ -1,75 +1,80 @@
 ---
-outline: 'deep'
+title: 前端认证提供方
+feature_ids:
+  - plugin.frontend-auth-provider.identifier
+  - plugin.frontend-auth-provider.authenticate
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 前端认证提供方能力
+# 前端认证提供方
 
-前端认证提供方能力用于在请求进入代理流程前认证客户端请求。它面向“谁可以调用 CLIProxyAPI”这个问题，不负责上游凭证选择。
+`FrontendAuthProvider` 在请求进入代理处理之前做前端认证。
 
-## 能力字段
+## 1. 这段解决什么问题
+
+插件查看入站方法、路径、头、查询和正文，决定是否接受，并给出主体标识和下游可用的属性。
+
+## 2. 适用条件与不做的事
+
+不解析上游凭证文件，那是 [凭证提供方](/cn/plugin/auth-provider)。独占开关不是方法，见 [前端认证独占模式](/cn/plugin/frontend-auth-exclusive)。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.frontend_auth_provider` 设为 true。需要独占时再加 `frontend_auth_provider_exclusive`，说明不在本页。
 
 ```json
 {
-  "capabilities": {
-    "frontend_auth_provider": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-frontend-auth",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-frontend-auth"
+    },
+    "capabilities": {
+      "frontend_auth_provider": true
+    }
   }
 }
 ```
 
-源码参考：
-
-- `sdk/pluginapi/types.go`：`FrontendAuthProvider`、`FrontendAuthRequest`、`FrontendAuthResponse`
-- `sdk/pluginabi/types.go`：`frontend_auth.identifier`、`frontend_auth.authenticate`
-- `internal/pluginhost/adapters.go`：`RegisterFrontendAuthProviders`
-
-示例参考：
-
-- `examples/plugin/frontend-auth/go/main.go`
-- `examples/plugin/simple/go/main.go`：`MethodFrontendAuthIdentifier`、`MethodFrontendAuthAuthenticate`
-
-## 方法
-
-| 方法 | 作用 |
-| --- | --- |
-| `frontend_auth.identifier` | 返回该前端认证提供方的稳定标识。 |
-| `frontend_auth.authenticate` | 根据 HTTP 请求内容判断是否认证通过。 |
-
-## 请求
-
-`frontend_auth.authenticate` 接收：
-
-```json
-{
-  "Method": "POST",
-  "Path": "/v1/chat/completions",
-  "Headers": {
-    "Authorization": ["Bearer ..."]
-  },
-  "Query": {},
-  "Body": "base64-body"
-}
+```go
+Identifier() string
+Authenticate(context.Context, FrontendAuthRequest) (FrontendAuthResponse, error)
 ```
 
-## 响应
+ABI 方法名是 `frontend_auth.identifier` 与 `frontend_auth.authenticate`。标识结果对象的字段是 `identifier`。示例见 `examples/plugin/frontend-auth`。
 
-```json
-{
-  "Authenticated": true,
-  "Principal": "user-or-client-id",
-  "Metadata": {
-    "provider": "example-frontend-auth-go"
-  }
-}
-```
+## 4. 细项说明
 
-`Principal` 是认证主体，`Metadata` 可携带给下游使用的身份属性。
+「默认值」与台账 defaults 逐字相同。
 
-## 与内置 API Key 的关系
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.frontend-auth-provider.identifier | `Identifier`，ABI `frontend_auth.identifier`。 |  | 无参数。返回字符串。失败或空白按空字符串处理。 |
+| plugin.frontend-auth-provider.authenticate | `Authenticate`，ABI `frontend_auth.authenticate`。 |  | 参数 `FrontendAuthRequest`，返回 `FrontendAuthResponse`。 |
+| FrontendAuthRequest.Method | HTTP 方法。 |  | 字符串。 |
+| FrontendAuthRequest.Path | 请求路径。 |  | 字符串。 |
+| FrontendAuthRequest.Headers | 入站头。 |  | `http.Header`。 |
+| FrontendAuthRequest.Query | 查询参数。 |  | `url.Values`。 |
+| FrontendAuthRequest.Body | 原始正文。 |  | `[]byte`，JSON 中为 base64。 |
+| FrontendAuthResponse.Authenticated | 是否接受该请求。 |  | 布尔。 |
+| FrontendAuthResponse.Principal | 已认证主体标识。 |  | 字符串。 |
+| FrontendAuthResponse.Metadata | 交给下游的身份属性。 |  | `map[string]string`。 |
 
-普通前端认证提供方会与宿主已有认证方式一起工作。只有声明 [前端认证独占模式](./frontend-auth-exclusive) 时，插件才会在被选中后成为唯一前端认证来源。
+## 5. 常见错误与边界
 
-## 开发注意
+`Authenticate` 返回 `error` 时，ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
-- 前端认证只认证客户端请求，不应读取或返回上游凭证。
-- 对请求体做认证时要注意大小和敏感信息，不要在日志里输出原始 body。
-- 插件返回 `Authenticated: false` 时，宿主会继续按当前认证链路处理或拒绝请求，具体取决于是否启用了独占模式。
+`Authenticated` 为 false 表示未接受，与方法返回错误不是同一条路径。
+
+## 6. 相关功能
+
+独占布尔值见 [前端认证独占模式](/cn/plugin/frontend-auth-exclusive)。上游凭证见 [凭证提供方](/cn/plugin/auth-provider)。
+
+## 7. 使用经验
+
+暂无

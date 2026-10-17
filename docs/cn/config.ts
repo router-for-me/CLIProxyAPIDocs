@@ -189,16 +189,19 @@ export default defineConfig({
                             {text: '请求转换', link: '/cn/plugin/request-translator'},
                             {text: '请求规整', link: '/cn/plugin/request-normalizer'},
                             {text: '请求拦截', link: '/cn/plugin/request-interceptor'},
+                            {text: '请求生命周期', link: '/cn/plugin/request-lifecycle'},
                         ]
                     },
                     {
                         text: '响应处理',
                         items: [
                             {text: '响应转换', link: '/cn/plugin/response-translator'},
+                            {text: '响应规整', link: '/cn/plugin/response-normalizer'},
                             {text: '响应转换前规整', link: '/cn/plugin/response-before-translator'},
                             {text: '响应转换后规整', link: '/cn/plugin/response-after-translator'},
                             {text: '响应拦截', link: '/cn/plugin/response-interceptor'},
                             {text: '流式响应拦截', link: '/cn/plugin/response-stream-interceptor'},
+                            {text: 'WebSocket 响应观察', link: '/cn/plugin/websocket-observer'},
                         ]
                     },
                     {
@@ -208,6 +211,7 @@ export default defineConfig({
                             {text: '用量观察', link: '/cn/plugin/usage-plugin'},
                             {text: '命令行扩展', link: '/cn/plugin/command-line-plugin'},
                             {text: 'Management API', link: '/cn/plugin/management-api'},
+                            {text: '额度提供方', link: '/cn/plugin/quota-provider'},
                             {text: '宿主回调', link: '/cn/plugin/host-callbacks'},
                         ]
                     },
