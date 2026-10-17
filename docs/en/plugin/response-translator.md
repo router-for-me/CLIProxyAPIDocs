@@ -1,63 +1,59 @@
 ---
-outline: 'deep'
+title: Response Translator
+feature_ids:
+  - plugin.response-translator.translate-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Response Translator Capability
+# Response Translator
 
-The response translator capability converts a canonical response back into the target protocol requested by the client. It is symmetrical with the [request translator capability](./request-translator) and runs after the upstream response is returned but before it is sent to the client.
+`ResponseTranslator` converts a canonical response payload into another format.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "response_translator": true
-  }
-}
+The plugin sees the original client request, the already translated provider request, and the response body to translate, and returns bytes in the target format.
+
+## 2. Scope and non-goals
+
+There is only `TranslateResponse`. Folding into canonical form is done by [Response Normalizer](/plugin/response-normalizer). Before and after translation are two registration slots, not two interfaces. Rewriting a successful response is in [Response Interceptor](/plugin/response-interceptor).
+
+## 3. How to configure or call it
+
+Set `capabilities.response_translator` to true.
+
+```go
+TranslateResponse(context.Context, ResponseTransformRequest) (PayloadResponse, error)
 ```
 
-Source references:
+The ABI method name is `response.translate`.
 
-- `sdk/pluginapi/types.go`: `ResponseTranslator`, `ResponseTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `response.translate`
-- `internal/pluginhost/adapters.go`: `TranslateResponse`, `callResponseTranslator`
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `examples/plugin/response-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodResponseTranslate`
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.response-translator.translate-response | `TranslateResponse`, ABI `response.translate`. |  | Parameter `ResponseTransformRequest`, return `PayloadResponse`. |
+| ResponseTransformRequest.FromFormat | Source protocol. |  | String. |
+| ResponseTransformRequest.ToFormat | Target protocol. |  | String. |
+| ResponseTransformRequest.Model | Model ID. |  | String. |
+| ResponseTransformRequest.Stream | Whether the response is streaming. |  | Boolean. |
+| ResponseTransformRequest.OriginalRequest | Original client request body. |  | `[]byte`. |
+| ResponseTransformRequest.TranslatedRequest | Provider request body. |  | `[]byte`. |
+| ResponseTransformRequest.Body | Response payload to translate. |  | `[]byte`. |
+| PayloadResponse.Body | Translated payload. |  | `[]byte`. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `response.translate` | Converts response `Body` from `FromFormat` to `ToFormat`. |
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500. This method does not change the status code.
 
-## Request
+## 6. Related behavior
 
-```json
-{
-  "FromFormat": "codex",
-  "ToFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "OriginalRequest": "base64-client-body",
-  "TranslatedRequest": "base64-provider-request",
-  "Body": "base64-upstream-response"
-}
-```
+The same normalization interface used before and after translation is in [Response Normalizer](/plugin/response-normalizer).
 
-## Response
+## 7. Field experience
 
-```json
-{
-  "Body": "base64-client-response"
-}
-```
-
-## Development Notes
-
-- `OriginalRequest` is the raw client request, and `TranslatedRequest` is the request sent upstream. They can be used to complete the response format.
-- Response translation should output a complete response required by the client protocol.
-- Whether streaming responses can be translated depends on host executor and format capabilities. Plugins should explicitly test streaming scenarios.
+None yet.
 

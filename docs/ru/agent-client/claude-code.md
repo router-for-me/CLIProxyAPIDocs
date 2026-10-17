@@ -1,38 +1,74 @@
+---
+title: Claude Code
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
+
 # Claude Code
 
-Отредактируйте файл `~/.claude/settings.json` и добавьте следующее содержимое:
+Здесь описано, как направить базовый адрес и ключ доступа Claude Code на этот прокси и какие зарегистрированные конечные точки вызываются при такой конфигурации.
+
+## 1. Какую задачу решает этот раздел
+
+По умолчанию Claude Code отправляет совместимые с Anthropic запросы на официальный адрес. После смены базового адреса на этот прокси и ключа доступа на одну из записей `access.api-keys` диалог, подсчёт токенов и каталог моделей входят в маршруты, уже зарегистрированные этим прокси.
+
+## 2. Когда применимо и чего здесь нет
+
+Эта страница меняет только собственные переменные окружения Claude Code. Она не создаёт учётные данные Claude upstream и не меняет `access.api-keys` этого прокси. Порядок принятия ключа и безопасный режим примерных ключей описаны в разделе [Клиентские ключи](/ru/api/access).
+
+Здесь не задаются режим разрешений, тайм-аут, телеметрия, сила рассуждения или конкретное имя модели. Модель должна быть ID, который уже есть в текущем каталоге. Преобразование протокола до попадания запроса в upstream здесь тоже не описывается.
+
+## 3. Как настроить или вызвать
+
+Отредактируйте `~/.claude/settings.json`. Не добавляйте `/v1` к базовому адресу. Клиент сам дописывает остаток пути.
 
 ```json
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "<your_api_key>",
-    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8317",
-    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
-    "API_TIMEOUT_MS": "600000",
-    "BASH_DEFAULT_TIMEOUT_MS": "600000",
-    "BASH_MAX_TIMEOUT_MS": "600000",
-    "CLAUDE_API_TIMEOUT": "600000",
-    "CLAUDE_CODE_MAX_CONTEXT_TOKENS": "200000",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "95",
-    "DISABLE_TELEMETRY": "1",
-    "MCP_TIMEOUT": "30000",
-    "MCP_TOOL_TIMEOUT": "600000"
-  },
-  "permissions": {
-    "allow": [],
-    "deny": [],
-    "defaultMode": "bypassPermissions"
-  },
-  "model": "claude-opus-5",
-  "hooks": {},
-  "worktree": {
-    "baseRef": "fresh"
-  },
-  "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true,
-  "skipWorkflowUsageWarning": true,
-  "verbose": true,
-  "autoCompactEnabled": true
+    "ANTHROPIC_BASE_URL": "https://example.invalid",
+    "ANTHROPIC_AUTH_TOKEN": "YOUR_API_KEY",
+    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1"
+  }
 }
 ```
+
+`YOUR_API_KEY` должен полностью совпадать с одним настроенным клиентским ключом. Прокси по очереди смотрит `Authorization`, `X-Goog-Api-Key`, `X-Api-Key` и параметры запроса `key`, `auth_token` и берёт первый уже настроенный ключ. Если `Authorization` начинается с `Bearer` и пробела, используется только следующий за ним токен.
+
+При такой конфигурации клиент вызывает эти зарегистрированные конечные точки:
+
+| Метод и путь | route ID |
+| --- | --- |
+| `POST /v1/messages` | `route.v1.post-messages` |
+| `POST /v1/messages/count_tokens` | `route.v1.post-messages-count-tokens` |
+| `GET /v1/models` | `route.v1.get-models` |
+
+Каталог моделей вызывается только если переключатель обнаружения выше включён и клиент действительно запрашивает каталог. Диалог и подсчёт от этого переключателя не зависят.
+
+## 4. Подробности
+
+Эти поля принадлежат Claude Code. Это не ключи YAML данного прокси. Пустое значение по умолчанию означает, что адрес не указывает на этот прокси.
+
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| `ANTHROPIC_BASE_URL` | Корневой адрес API, который использует Claude Code. |  | Пишите корень вида `https://example.invalid`. Не пишите `https://example.invalid/v1`. Клиент дописывает `/v1/messages`, `/v1/messages/count_tokens` и `/v1/models`. |
+| `ANTHROPIC_AUTH_TOKEN` | Клиентский ключ, отправляемый этому прокси. |  | Значение должно быть настроенным ключом, например `YOUR_API_KEY`. Это не ключ провайдера upstream. |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | Запрашивает ли клиент каталог моделей. |  | `GET /v1/models` запрашивается только при значении `1`. Если запрос несёт `Anthropic-Version` или `User-Agent` начинается с `claude-cli`, этот маршрут возвращает каталог Claude. |
+
+`X-Claude-Code-Session-Id` распознаётся этим прокси как сеанс Claude и используется для привязки сеанса. Это не маршрут.
+
+## 5. Типичные ошибки и границы
+
+Если ни один принимаемый ключ не передан, ответ — 401 с телом `{"error":"Missing API key"}`. Если значение передано, но ни одно не совпадает с конфигурацией, ответ — 401 с телом `{"error":"Invalid API key"}`. Когда `access.api-keys` пуст, эти маршруты больше не требуют клиентский ключ.
+
+Если безопасный режим примерных ключей включён и в списке всё ещё есть `your-api-key-1`, `your-api-key-2` или `your-api-key-3`, префикс `/v1` до входа в обработчик возвращает 403 и устанавливает `X-CPA-SAFE-MODE: example-api-key`. Не используйте ключ из шаблона как `ANTHROPIC_AUTH_TOKEN`.
+
+Если в базовом адресе лишний `/v1`, путь, который собирает клиент, не является зарегистрированным путём из таблицы выше. `POST /v1/messages` возвращает один JSON только когда `stream` отсутствует или равен логическому JSON `false`. Любое другое присутствующее значение `stream` идёт через SSE. Маршрут подсчёта возвращает только JSON.
+
+## 6. Связанные возможности
+
+Как записывать ключ, описано в разделе [Клиентские ключи](/ru/api/access). Статус и тела двух маршрутов сообщений — в разделе [Claude Messages](/ru/api/claude-messages). Формат каталога — в разделе [OpenAI Chat](/ru/api/openai-chat). Привязка сеанса — в разделе [Стратегия маршрутизации](/ru/routing/strategy).
+
+## 7. Практический опыт
+
+Пока нет.

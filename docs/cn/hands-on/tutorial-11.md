@@ -1,73 +1,20 @@
 # 零成本部署AIStudio反代
 
-> **请注意：** 本教程的部署方案需配合 `CLIProxyAPI` 使用。在开始之前，请确保你已有一个正在运行的 `CLIProxyAPI` 实例。
+只配置当前程序里的 AI Studio WebSocket 认证，然后按已登记的 Gemini 路由调用。不要在本页部署第三方 Cookie 反代。
 
-CLIProxyAPI 自 v6.3.x 版本起，开始支持通过 WebSocket 方式接入 AI Provider，并首个支持了 AIStudio。
+## 场景
 
-然而，这种方式需要一个始终开启的浏览器来运行 AIStudioBuild 上的 WebSocket 通信程序，这总归有些不便。如果选择将其部署在 VPS 上，又会面临 VPS 内存要求较高的问题。
+旧教程要求把浏览器 Cookie 放进外部站点。功能页已经写明不再介绍第三方 AI Studio 应用。本页因此不再保留那些步骤。
 
-为了解决这个问题，我花了点时间尝试多种无头浏览器方案。最终，我选择使用 Docker 在 HuggingFace 上进行部署，此举能充分利用 HuggingFace 免费实例的大内存优势，实现零成本部署。
+## 步骤
 
-### 第一步：配置 AIStudioBuild 应用
+1. 是否要求 WebSocket 认证，只改 [AI Studio WebSocket 认证](/cn/configuration/provider/ai-studio)。省略和显式关闭的差别以该页为准。
+2. 客户端调用本代理时使用[客户端密钥](/cn/api/access)中的 `YOUR_API_KEY`。
+3. Gemini 的模型列表和生成调用见 [Gemini](/cn/api/gemini)。
+4. 不要把 Codex 的实时会话当成 AI Studio。实时路由见[实时会话](/cn/api/realtime)。
+5. 若上游是 Gemini API 密钥，密钥和地址见[上游 API 密钥](/cn/accounts/api-keys-api)与[上游基础地址](/cn/accounts/api-keys-base)。
+6. 模型 ID 必须来自[模型目录](/cn/introduction/models)，不要在本页登记新名字。
 
-需要根据你的 `CLIProxyAPI` 的设置，配置好 AIStudioBuild 上的 WebSocket 通信程序：打开官方提供的[示例程序](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)，复制该程序后**需**修改图中红框处的两个地方。其中，如果 `CLIProxyAPI` 中设置了 `wsauth` 为 `true`，那么就需要设置 `JWT_TOKEN`为 `CLIProxyAPI` 中的拟用于鉴权的 `api-keys` 值；设置 `WEBSOCKET_PROXY_URL` 为 `CLIProxyAPI` 所在的地址，例如：`wss://mycap.example.com/v1/ws`。设置完成后保存，并记录这个应用的链接备用。
+## 不要在本页完成的事
 
-![](https://img.072899.xyz/2025/11/359a2572d0206c20dba7fe12a136d6e8.png)
-
-多账户使用时，需要多操作一个步骤，将该应用访问权限设置为 `Public`。
-
-![](https://img.072899.xyz/2025/11/69c6395d1a98c38c68bc6c8dd46b3014.png)
-
-**安全警告：** 设置为 `Public` 后，请务必妥善保管你的链接。**切勿**将此链接公开分享，以免导致授权信息泄露。
-
-### 第二步：准备 AIStudio Cookie
-
-这一步推荐使用浏览器的隐私模式，登录 https://aistudio.google.com/ ，在浏览器的开发者工具中复制 Cookie 即可，具体位置如下图所示：
-
-![](https://img.072899.xyz/2025/11/51f860bf363cab01aa4c3fd5181b7f72.png)
-
-### 第三步（1）：部署 HuggingFace Space
-
-打开 https://huggingface.co/spaces/hkfires/AIStudioBuildWS ，复制该 Space。在 `CAMOUFOX_INSTANCE_URL` 处填入第一步准备的程序的链接，在 `USER_COOKIE_1` 处填入第二步准备的 Cookie，点击 Duplicate Space。
-
-![](https://img.072899.xyz/2025/11/04e84ce3b0f2abe7ae9e717ac8b5aa0b.png)
-
-等待 HuggingFace 构建完成，出现如下日志，即部署成功：
-
-![](https://img.072899.xyz/2025/11/e818f38cfb272c1fc10ca97c2ef23c6b.png)
-
-如果有多个账户，参考 `USER_COOKIE_1`，在 HuggingFace Space 的设置中依次增加 `USER_COOKIE_2`、`USER_COOKIE_3` 等环境变量即可。
-
-**重要提醒：** Cookie 属于敏感信息，请**务必使用 "Secrets"** (而不是 "Variables") 来存储，以防止 Cookie 外泄。
-
-### 第三步（2）：服务器 Docker 部署
-
-如果你拥有自己的服务器（VPS），也可以使用 Docker Compose 进行部署。
-
-1.  **下载代码**
-    ```bash
-    git clone https://github.com/hkfires/AIStudioBuildWS.git
-    cd AIStudioBuildWS
-    ```
-
-2.  **配置环境变量**
-    复制 `.env.example` 为 `.env`，并填入必要信息（`CAMOUFOX_INSTANCE_URL` 和 `USER_COOKIE_1` 等）。
-    
-    也可以在 `cookies` 目录下放置 JSON 格式的 Cookie 文件（文件名任意），程序会自动读取。
-    ```bash
-    cp .env.example .env
-    nano .env
-    ```
-
-3.  **启动服务**
-    ```bash
-    docker compose up -d --build
-    ```
-
-部署成功后，我们应该在 `CLIProxyAPI` 的中看到类似如下的日志。至此，整个部署全部完成。
-
-![](https://img.072899.xyz/2025/11/e0db39f81a3bbb956cbe9364e656a76f.png)
-
-### 参考项目
-
-https://github.com/cliouo/aistudio-build-proxy-all
+不收集、不粘贴 Cookie，不给出外部网站的部署步骤。

@@ -1,85 +1,87 @@
 ---
-outline: 'deep'
+title: Наблюдение за использованием
+feature_ids:
+  - plugin.usage-plugin.handle-usage
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность наблюдения за использованием
+# Наблюдение за использованием
 
-Возможность наблюдения за использованием получает информацию об использовании, задержке, ошибках и биллинге после завершения запроса. Она подходит для интеграции внешней статистики, аудита, биллинга или мониторинга.
+`UsagePlugin` после завершения запроса получает одну запись использования.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "usage_plugin": true
-  }
-}
+Плагин получает модель, учётные данные, задержку, сведения об ошибке и счётчики токенов этого выполнения для собственной статистики.
+
+## 2. Когда применимо и чего здесь нет
+
+У `HandleUsage` нет возвращаемого `error`, поэтому запись нельзя отклонить возвратом ошибки. Он также не переписывает уже созданный ответ. Уведомление о конечном состоянии — это [Жизненный цикл запроса](/ru/plugin/request-lifecycle), другой интерфейс.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.usage_plugin` равным true.
+
+```go
+HandleUsage(context.Context, UsageRecord)
 ```
 
-Исходный код:
+Имя метода ABI — `usage.handle`. Поля без тега используют экспортируемое имя Go. `time.Time` — RFC3339. `time.Duration` — целое число наносекунд.
 
-- `sdk/pluginapi/types.go`: `UsagePlugin`, `UsageRecord`, `UsageDetail`, `UsageFailure`
-- `sdk/pluginabi/types.go`: `usage.handle`
-- `internal/pluginhost/adapters.go`: `RegisterUsagePlugins`, `HandleUsage`
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/usage/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodUsageHandle`
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.usage-plugin.handle-usage | `HandleUsage`, ABI `usage.handle`. |  | Параметр `UsageRecord`. Возвращаемого значения нет. |
+| UsageRecord.RequestID | ID этого выполнения модели. |  | Строка UUID v4. |
+| UsageRecord.TraceID | ID трассировки входящего HTTP. |  | 8 шестнадцатеричных знаков. Может быть пустым. |
+| UsageRecord.Provider | Провайдер upstream. |  | Строка. |
+| UsageRecord.BaseURL | Базовый адрес upstream у этого запроса или учётных данных. |  | Может быть пустым. |
+| UsageRecord.ExecutorType | Имя реализации исполнителя. |  | Строка. |
+| UsageRecord.Model | Фактически использованная модель. |  | Строка. |
+| UsageRecord.Alias | Псевдоним на стороне пользователя. |  | Может быть пустым, если псевдоним не использовался. |
+| UsageRecord.APIKey | Идентификатор ключа клиента. |  | Может быть пустым. Это не поле, гарантирующее исходный ключ. Понимайте его как идентификатор, который дал хост. |
+| UsageRecord.IsNativeKey | Аутентифицирован ли провайдер собственной конфигурацией этого прокси. |  | Логическое значение. |
+| UsageRecord.AccessProvider | Провайдер аутентификации клиента. |  | Например `config-inline` или ID плагина. |
+| UsageRecord.SessionID | ID сеанса. |  | Может быть пустым. |
+| UsageRecord.ParentSessionID | ID родительского сеанса. |  | Может быть пустым. |
+| UsageRecord.AuthID | ID выбранных учётных данных. |  | Строка. |
+| UsageRecord.AuthIndex | Индекс учётных данных. |  | Может быть пустым. |
+| UsageRecord.AuthType | Тип учётных данных. |  | Строка. |
+| UsageRecord.Source | Источник запроса. |  | Строка. |
+| UsageRecord.ReasoningEffort | Запрошенная сила рассуждения. |  | Строка. |
+| UsageRecord.ServiceTier | Запрошенный или сообщённый уровень обслуживания. |  | Строка. |
+| UsageRecord.ResponseServiceTier | Итоговый уровень в ответе upstream. |  | Строка. |
+| UsageRecord.ResponseModel | Имя модели в ответе upstream. |  | Пусто, если неизвестно. |
+| UsageRecord.Generate | Просил ли клиент фактическую генерацию. |  | Хост до доставки нормализует опущенное значение в true. |
+| UsageRecord.Stream | Было ли выполнение потоковым. |  | Логическое значение. |
+| UsageRecord.RequestedAt | Время получения запроса. |  | `time.Time`. |
+| UsageRecord.Latency | Полная задержка. |  | `time.Duration`. |
+| UsageRecord.TTFT | Время до первого токена потока. |  | `time.Duration`. |
+| UsageRecord.Failed | Была ли ошибка. |  | Логическое значение. |
+| UsageRecord.Failure | Подробности ошибки. |  | `StatusCode` и `Body`. |
+| UsageRecord.Detail | Счётчики токенов. |  | См. поля счётчиков ниже. Тип каждого — `int64`. |
+| UsageRecord.ResponseHeaders | Выбранные заголовки ответа upstream. |  | `http.Header`. |
+| UsageDetail.InputTokens | Входные токены. |  | `int64`. |
+| UsageDetail.OutputTokens | Выходные токены. |  | `int64`. |
+| UsageDetail.ReasoningTokens | Токены рассуждения. |  | `int64`. |
+| UsageDetail.CachedTokens | Сумма кэшированных токенов. |  | `int64`. |
+| UsageDetail.CacheReadTokens | Чтение кэша. |  | `int64`. |
+| UsageDetail.CacheCreationTokens | Создание кэша. |  | `int64`. |
+| UsageDetail.TotalTokens | Итого. |  | `int64`. |
 
-## Методы
+## 5. Типичные ошибки и границы
 
-| Метод | Назначение |
-| --- | --- |
-| `usage.handle` | Получает запись использования одного завершённого запроса. |
+У этого метода нет возврата ошибки. Конверт ошибки ABI не используется, чтобы отклонить запись использования. Если `Generate` опущен, до плагина он уже true. Тело ошибки находится в `Failure.Body`, код состояния — в `Failure.StatusCode`.
 
-## Содержимое записи
+## 6. Связанные возможности
 
-`UsageRecord` содержит:
+Конечное состояние описано в разделе [Жизненный цикл запроса](/ru/plugin/request-lifecycle).
 
-```json
-{
-  "Provider": "codex",
-  "ExecutorType": "codex",
-  "Model": "gpt-5.5",
-  "Alias": "gpt-5.5",
-  "APIKey": "client-key-id",
-  "AuthID": "auth-1",
-  "AuthIndex": "0",
-  "AuthType": "oauth",
-  "Source": "openai",
-  "ReasoningEffort": "high",
-  "ServiceTier": "priority",
-  "RequestedAt": "2026-06-15T12:00:00Z",
-  "Latency": 1234567890,
-  "TTFT": 120000000,
-  "Failed": false,
-  "Detail": {
-    "InputTokens": 10,
-    "OutputTokens": 20,
-    "ReasoningTokens": 0,
-    "CachedTokens": 0,
-    "TotalTokens": 30
-  },
-  "ResponseHeaders": {}
-}
-```
+## 7. Практический опыт
 
-Неуспешные запросы содержат `Failed: true` и `Failure`:
-
-```json
-{
-  "Failure": {
-    "StatusCode": 429,
-    "Body": "rate limited"
-  }
-}
-```
-
-## Замечания по разработке
-
-- Usage plugin должен быстро возвращаться, чтобы не блокировать путь завершения запроса.
-- Если нужно писать во внешнюю систему, лучше буферизовать или отправлять асинхронно внутри плагина.
-- Не раскрывайте клиентский API key, upstream token или полные чувствительные тела ответов.
-- Наблюдение за использованием — побочная возможность; оно не должно изменять запросы или ответы.
+Пока нет.
 

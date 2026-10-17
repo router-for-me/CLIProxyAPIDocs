@@ -1,186 +1,86 @@
 ---
-outline: 'deep'
+title: Маршрутизатор моделей
+feature_ids:
+  - plugin.model-router.route-model
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность маршрутизации моделей
+# Маршрутизатор моделей
 
-Возможность маршрутизации моделей позволяет плагину выбрать, где должен выполняться подходящий запрос модели, до того как хост сопоставит модель с провайдером и выберет учётные данные.
+`ModelRouter` решает, кто выполнит запрос, до разбора модели в провайдера и до выбора учётных данных.
 
-Используйте её, когда тело запроса, заголовки, query-параметры или исходная клиентская модель должны выбрать один из вариантов:
+## 1. Какую задачу решает этот раздел
 
-- исполнитель самого плагина-маршрутизатора;
-- исполнитель другого плагина;
-- встроенный путь провайдера, например `codex`, `antigravity`, `xai` или `claude`.
+Плагин может назначить целью этого запроса свой исполнитель, исполнитель другого плагина или уже существующий встроенный провайдер.
 
-## Поле возможности
+## 2. Когда применимо и чего здесь нет
+
+Есть только `RouteModel`. Он не заменяет сам исполнитель. Если цель — `self`, у этого плагина всё равно должен быть [Исполнитель](/ru/plugin/executor). Он также не выбирает ID из кандидатов учётных данных. Это [Планировщик](/ru/plugin/scheduler).
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.model_router` равным true.
 
 ```json
 {
-  "capabilities": {
-    "model_router": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-router",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-router"
+    },
+    "capabilities": {
+      "model_router": true
+    }
   }
 }
 ```
 
-Если маршрутизатор может отправлять запросы в собственный исполнитель, также объявите возможность исполнителя:
-
-```json
-{
-  "capabilities": {
-    "model_router": true,
-    "executor": true,
-    "executor_model_scope": "static",
-    "executor_input_formats": ["claude"],
-    "executor_output_formats": ["claude"]
-  }
-}
+```go
+RouteModel(context.Context, ModelRouteRequest) (ModelRouteResponse, error)
 ```
 
-Исходный код:
+Имя метода ABI — `model.route`. Когда `Handled` равен true, `TargetKind` должен быть `self`, `executor` или `provider`.
 
-- `sdk/pluginapi/types.go`: `ModelRouter`, `ModelRouteRequest`, `ModelRouteResponse`, `ModelRouteTargetKind`
-- `sdk/pluginabi/types.go`: `model.route`
-- `internal/pluginhost/model_router.go`: приоритет маршрутизаторов, проверка цели и доступность встроенных провайдеров
-- `sdk/api/handlers/handlers.go`: входной путь запроса до обычного определения провайдера и выбора учётных данных
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/claude-web-search-router/go/main.go`
-- `examples/plugin/claude-web-search-router/go/fallback.go`
-
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `model.route` | Возвращает решение маршрутизации для текущего клиентского запроса. |
-
-## Когда выполняется
-
-Хост вызывает включённые маршрутизаторы моделей до обычного сопоставления модели с провайдером и выбора учётных данных. Плагины с более высоким приоритетом выполняются первыми. Если маршрутизатор возвращает `Handled: false`, невалидную цель или недоступную цель, хост пропускает этот результат и пробует следующий маршрутизатор. Если ни один маршрутизатор не обработал запрос, продолжается обычный путь хоста.
-
-Запрос всё ещё находится в исходном клиентском протоколе. Например, Claude-совместимый запрос приходит с `SourceFormat: "claude"`, а сырое тело Claude-запроса находится в `Body`.
-
-## Запрос
-
-```json
-{
-  "Plugin": {},
-  "PluginID": "claude-web-search-router",
-  "SourceFormat": "claude",
-  "RequestedModel": "claude-sonnet-4-6",
-  "Stream": true,
-  "Headers": {},
-  "Query": {},
-  "Body": "base64-client-body",
-  "Metadata": {},
-  "AvailableProviders": ["antigravity", "codex", "xai"]
-}
-```
-
-Важные поля:
-
-| Поле | Описание |
-| --- | --- |
-| `PluginID` | Локальный ID плагина-маршрутизатора в хосте. |
-| `SourceFormat` | Исходный протокол клиента, например `openai`, `claude` или `gemini`. |
-| `RequestedModel` | Клиентская модель до определения провайдера и выбора учётных данных. |
-| `Stream` | Ожидает ли клиент потоковый вывод. |
-| `Headers` / `Query` | Входящие заголовки и query-параметры. |
-| `Body` | Сырое тело клиентского запроса. В RPC JSON кодируется как base64. |
-| `Metadata` | Снимок контекста запроса, созданный по мере возможности. Рассматривайте его как доступные только для чтения JSON-подобные данные. |
-| `AvailableProviders` | Ключи встроенных провайдеров, для которых сейчас зарегистрированы учётные данные. Проверяйте их перед возвратом `TargetKind: "provider"`. |
-
-## Ответ
-
-Не обрабатывать:
-
-```json
-{
-  "Handled": false
-}
-```
-
-Маршрутизировать в исполнитель того же плагина:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "self",
-  "Reason": "matched_web_search"
-}
-```
-
-Маршрутизировать в исполнитель другого плагина:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "executor",
-  "Target": "search-executor",
-  "Reason": "matched_search_executor"
-}
-```
-
-Маршрутизировать во встроенный провайдер:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "provider",
-  "Target": "codex",
-  "TargetModel": "gpt-5.4-mini",
-  "Reason": "matched_codex_web_search"
-}
-```
-
-## Типы целей
-
-| TargetKind | Target | TargetModel | Поведение |
+| Поле | Значение | По умолчанию | Ограничение |
 | --- | --- | --- | --- |
-| `self` | Игнорируется плагином; хост использует ID текущего плагина-маршрутизатора. | Игнорируется. | Выполняет исполнитель самого плагина-маршрутизатора. |
-| `executor` | ID целевого плагина. | Игнорируется. | Напрямую выполняет исполнитель другого плагина. |
-| `provider` | Ключ встроенного провайдера. | Необязательная замена модели. | Продолжает путь через встроенный AuthManager и исполнитель провайдера. |
+| plugin.model-router.route-model | `RouteModel`, ABI `model.route`. |  | Параметр `ModelRouteRequest`, возврат `ModelRouteResponse`. |
+| ModelRouteRequest.Plugin | Метаданные плагина. |  | `Metadata`. |
+| ModelRouteRequest.PluginID | Локальный для хоста ID плагина. |  | Строка. |
+| ModelRouteRequest.SourceFormat | Исходный протокол клиента. |  | Строка. |
+| ModelRouteRequest.RequestedModel | Модель клиента до выбора провайдера и учётных данных. |  | Строка. |
+| ModelRouteRequest.Stream | Ожидается ли потоковый вывод. |  | Логическое значение. |
+| ModelRouteRequest.Headers | Входящие заголовки. |  | `http.Header`. |
+| ModelRouteRequest.Query | Параметры запроса. |  | `url.Values`. |
+| ModelRouteRequest.Body | Исходное тело клиента. |  | `[]byte`, в JSON это base64. |
+| ModelRouteRequest.Metadata | Снимок контекста. |  | Только для чтения, понимается как значения JSON. |
+| ModelRouteRequest.AvailableProviders | Ключи встроенных provider, у которых сейчас есть зарегистрированные учётные данные. |  | Только для чтения. При `TargetKind` равном `provider` цель можно выбрать отсюда. |
+| ModelRouteResponse.Handled | Принято ли решение о маршруте. |  | При false не применяется. |
+| ModelRouteResponse.TargetKind | Вид цели. |  | `self`, `executor`, `provider`. Другие значения недействительны. |
+| ModelRouteResponse.Target | Цель. |  | Для `executor` это ID плагина. Для `provider` это ключ provider, пустое значение недействительно. `self` использует ID текущего плагина маршрутизатора. |
+| ModelRouteResponse.TargetModel | Имя модели на пути провайдера. |  | Имеет смысл только для `provider`. Пустое значение сохраняет модель, запрошенную клиентом. |
+| ModelRouteResponse.Reason | Необязательная диагностическая причина. |  | Строка. |
 
-Прямые маршруты в исполнитель плагина выполняются без выбора записи учётных данных. Целевой исполнитель должен объявить возможность исполнителя, разрешать статическое выполнение через `executor_model_scope: "static"` или `"both"` и поддерживать форматы запроса/ответа для текущего запроса.
+## 5. Типичные ошибки и границы
 
-Маршруты провайдеров должны указывать провайдера, который есть в `AvailableProviders`. Если `TargetModel` пустой, хост сохраняет исходную клиентскую модель. Если целевому провайдеру нужно нативное имя модели, задайте `TargetModel` явно вместо пересылки клиентского имени модели.
+Когда метод возвращает `error`, эта попытка маршрутизации завершается ошибкой. Если ABI `http_status` опущен или равен 0, он считается HTTP 500.
 
-## Пример конфигурации
+`Handled` равный true при виде не из трёх, или пустой `Target` для `executor` либо `provider`, не является действительным решением. У ключа цели `provider` снимаются крайние пробелы, и он переводится в нижний регистр.
 
-Пример `claude-web-search-router` использует ModelRouter, чтобы обнаруживать встроенные запросы Claude Code `web_search` и направлять их во встроенные провайдеры с поддержкой web search или в собственный исполнитель плагина для Tavily.
+## 6. Связанные возможности
 
-```yaml
-plugins:
-  enabled: true
-  dir: "plugins"
-  configs:
-    claude-web-search-router:
-      enabled: true
-      priority: 20
-      route: fallback
-      antigravity_model: "gemini-3.1-flash-lite"
-      codex_model: "gpt-5.4-mini"
-      xai_model: "grok-4.3"
-      tavily_api_keys:
-        - "tvly-xxxxxxxx"
-      require_web_search_only: true
-```
+Выполнение описано в разделе [Исполнитель](/ru/plugin/executor). Выбор учётных данных — в разделе [Планировщик](/ru/plugin/scheduler).
 
-Поведение маршрутов примера:
+## 7. Практический опыт
 
-| Маршрут | Цель |
-| --- | --- |
-| `antigravity_google` | `TargetKind: "provider"`, `Target: "antigravity"`, `TargetModel: antigravity_model` |
-| `codex_web_search` | `TargetKind: "provider"`, `Target: "codex"`, `TargetModel: codex_model` |
-| `xai_web_search` | `TargetKind: "provider"`, `Target: "xai"`, `TargetModel: xai_model` |
-| `tavily` | `TargetKind: "self"`, исполнитель плагина сам обрабатывает Tavily. |
-| `fallback` | `TargetKind: "self"`, исполнитель плагина оркестрирует резервные варианты (fallback) по нескольким бэкендам. |
+Пока нет.
 
-## Замечания по разработке
-
-- Возвращайте `Handled: false` для запросов, которые плагин не распознаёт, чтобы нижестоящие маршрутизаторы и обычный путь хоста могли продолжить обработку.
-- Держите `model.route` быстрым. Он должен классифицировать запрос и выбрать цель, а не выполнять полный upstream-запрос.
-- Используйте `AvailableProviders` перед возвратом цели встроенного провайдера.
-- Используйте `self`, когда исполнитель плагина должен оркестрировать резервные варианты (fallback), вызывать `host.model.*` или использовать внешний сервис плагина.
-- Используйте `provider`, когда запрос должен продолжить путь через управляемый хостом выбор учётных данных, логирование запросов, учёт использования и встроенный исполнитель.
-- `model_router` включается через флаг возможности и метод `model.route`. Повышение версии схемы плагина не требуется.

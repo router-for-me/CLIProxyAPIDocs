@@ -1,63 +1,59 @@
 ---
-outline: 'deep'
+title: Преобразование ответов
+feature_ids:
+  - plugin.response-translator.translate-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность преобразования ответов
+# Преобразование ответов
 
-Возможность преобразования ответов конвертирует канонический ответ обратно в целевой протокол, запрошенный клиентом. Она симметрична [возможности преобразования запросов](./request-translator) и выполняется после возврата upstream-ответа, но до отправки клиенту.
+`ResponseTranslator` преобразует payload ответа в канонической форме в другой формат.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "response_translator": true
-  }
-}
+Плагин одновременно видит исходный запрос клиента, уже преобразованный запрос провайдера и тело ответа, которое нужно преобразовать, и возвращает байты целевого формата.
+
+## 2. Когда применимо и чего здесь нет
+
+Есть только `TranslateResponse`. Сведение к канонической форме делает [Нормализация ответа](/ru/plugin/response-normalizer). До и после преобразования — это два слота регистрации, а не два интерфейса. Повторное изменение успешного ответа описано в разделе [Перехват ответов](/ru/plugin/response-interceptor).
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.response_translator` равным true.
+
+```go
+TranslateResponse(context.Context, ResponseTransformRequest) (PayloadResponse, error)
 ```
 
-Исходный код:
+Имя метода ABI — `response.translate`.
 
-- `sdk/pluginapi/types.go`: `ResponseTranslator`, `ResponseTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `response.translate`
-- `internal/pluginhost/adapters.go`: `TranslateResponse`, `callResponseTranslator`
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/response-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodResponseTranslate`
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.response-translator.translate-response | `TranslateResponse`, ABI `response.translate`. |  | Параметр `ResponseTransformRequest`, возврат `PayloadResponse`. |
+| ResponseTransformRequest.FromFormat | Протокол источника. |  | Строка. |
+| ResponseTransformRequest.ToFormat | Целевой протокол. |  | Строка. |
+| ResponseTransformRequest.Model | ID модели. |  | Строка. |
+| ResponseTransformRequest.Stream | Является ли ответ потоковым. |  | Логическое значение. |
+| ResponseTransformRequest.OriginalRequest | Исходное тело запроса клиента. |  | `[]byte`. |
+| ResponseTransformRequest.TranslatedRequest | Тело запроса провайдера. |  | `[]byte`. |
+| ResponseTransformRequest.Body | Payload ответа для преобразования. |  | `[]byte`. |
+| PayloadResponse.Body | Преобразованный payload. |  | `[]byte`. |
 
-## Методы
+## 5. Типичные ошибки и границы
 
-| Метод | Назначение |
-| --- | --- |
-| `response.translate` | Преобразует `Body` ответа из `FromFormat` в `ToFormat`. |
+Когда возвращается `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500. Этот метод не меняет код состояния.
 
-## Запрос
+## 6. Связанные возможности
 
-```json
-{
-  "FromFormat": "codex",
-  "ToFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "OriginalRequest": "base64-client-body",
-  "TranslatedRequest": "base64-provider-request",
-  "Body": "base64-upstream-response"
-}
-```
+Один и тот же интерфейс приведения до и после преобразования описан в разделе [Нормализация ответа](/ru/plugin/response-normalizer).
 
-## Ответ
+## 7. Практический опыт
 
-```json
-{
-  "Body": "base64-client-response"
-}
-```
-
-## Замечания по разработке
-
-- `OriginalRequest` — исходный клиентский запрос, а `TranslatedRequest` — запрос, отправленный upstream. Их можно использовать для заполнения формата ответа.
-- Response translation должен выводить полный ответ, требуемый клиентским протоколом.
-- Возможность преобразования стриминговых ответов зависит от executor и возможностей формата хоста; плагин должен явно тестировать stream-сценарии.
+Пока нет.
 

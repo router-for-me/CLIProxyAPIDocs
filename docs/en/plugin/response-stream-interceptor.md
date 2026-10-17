@@ -1,83 +1,78 @@
 ---
-outline: 'deep'
+title: Streaming Response Interceptor
+feature_ids:
+  - plugin.stream-chunk-interceptor.intercept-stream-chunk
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Streaming Response Interceptor Capability
+# Streaming Response Interceptor
 
-The streaming response interceptor capability rewrites or drops SSE and other streaming response chunks before they are sent to the client, and can also adjust streaming response headers.
+`StreamChunkInterceptor` rewrites successful HTTP streaming chunks before they are handed downstream.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "response_stream_interceptor": true
-  }
-}
+The plugin first receives one initialization call that has only headers, then rewrites, drops, or replaces the payload chunk by chunk.
+
+## 2. Scope and non-goals
+
+It does not handle a non-streaming whole body. That is [Response Interceptor](/plugin/response-interceptor). It does not observe WebSocket.
+
+`StreamChunkHeaderInitIndex` is -1 and means header initialization, when there is not yet a payload chunk. Payload chunks have `ChunkIndex` starting at 0.
+
+## 3. How to configure or call it
+
+The registration key is `response_stream_interceptor`.
+
+```go
+InterceptStreamChunk(context.Context, StreamChunkInterceptRequest) (StreamChunkInterceptResponse, error)
 ```
 
-Source references:
+The ABI method name is `response.intercept_stream_chunk`.
 
-- `sdk/pluginapi/types.go`: `StreamChunkInterceptor`, `StreamChunkInterceptRequest`, `StreamChunkInterceptResponse`
-- `sdk/pluginabi/types.go`: `response.intercept_stream_chunk`
-- `internal/pluginhost/adapters.go`: `InterceptStreamChunk`
+The contract version affects fields on payload chunks. The header-initialization call is not affected by these two omission rules:
 
-Example reference:
+- When `schema_version` is greater than or equal to 3, payload chunks no longer carry `OriginalRequest` and `RequestBody`. Lower versions give a fresh copy every time.
+- When `schema_version` is greater than or equal to 5, payload chunks no longer carry `HistoryChunks`. Lower versions give a fresh copy every time.
 
-- `internal/pluginhost/adapters_test.go`: tests for stream chunk history, dropping chunks, and header initialization
+The current `SchemaVersion` is 6, so payload chunks omit both kinds of fields. A plugin that needs them should stay below the matching version.
 
-## Methods
+## 4. Details
 
-| Method | Purpose |
-| --- | --- |
-| `response.intercept_stream_chunk` | Rewrites streaming response header initialization or a single payload chunk. |
+The Default column matches the ledger `defaults` verbatim.
 
-## Request
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.stream-chunk-interceptor.intercept-stream-chunk | `InterceptStreamChunk`, ABI `response.intercept_stream_chunk`. |  | Parameter `StreamChunkInterceptRequest`, return `StreamChunkInterceptResponse`. |
+| StreamChunkInterceptRequest.RequestID | Execution ID. |  | String. |
+| StreamChunkInterceptRequest.SourceFormat | Client protocol. |  | String. |
+| StreamChunkInterceptRequest.Model | Execution model. |  | String. |
+| StreamChunkInterceptRequest.RequestedModel | Model requested by the client. |  | String. |
+| StreamChunkInterceptRequest.RequestHeaders | Request headers. |  | `http.Header`. |
+| StreamChunkInterceptRequest.ResponseHeaders | Current stream response headers. |  | `http.Header`. |
+| StreamChunkInterceptRequest.OriginalRequest | Original client body. |  | Header initialization always has a fresh copy. Payload chunks are nil at contract 3 and above. Read-only. |
+| StreamChunkInterceptRequest.RequestBody | Request payload that was actually executed. |  | The same version rule as `OriginalRequest`. Read-only. |
+| StreamChunkInterceptRequest.Body | Current chunk body. |  | `[]byte`. |
+| StreamChunkInterceptRequest.HistoryChunks | Recent chunks already handed downstream. |  | At most 64 chunks, and the total bytes do not exceed 1 MiB. Header initialization keeps them when non-empty. Payload chunks are nil at contract 5 and above. Read-only. |
+| StreamChunkInterceptRequest.ChunkIndex | Chunk index. |  | Payloads start at 0. -1 is header initialization. |
+| StreamChunkInterceptRequest.Metadata | Context snapshot. |  | Read-only, understood as JSON values. |
+| StreamChunkInterceptResponse.Headers | Replace stream headers of the same name. |  | Headers not mentioned are kept. |
+| StreamChunkInterceptResponse.Body | Replace the current chunk. |  | Replaced only when non-empty. |
+| StreamChunkInterceptResponse.ClearHeaders | Headers to delete first. |  | Deleted before `Headers` is applied. |
+| StreamChunkInterceptResponse.DropChunk | Do not hand the current payload chunk downstream. |  | A dropped chunk does not enter `HistoryChunks`. Header updates in the same return still take effect. |
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "RequestHeaders": {},
-  "ResponseHeaders": {},
-  "OriginalRequest": "base64-client-body",
-  "RequestBody": "base64-upstream-request",
-  "Body": "base64-current-chunk",
-  "HistoryChunks": ["base64-previous-chunk"],
-  "ChunkIndex": 0,
-  "Metadata": {}
-}
-```
+## 5. Common errors and limits
 
-`ChunkIndex` starts at `0`. `-1` means a header-only initialization call, where the response headers can be adjusted before payload chunks are handled.
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Response
+An empty `Body` does not replace the current chunk. `DropChunk` only skips delivery of a payload chunk. If the plugin caches the request body or history on its own side, it can use only the header-initialization call. It cannot expect every payload chunk of contract 6 to still carry them.
 
-```json
-{
-  "Headers": {
-    "X-Stream-Plugin": ["example"]
-  },
-  "Body": "base64-new-chunk",
-  "ClearHeaders": ["X-Old-Header"],
-  "DropChunk": false
-}
-```
+## 6. Related behavior
 
-Semantics:
+A successful non-streaming response is in [Response Interceptor](/plugin/response-interceptor). WebSocket frames are in [WebSocket Response Observer](/plugin/websocket-observer).
 
-- A non-empty `Body` replaces the current chunk.
-- `DropChunk: true` skips the current payload chunk and prevents it from being written into later `HistoryChunks`.
-- Header changes are still applied even when a chunk is dropped.
+## 7. Field experience
 
-## History Window
-
-`HistoryChunks` is a recent chunk snapshot retained by the host. It currently keeps up to 64 chunks and 1 MiB of history bytes. A plugin cannot depend on it containing the full stream history.
-
-## Development Notes
-
-- Do not make high-latency external requests for every chunk.
-- Preserve SSE protocol boundaries; do not break `data:`, blank lines, or terminal chunks.
-- Host model callbacks started with `host_callback_id` skip the originating plugin's own streaming interceptors.
+None yet.
 

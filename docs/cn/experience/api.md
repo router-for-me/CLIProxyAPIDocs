@@ -1,0 +1,160 @@
+---
+title: "接入 API 使用经验"
+related_feature_ids:
+  - access.api-keys.value
+  - api-keys.claude.models-thinking-levels
+  - api-keys.codex.base-url
+  - api-keys.gemini.models-thinking-levels
+  - api-keys.openai-compatibility.base-url
+  - api-keys.openai-compatibility.models-name
+  - api-keys.openai-compatibility.models-thinking-levels
+  - cli.server.antigravity-login
+  - cli.server.claude-login
+  - cli.server.codex-login
+  - cli.server.config
+  - cli.server.kimi-login
+  - mode.docker.compose
+  - models.codex-catalog.value
+  - multimedia.disable-image-generation.value
+  - multimedia.gpt-image-2-base-model.value
+  - oauth.auth-dir.value
+  - oauth.providers.aistudio-ws-auth
+  - observability.logs.request-log
+  - requests.payload.override-params
+  - route.v1.get-models
+  - route.v1.post-chat-completions
+  - route.v1.post-images-generations
+  - route.v1.post-messages
+  - route.v1.post-messages-count-tokens
+  - route.v1.post-responses
+  - route.v1.post-responses-compact
+  - route.v1beta.post-models-action
+source_issues:
+  - 13
+  - 22
+  - 37
+  - 73
+  - 158
+  - 181
+  - 203
+  - 228
+  - 269
+  - 308
+  - 313
+  - 335
+  - 391
+  - 573
+  - 599
+  - 637
+  - 712
+  - 740
+  - 741
+  - 751
+  - 978
+  - 1009
+  - 1012
+  - 1083
+  - 1173
+  - 1199
+  - 1240
+  - 1365
+  - 1401
+  - 1468
+  - 1476
+  - 1540
+  - 1692
+  - 1700
+  - 1913
+  - 1918
+  - 1961
+  - 2406
+  - 2459
+  - 2714
+  - 2753
+  - 2764
+  - 2986
+  - 3006
+  - 3012
+  - 3352
+  - 3365
+  - 3376
+  - 3443
+  - 3531
+  - 3628
+  - 3697
+  - 3738
+  - 3814
+  - 3816
+  - 3907
+  - 4092
+  - 4169
+  - 4172
+  - 4440
+  - 4594
+  - 4783
+  - 4933
+  - 4937
+  - 4963
+  - 4969
+  - 4987
+  - 5021
+  - 5028
+  - 5253
+  - 5301
+  - 5624
+  - 5647
+  - 5656
+  - 5711
+  - 6396
+  - 6623
+  - 6663
+  - 6674
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+---
+# 接入 API
+
+## 适用版本与边界
+
+本页收录的做法只对照钉住提交 `911f49cbd49f4fe2516979754a7488a3fd14fe64` 里仍然存在的配置、路由或命令。本页不是官方行为承诺。密钥、Cookie、邮箱、授权文件和用户请求正文都没有抄入。
+
+## 短做法
+
+- <a id="exp-api-require-client-key"></a>**调用公开路由时带上客户端密钥**（`exp.api.require-client-key`）。现象：客户端收到 Missing API key 或 Invalid API key，或者 /v1 完全不校验身份。做法：在 access.api-keys 配置客户端密钥，请求里发送其中一把，不要发送上游密钥。列表为空时公开路由不校验客户端密钥。Claude Code 的基址使用代理根路径，Codex 账号另外执行 --codex-login。来源 issue：[#13](https://github.com/router-for-me/CLIProxyAPI/issues/13)、[#22](https://github.com/router-for-me/CLIProxyAPI/issues/22)、[#37](https://github.com/router-for-me/CLIProxyAPI/issues/37)、[#181](https://github.com/router-for-me/CLIProxyAPI/issues/181)、[#228](https://github.com/router-for-me/CLIProxyAPI/issues/228)、[#573](https://github.com/router-for-me/CLIProxyAPI/issues/573)、[#637](https://github.com/router-for-me/CLIProxyAPI/issues/637)、[#2406](https://github.com/router-for-me/CLIProxyAPI/issues/2406)、[#2459](https://github.com/router-for-me/CLIProxyAPI/issues/2459)、[#2714](https://github.com/router-for-me/CLIProxyAPI/issues/2714)、[#3006](https://github.com/router-for-me/CLIProxyAPI/issues/3006)、[#3443](https://github.com/router-for-me/CLIProxyAPI/issues/3443)、[#3628](https://github.com/router-for-me/CLIProxyAPI/issues/3628)。对应官方页：[客户端密钥](/cn/api/access)、[Claude 登录](/cn/accounts/claude)、[Codex 登录](/cn/accounts/codex)、[命令行参数](/cn/introduction/install)、[OAuth 目录、别名与排除](/cn/accounts/oauth)、[日志与用量](/cn/operations/observability)、[OpenAI Chat](/cn/api/openai-chat)、[Claude Messages](/cn/api/claude-messages)、[Responses](/cn/api/responses)。
+- <a id="exp-api-replace-example-client-keys"></a>**换掉示例客户端密钥**（`exp.api.replace-example-client-keys`）。现象：公开服务仍使用示例配置里的 your-api-key-1 一类占位符。做法：把这些示例值换成自己的 access.api-keys，并让进程读到改过的配置。示例安全模式会拒绝仍含 your-api-key-1、your-api-key-2 或 your-api-key-3 的公开访问。来源 issue：[#751](https://github.com/router-for-me/CLIProxyAPI/issues/751)、[#3376](https://github.com/router-for-me/CLIProxyAPI/issues/3376)、[#3814](https://github.com/router-for-me/CLIProxyAPI/issues/3814)、[#4963](https://github.com/router-for-me/CLIProxyAPI/issues/4963)、[#4987](https://github.com/router-for-me/CLIProxyAPI/issues/4987)。对应官方页：[客户端密钥](/cn/api/access)、[使用 Docker Compose](/cn/docker/docker)。
+- <a id="exp-api-call-responses"></a>**Codex 客户端调用 responses 路由**（`exp.api.call-responses`）。现象：Codex 客户端走聊天补全，或请求了不存在的 /responses。做法：调用 POST /v1/responses。聊天补全会带上 Codex 不接受的字段。Codex 快速聊天是客户端自己的界面，代理只提供这条路由。来源 issue：[#1401](https://github.com/router-for-me/CLIProxyAPI/issues/1401)、[#1692](https://github.com/router-for-me/CLIProxyAPI/issues/1692)、[#1913](https://github.com/router-for-me/CLIProxyAPI/issues/1913)、[#2764](https://github.com/router-for-me/CLIProxyAPI/issues/2764)、[#2986](https://github.com/router-for-me/CLIProxyAPI/issues/2986)、[#3697](https://github.com/router-for-me/CLIProxyAPI/issues/3697)、[#5711](https://github.com/router-for-me/CLIProxyAPI/issues/5711)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[Codex 登录](/cn/accounts/codex)、[Responses](/cn/api/responses)。
+- <a id="exp-api-gemini-native-route"></a>**Gemini 图像和结构化输出走原生路由**（`exp.api.gemini-native-route`）。现象：OpenAI 兼容路径上的 Gemini 图像或结构化输出为空，或重复更早的轮次。做法：改用 /v1beta 的 generateContent。结构化输出把 response schema 放在该请求体里。不要改走 POST /v1/images/generations。Gemini CLI 图像模型已不可用时，用 AI Studio 或 Antigravity 登录后的这条路由。来源 issue：[#203](https://github.com/router-for-me/CLIProxyAPI/issues/203)、[#313](https://github.com/router-for-me/CLIProxyAPI/issues/313)、[#335](https://github.com/router-for-me/CLIProxyAPI/issues/335)、[#1012](https://github.com/router-for-me/CLIProxyAPI/issues/1012)、[#1476](https://github.com/router-for-me/CLIProxyAPI/issues/1476)、[#1918](https://github.com/router-for-me/CLIProxyAPI/issues/1918)。对应官方页：[AI Studio WebSocket 认证](/cn/configuration/provider/ai-studio)、[Gemini](/cn/api/gemini)。
+- <a id="exp-api-gemini-audio-chat"></a>**Gemini 音频走聊天补全**（`exp.api.gemini-audio-chat`）。现象：客户端要把 Gemini 音频交给本代理。做法：调用 POST /v1/chat/completions，把音频放在文件内容片段里。来源 issue：[#73](https://github.com/router-for-me/CLIProxyAPI/issues/73)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-copilot-chat-sampling"></a>**Copilot 走 /v1 时省略 top_p**（`exp.api.copilot-chat-sampling`）。现象：Copilot 的 OpenAI 兼容客户端要访问 Gemini。做法：把客户端指到 /v1。temperature 用 0，并且不要同时发送 top_p。来源 issue：[#158](https://github.com/router-for-me/CLIProxyAPI/issues/158)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-gemini-thinking-field"></a>**按上游字段转发 AI Studio 思考**（`exp.api.gemini-thinking-field`）。现象：AI Studio 思考没有按客户端期望生效。做法：在 /v1beta 的 generateContent 上转发调用方的思考设置，字段必须是上游接受的那一个。来源 issue：[#269](https://github.com/router-for-me/CLIProxyAPI/issues/269)。对应官方页：[模型思考能力](/cn/configuration/thinking-models)、[Gemini](/cn/api/gemini)。
+- <a id="exp-api-chat-reasoning-effort"></a>**聊天补全要带 reasoning effort 才流出思考**（`exp.api.chat-reasoning-effort`）。现象：Gemini 思考文本没有出现在聊天补全流里。做法：请求里要包含 reasoning effort，思考文本才会随聊天补全流出。来源 issue：[#308](https://github.com/router-for-me/CLIProxyAPI/issues/308)。对应官方页：[模型思考能力](/cn/configuration/thinking-models)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-use-listed-model-id"></a>**客户端使用目录中的模型 id**（`exp.api.use-listed-model-id`）。现象：客户端还在请求旧的预览名，或猜了一个目录里没有的 id。做法：从已经指向本代理的客户端调用目录中仍存在的 id，例如 gemini-3-pro-preview。不要继续使用已经换掉的 Antigravity 旧 id。来源 issue：[#391](https://github.com/router-for-me/CLIProxyAPI/issues/391)、[#3365](https://github.com/router-for-me/CLIProxyAPI/issues/3365)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-deepseek-max-tokens"></a>**DeepSeek 需要客户端降低 max token**（`exp.api.deepseek-max-tokens`）。现象：Claude Code 经 OpenAI 兼容段调用 DeepSeek 失败。做法：把客户端的 max token 降到该上游接受的范围。同一条 openai-compatibility 配置在范围内可以工作。来源 issue：[#599](https://github.com/router-for-me/CLIProxyAPI/issues/599)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-count-tokens-tool-shape"></a>**计数接口按上游方式计算工具**（`exp.api.count-tokens-tool-shape`）。现象：Claude Code 的 /context 显示工具 token 很少，或过早压缩。做法：这是 Google count-tokens 的计数方式，工具可能被算成一个 token。调用的是现有计数路由，不是代理把上下文改小。来源 issue：[#712](https://github.com/router-for-me/CLIProxyAPI/issues/712)、[#741](https://github.com/router-for-me/CLIProxyAPI/issues/741)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-claude-code-messages"></a>**Claude Code 必须调用 messages**（`exp.api.claude-code-messages`）。现象：Claude Code 的 token 状态一直是零。做法：客户端要调用 /v1/messages。指到聊天补全时，Claude Code 不会按消息协议统计。来源 issue：[#740](https://github.com/router-for-me/CLIProxyAPI/issues/740)。对应官方页：[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-antigravity-image-chat"></a>**Antigravity 图像走聊天补全**（`exp.api.antigravity-image-chat`）。现象：Gemini CLI 凭证的模型列表里没有图像模型。做法：图像调用使用 --antigravity-login 的凭证，并走聊天补全路由。来源 issue：[#978](https://github.com/router-for-me/CLIProxyAPI/issues/978)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-tool-call-ids"></a>**工具往返必须带上 id**（`exp.api.tool-call-ids`）。现象：gemini-claude 的工具回合在下一次调用失败。做法：functionCall 和 functionResponse 都要带同一个 id。来源 issue：[#1009](https://github.com/router-for-me/CLIProxyAPI/issues/1009)。对应官方页：[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-gemini-for-images"></a>**图像模型走 Gemini 协议**（`exp.api.gemini-for-images`）。现象：responses 路径上没有聊天图像输出。做法：图像模型调用 Gemini 协议，不要期待 responses 有官方映射。来源 issue：[#1083](https://github.com/router-for-me/CLIProxyAPI/issues/1083)。对应官方页：[Responses](/cn/api/responses)、[Gemini](/cn/api/gemini)。
+- <a id="exp-api-antigravity-claude-messages"></a>**Antigravity Claude 走 messages**（`exp.api.antigravity-claude-messages`）。现象：OpenAI 兼容路由丢掉了 Antigravity Claude 的工具调用。做法：让 OpenCode 调用 Anthropic messages 路由。模型名使用 claude-opus-4-6-thinking 这种不带 gemini- 前缀的 id。不要把同一对话混进原生 Anthropic 调用，否则思考预算不会套用。未选择展示方式时，空的思考块是预期结果。来源 issue：[#1173](https://github.com/router-for-me/CLIProxyAPI/issues/1173)、[#1199](https://github.com/router-for-me/CLIProxyAPI/issues/1199)、[#1468](https://github.com/router-for-me/CLIProxyAPI/issues/1468)、[#5253](https://github.com/router-for-me/CLIProxyAPI/issues/5253)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-restart-after-auth-removal"></a>**删除凭证后重启才更新模型列表**（`exp.api.restart-after-auth-removal`）。现象：已经从目录删除的凭证仍出现在 GET /v1/models。做法：删除 auth-dir 中的文件后重启进程，模型列表才会去掉它。来源 issue：[#1240](https://github.com/router-for-me/CLIProxyAPI/issues/1240)。对应官方页：[OAuth 目录、别名与排除](/cn/accounts/oauth)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-messages-usage-at-end"></a>**非 Claude 上游在消息末尾才给用量**（`exp.api.messages-usage-at-end`）。现象：messages 流的 message_start 里 input_tokens 是零。做法：只有 Claude 上游会在 message_start 填输入 token。OpenAI 兼容聊天上游没有初始用量对象，用量在结束时给出。上游省略用量时，历史也会是零。来源 issue：[#1365](https://github.com/router-for-me/CLIProxyAPI/issues/1365)、[#1700](https://github.com/router-for-me/CLIProxyAPI/issues/1700)、[#2753](https://github.com/router-for-me/CLIProxyAPI/issues/2753)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[日志与用量](/cn/operations/observability)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-opus-effort-field"></a>**Opus 努力值来自 output_config.effort**（`exp.api.opus-effort-field`）。现象：想给 Claude Opus 4.6 单独做思考模型。做法：messages 路由已经读取 output_config.effort。用这个字段，而不是再造一个模型 id。来源 issue：[#1540](https://github.com/router-for-me/CLIProxyAPI/issues/1540)。对应官方页：[模型思考能力](/cn/configuration/thinking-models)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-avoid-chat-translation"></a>**能直连上游协议时不要经聊天补全转换**（`exp.api.avoid-chat-translation`）。现象：聊天补全占用很高的 CPU。做法：升级到钉住版本，并让客户端使用上游原协议。协议转换比直连更耗 CPU。来源 issue：[#1961](https://github.com/router-for-me/CLIProxyAPI/issues/1961)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-image-base-model"></a>**图像调用记在基础聊天模型上**（`exp.api.image-base-model`）。现象：gpt-image-2 的用量没有记在图像模型名下。做法：图像生成是基础聊天模型上的工具，记录使用配置的基础模型。透明背景由图像路由上的 background 字段表示，代理不翻译竖向视频尺寸。来源 issue：[#3012](https://github.com/router-for-me/CLIProxyAPI/issues/3012)、[#3907](https://github.com/router-for-me/CLIProxyAPI/issues/3907)、[#4937](https://github.com/router-for-me/CLIProxyAPI/issues/4937)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[图像、语音与视频](/cn/api/media)。
+- <a id="exp-api-responses-stream-shape"></a>**responses 流不使用 DONE 作为结束**（`exp.api.responses-stream-shape`）。现象：客户端等待 responses 的 DONE 标记，或在首个事件前看到 HTTP 200。做法：responses 协议不发送 DONE。流可以在首个事件前返回 200，因为代理不等待那段时间。若另一个 OpenAI 流带有 DONE，它必须位于最后，后面的块会被移到它前面。来源 issue：[#3352](https://github.com/router-for-me/CLIProxyAPI/issues/3352)、[#4594](https://github.com/router-for-me/CLIProxyAPI/issues/4594)、[#4783](https://github.com/router-for-me/CLIProxyAPI/issues/4783)。对应官方页：[Responses](/cn/api/responses)。
+- <a id="exp-api-disable-image-tool-injection"></a>**停止注入图像工具**（`exp.api.disable-image-tool-injection`）。现象：混合的免费和付费 Codex 凭证破坏了提示缓存，或 gpt-5.5 不能使用。做法：用 multimedia.disable-image-generation 停止注入 image_generation。true 会同时关闭图像路由。只停止注入时按功能页使用 chat 或 passthrough。来源 issue：[#3531](https://github.com/router-for-me/CLIProxyAPI/issues/3531)、[#4172](https://github.com/router-for-me/CLIProxyAPI/issues/4172)、[#4440](https://github.com/router-for-me/CLIProxyAPI/issues/4440)。对应官方页：[Codex 登录](/cn/accounts/codex)、[模型目录](/cn/introduction/models)、[图像、语音与视频](/cn/api/media)、[Responses](/cn/api/responses)。
+- <a id="exp-api-deepseek-no-openai-thinking"></a>**第三方 DeepSeek 不会填 OpenAI 思考字段**（`exp.api.deepseek-no-openai-thinking`）。现象：聊天补全里没有出现 OpenAI 风格的思考字段。做法：OpenAI 兼容的 DeepSeek 凭证不会代填该字段。思考是否启用以该模型条目为准，聊天样式的覆盖规则对不上 responses 的 reasoning.effort。来源 issue：[#3738](https://github.com/router-for-me/CLIProxyAPI/issues/3738)、[#4933](https://github.com/router-for-me/CLIProxyAPI/issues/4933)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[模型思考能力](/cn/configuration/thinking-models)、[覆盖载荷规则](/cn/routing/requests-override)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-compaction-needs-model"></a>**压缩需要上游提供压缩模型**（`exp.api.compaction-needs-model`）。现象：Codex 压缩失败。做法：上游目录里要有压缩所用的模型。OpenAI 兼容目录没有该模型时不能压缩。来源 issue：[#3816](https://github.com/router-for-me/CLIProxyAPI/issues/3816)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)、[Responses](/cn/api/responses)。
+- <a id="exp-api-responses-instructions"></a>**responses 用 instructions 代替 system**（`exp.api.responses-instructions`）。现象：请求里的 system 角色被拒绝。做法：responses 协议没有 system 角色。把说明放进 instructions。显式的 web search sources 和带命名空间的自定义工具调用会按原样保留。来源 issue：[#4092](https://github.com/router-for-me/CLIProxyAPI/issues/4092)、[#5021](https://github.com/router-for-me/CLIProxyAPI/issues/5021)、[#6623](https://github.com/router-for-me/CLIProxyAPI/issues/6623)。对应官方页：[Codex 登录](/cn/accounts/codex)、[Responses](/cn/api/responses)。
+- <a id="exp-api-no-synthetic-reasoning"></a>**目录不返回思考文本时不要期待代理补写**（`exp.api.no-synthetic-reasoning`）。现象：Claude Code 看不到 gpt-5.6 的推理块。做法：模型目录不提供思考文本时，代理不会为了显示而补写。Gemini 推理文本也按上游原样转发。来源 issue：[#4169](https://github.com/router-for-me/CLIProxyAPI/issues/4169)、[#6663](https://github.com/router-for-me/CLIProxyAPI/issues/6663)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[Codex 登录](/cn/accounts/codex)、[模型目录](/cn/introduction/models)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-reasoning-summary-vs-effort"></a>**推理摘要只在请求要求时出现**（`exp.api.reasoning-summary-vs-effort`）。现象：responses 没有带上推理摘要，聊天补全却有。做法：responses 只在请求要求 summary 时包含推理。聊天补全从 reasoning effort 推断。来源 issue：[#4969](https://github.com/router-for-me/CLIProxyAPI/issues/4969)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)、[Responses](/cn/api/responses)。
+- <a id="exp-api-chat-done-marker"></a>**聊天补全流以 DONE 结束**（`exp.api.chat-done-marker`）。现象：流在没有 DONE 时被客户端当成提前关闭。做法：OpenAI 聊天补全流要求以 DONE 结束。没有这个标记就会被看成已关闭。来源 issue：[#5028](https://github.com/router-for-me/CLIProxyAPI/issues/5028)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-drop-unsupported-claude-fields"></a>**发往 Codex 前丢掉不支持的 Claude 字段**（`exp.api.drop-unsupported-claude-fields`）。现象：Claude 字段导致 Codex 请求失败。做法：stop sequences 一类 Codex 不接受的字段会被去掉，以便继续投递。来源 issue：[#5301](https://github.com/router-for-me/CLIProxyAPI/issues/5301)。对应官方页：[Codex 登录](/cn/accounts/codex)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-api-chat-image-model"></a>**图像对话模型仍走聊天补全**（`exp.api.chat-image-model`）。现象：gemini-3.1-flash-image 被发到单独的图像路由。做法：把它当作普通聊天图像模型，调用聊天补全，而不是另一条图像路由。来源 issue：[#5624](https://github.com/router-for-me/CLIProxyAPI/issues/5624)。对应官方页：[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-api-kimi-native-responses"></a>**Kimi responses 保持 Kimi 自己的工具**（`exp.api.kimi-native-responses`）。现象：Codex 工具类型在 Kimi responses 上被改写。做法：Kimi 登录后的 responses 转发到 Kimi 自己的端点。Codex 专用工具和 tool_search 不会被改写成别的类型。来源 issue：[#5647](https://github.com/router-for-me/CLIProxyAPI/issues/5647)、[#5656](https://github.com/router-for-me/CLIProxyAPI/issues/5656)。对应官方页：[Kimi 登录](/cn/accounts/kimi)、[Responses](/cn/api/responses)。
+- <a id="exp-api-one-client-key-endpoint"></a>**客户端密钥共用一个代理入口**（`exp.api.one-client-key-endpoint`）。现象：想按项目拆成多个代理入口。做法：钉住版本没有分项目入口。access.api-keys 里的密钥共用同一组公开路由。来源 issue：[#6396](https://github.com/router-for-me/CLIProxyAPI/issues/6396)。对应官方页：[客户端密钥](/cn/api/access)。
+- <a id="exp-api-compat-always-chat"></a>**兼容凭证固定调用聊天补全**（`exp.api.compat-always-chat`）。现象：OpenAI 兼容凭证没有走 responses。做法：这类凭证始终调用上游的聊天补全端点。responses 上游要改配到 Codex API key。来源 issue：[#6674](https://github.com/router-for-me/CLIProxyAPI/issues/6674)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[OpenAI Chat](/cn/api/openai-chat)。
+
+## 独立页
+
+这一区域没有需要独立成页的做法。

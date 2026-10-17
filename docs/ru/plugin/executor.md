@@ -1,114 +1,126 @@
 ---
-outline: 'deep'
+title: Исполнитель
+feature_ids:
+  - plugin.provider-executor.identifier
+  - plugin.provider-executor.execute
+  - plugin.provider-executor.execute-stream
+  - plugin.provider-executor.count-tokens
+  - plugin.provider-executor.http-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность исполнителя
+# Исполнитель
 
-Возможность исполнителя фактически отправляет запросы модели upstream-провайдеру или локальному backend. Это возможность, наиболее близкая к upstream-адаптеру.
+`ProviderExecutor` отправляет запрос в upstream или локальный бэкенд и предоставляет поток, подсчёт и исходный HTTP.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
+
+После того как хост выбрал учётные данные и протокол, плагин выполняет непотоковое выполнение, потоковое выполнение, подсчёт токенов или один собственный HTTP-запрос исполнителя.
+
+## 2. Когда применимо и чего здесь нет
+
+Все пять методов принадлежат этому одному интерфейсу. Преобразование протокола — не обязанность исполнителя. См. страницы запроса и ответа. HTTP upstream должен использовать `HTTPClient` из параметров, а не обходить хост из плагина. См. [Callback хоста](/ru/plugin/host-callbacks).
+
+Исполнитель должен объявить хотя бы один входной формат и один выходной. Пустой `executor_model_scope` считается `both`. Нераспознанное значение тоже считается `both`. `both` одновременно покрывает статические модели и модели учётных данных OAuth. `static` — только статические модели не OAuth. `oauth` — только модели учётных данных OAuth.
+
+Имена форматов сначала нормализуются по псевдонимам: `chat-completions`, `chat_completions`, `openai-chat-completions` и `openai_chat_completions` — все это `openai`. `responses`, `openai-responses` и `openai_responses` — все это `openai-response`. `anthropic` — это `claude`. Пустая строка и `none` отбрасываются. Остальные имена используются после обрезки крайних пробелов. Публичные форматы в `sdk/translator` также включают `gemini`, `codex`, `antigravity` и `interactions`.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.executor` равным true и запишите область и форматы.
 
 ```json
 {
-  "capabilities": {
-    "executor": true,
-    "executor_model_scope": "both",
-    "executor_input_formats": ["chat-completions"],
-    "executor_output_formats": ["chat-completions"]
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-executor",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-executor"
+    },
+    "capabilities": {
+      "executor": true,
+      "executor_model_scope": "both",
+      "executor_input_formats": ["openai"],
+      "executor_output_formats": ["openai"]
+    }
   }
 }
 ```
 
-Исходный код:
-
-- `sdk/pluginapi/types.go`: `ProviderExecutor`, `ExecutorRequest`, `ExecutorResponse`, `ExecutorStreamResponse`, `ExecutorHTTPRequest`
-- `sdk/pluginabi/types.go`: `executor.identifier`, `executor.execute`, `executor.execute_stream`, `executor.count_tokens`, `executor.http_request`
-- `internal/pluginhost/adapters.go`: регистрация исполнителя, выбор форматов протокола и мост выполнения
-
-Примеры:
-
-- `examples/plugin/executor/go/main.go`
-- `examples/plugin/protocol-format/go/main.go`
-- `examples/plugin/simple/go/main.go`: методы, связанные с executor
-
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `executor.identifier` | Возвращает идентификатор provider, за который отвечает этот исполнитель. |
-| `executor.execute` | Выполняет нестриминговый запрос модели. |
-| `executor.execute_stream` | Выполняет стриминговый запрос модели. |
-| `executor.count_tokens` | Обрабатывает запрос подсчёта токенов. |
-| `executor.http_request` | Входная точка для HTTP-запросов, принадлежащих исполнителю. |
-
-## Форматы протокола
-
-`executor_input_formats` объявляет протоколы запросов, которые исполнитель может принимать напрямую. `executor_output_formats` объявляет протоколы ответов, которые исполнитель выдаёт напрямую.
-
-Частые значения:
-
-- `chat-completions`
-- `responses`
-- `anthropic`
-
-`examples/plugin/protocol-format` показывает объявление с входом `chat-completions` и выходом `responses`.
-
-## Область моделей
-
-`executor_model_scope` управляет связью исполнителя с путём регистрации моделей:
-
-| Значение | Описание |
-| --- | --- |
-| `static` | Исполнитель обслуживает только статические модели. |
-| `oauth` | Исполнитель обслуживает только модели, привязанные к OAuth или учётным данным. |
-| `both` | Исполнитель обслуживает и статические, и привязанные к учётным данным модели. |
-
-Пустое значение обрабатывается как `both`.
-
-## ExecutorRequest
-
-Запрос выполнения содержит:
-
-```json
-{
-  "AuthID": "auth-1",
-  "AuthProvider": "plugin-example",
-  "Model": "plugin-example-model",
-  "Format": "chat-completions",
-  "Stream": false,
-  "Headers": {},
-  "Query": {},
-  "OriginalRequest": "base64-client-body",
-  "SourceFormat": "chat-completions",
-  "Payload": "base64-provider-payload",
-  "StorageJSON": "base64-auth-json",
-  "AuthMetadata": {},
-  "AuthAttributes": {}
-}
+```go
+Identifier() string
+Execute(context.Context, ExecutorRequest) (ExecutorResponse, error)
+ExecuteStream(context.Context, ExecutorRequest) (ExecutorStreamResponse, error)
+CountTokens(context.Context, ExecutorRequest) (ExecutorResponse, error)
+HttpRequest(context.Context, ExecutorHTTPRequest) (ExecutorHTTPResponse, error)
 ```
 
-Когда плагин отправляет HTTP-запросы upstream, он должен использовать HTTP-клиент хоста через `host.http.*`. Так логирование запросов, proxy, транспортная политика и контекст учётных данных остаются под контролем хоста.
+Имена методов ABI — `executor.identifier`, `executor.execute`, `executor.execute_stream`, `executor.count_tokens` и `executor.http_request`. Поле результата идентификатора — `identifier`.
 
-## Ответы
+## 4. Подробности
 
-Нестриминговый ответ:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-```json
-{
-  "Payload": "base64-response-body",
-  "Headers": {
-    "content-type": ["application/json"]
-  },
-  "Metadata": {}
-}
-```
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.provider-executor.identifier | `Identifier`, ABI `executor.identifier`. |  | Без параметров. Возвращает строку. Ошибка или пустое значение считаются пустой строкой. |
+| plugin.provider-executor.execute | `Execute`, ABI `executor.execute`. |  | Параметр `ExecutorRequest`, возврат `ExecutorResponse`. |
+| plugin.provider-executor.execute-stream | `ExecuteStream`, ABI `executor.execute_stream`. |  | Параметр `ExecutorRequest`, возврат `ExecutorStreamResponse`. |
+| plugin.provider-executor.count-tokens | `CountTokens`, ABI `executor.count_tokens`. |  | Параметр `ExecutorRequest`, возврат `ExecutorResponse`. |
+| plugin.provider-executor.http-request | `HttpRequest`, ABI `executor.http_request`. |  | Параметр `ExecutorHTTPRequest`, возврат `ExecutorHTTPResponse`. |
+| ExecutorRequest.AuthID | ID выбранных учётных данных. |  | Строка. |
+| ExecutorRequest.AuthProvider | Провайдер учётных данных. |  | Строка. |
+| ExecutorRequest.Model | Запрошенная модель. |  | Строка. |
+| ExecutorRequest.Format | Целевой формат протокола. |  | Должен попадать в объявленные форматы. |
+| ExecutorRequest.Stream | Потоковый ли запрос. |  | Логическое значение. |
+| ExecutorRequest.Alt | Запасной маршрут или суффикс режима. |  | Строка. |
+| ExecutorRequest.Headers | Заголовки, переданные исполнителю. |  | `http.Header`. |
+| ExecutorRequest.Query | Параметры запроса. |  | `url.Values`. |
+| ExecutorRequest.OriginalRequest | Исходное тело клиента. |  | `[]byte`. |
+| ExecutorRequest.SourceFormat | Исходный протокол клиента. |  | Строка. |
+| ExecutorRequest.Payload | Уже преобразованный payload провайдера. |  | `[]byte`. |
+| ExecutorRequest.Metadata | Мешок расширений. |  | `map[string]any`. |
+| ExecutorRequest.StorageJSON | Хранилище плагина для этих учётных данных. |  | `[]byte`. |
+| ExecutorRequest.AuthMetadata | Метаданные учётных данных, которые хост может менять. |  | `map[string]any`. |
+| ExecutorRequest.AuthAttributes | Неизменяемые атрибуты. |  | `map[string]string`. |
+| ExecutorRequest.HTTPClient | HTTP-клиент хоста. |  | JSON игнорирует. |
+| ExecutorResponse.Payload | Исходное тело ответа. |  | `[]byte`. |
+| ExecutorResponse.Headers | Заголовки ответа для пересылки или проверки. |  | `http.Header`. |
+| ExecutorResponse.Metadata | Данные расширения исполнителя. |  | `map[string]any`. |
+| ExecutorStreamResponse.Headers | Заголовки ответа, имеющиеся до начала блоков. |  | `http.Header`. |
+| ExecutorStreamResponse.Chunks | Потоковые блоки, пока канал не закрыт. |  | Элементы — `ExecutorStreamChunk`. |
+| ExecutorStreamChunk.Payload | Один блок исходных байтов. |  | `[]byte`. |
+| ExecutorStreamChunk.Err | Ошибка, приложенная к этому блоку. |  | `error`. |
+| ExecutorHTTPRequest.AuthID | ID выбранных учётных данных. |  | Строка. |
+| ExecutorHTTPRequest.AuthProvider | Провайдер учётных данных. |  | Строка. |
+| ExecutorHTTPRequest.Method | Метод HTTP. |  | Строка. |
+| ExecutorHTTPRequest.URL | Абсолютный адрес upstream. |  | Строка. |
+| ExecutorHTTPRequest.Headers | Заголовки запроса. |  | `http.Header`. |
+| ExecutorHTTPRequest.Body | Исходное тело. |  | `[]byte`. |
+| ExecutorHTTPRequest.StorageJSON | Хранилище учётных данных плагина. |  | `[]byte`. |
+| ExecutorHTTPRequest.Metadata | Метаданные, которые хост может менять. |  | `map[string]any`. |
+| ExecutorHTTPRequest.Attributes | Неизменяемые атрибуты. |  | `map[string]string`. |
+| ExecutorHTTPRequest.HTTPClient | HTTP-клиент хоста. |  | JSON игнорирует. |
+| ExecutorHTTPResponse.StatusCode | Код состояния upstream. |  | Целое число. |
+| ExecutorHTTPResponse.Headers | Заголовки ответа upstream. |  | `http.Header`. |
+| ExecutorHTTPResponse.Body | Исходное тело ответа. |  | `[]byte`. |
 
-Стриминговый ответ возвращает `Headers` и поток chunk. Примеры C ABI помещают конечные chunk в массив ответа, а хост преобразует их во внутренний поток.
+## 5. Типичные ошибки и границы
 
-## Замечания по разработке
+Если не осталось ни одного входного формата, ошибка — `plugin executor <identifier> declares no input formats`. Если формат запроса не входит в объявленные, ошибка — `plugin executor <identifier> does not support input format "<format>"`. Выходным форматам соответствуют `declares no output formats` и `does not support output format`.
 
-- Исполнитель должен объявить минимум один входной и один выходной формат.
-- `Payload` уже переведён в тело запроса целевого протокола; не угадывайте исходный клиентский протокол заново.
-- Если нужно переиспользовать маршрут моделей хоста, не пишите executor. Используйте `host.model.*` из [callback хоста](./host-callbacks).
-- Не сохраняйте и не печатайте upstream-секреты в плагине. Данные учётных данных из `StorageJSON` нужно использовать и сразу отбросить.
+Когда метод возвращает `error`, опущенный или равный 0 ABI `http_status` считается HTTP 500. `HTTPClient` не входит в JSON.
+
+## 6. Связанные возможности
+
+Отправка запроса в этот исполнитель описана в разделе [Маршрутизатор моделей](/ru/plugin/model-router). Исходящий HTTP — в разделе [Callback хоста](/ru/plugin/host-callbacks).
+
+## 7. Практический опыт
+
+Пока нет.
 

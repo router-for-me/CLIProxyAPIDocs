@@ -1,89 +1,72 @@
 ---
-outline: 'deep'
+title: 宿主 HTTP 客户端
+feature_ids:
+  - plugin.host-http-client.do
+  - plugin.host-http-client.do-stream
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 宿主回调
+# 宿主 HTTP 客户端
 
-宿主回调是插件调用 CLIProxyAPI 宿主能力的机制。它不是插件能力字段，但对执行器、Management API、凭证和资源页面类插件非常重要。
+`HostHTTPClient` 是宿主交给插件的公开 HTTP 客户端。本页只写分配在这里的两个方法。
 
-## 方法清单
+## 1. 这段解决什么问题
 
-源码参考：
+插件通过宿主发非流式或流式上游请求，从而沿用宿主的传输策略。执行器在请求日志打开时，也靠它留下出站请求和原始上游响应。
 
-- `sdk/pluginabi/types.go`：所有 `host.*` 方法名
-- `sdk/pluginapi/types.go`：HTTP、模型执行和凭证文件请求/响应结构
-- `internal/pluginhost/host_callbacks.go`：宿主回调实现
+## 2. 适用条件与不做的事
 
-示例参考：
+只有 `Do` 与 `DoStream`。没有分配到本页的其他宿主回调不在这里说明，也不写宿主私有实现。
 
-- `examples/plugin/host-callback/go/main.go`
-- `examples/plugin/host-callback-auth-files/go/main.go`
-- `examples/plugin/host-model-callback/go/main.go`
+调用点出现在凭证登录、刷新、按凭证发现模型、执行器和额度查询的请求结构里，字段名都是 `HTTPClient`，并且 `json` 标签为 `-`，不会出现在 ABI 请求 JSON 中。Go 插件直接调用这个接口。
 
-## HTTP 回调
+## 3. 怎么配置或怎么调用
 
-| 方法 | 作用 |
-| --- | --- |
-| `host.http.do` | 通过宿主执行普通 HTTP 请求。 |
-| `host.http.do_stream` | 通过宿主执行流式 HTTP 请求。 |
-| `host.http.stream_read` | 读取宿主持有的 HTTP 流。 |
-| `host.http.stream_close` | 关闭宿主持有的 HTTP 流。 |
+这不是插件在 `capabilities` 里打开的能力，而是宿主传入的客户端。
 
-插件应优先用这些方法访问外部 HTTP 服务，这样代理、传输策略和请求日志仍由宿主管理。
-
-## 模型执行回调
-
-| 方法 | 作用 |
-| --- | --- |
-| `host.model.execute` | 发起非流式模型请求。 |
-| `host.model.execute_stream` | 发起流式模型请求，返回 `stream_id`。 |
-| `host.model.stream_read` | 读取模型流 chunk。 |
-| `host.model.stream_close` | 关闭模型流。 |
-
-请求核心字段：
-
-```json
-{
-  "entry_protocol": "openai",
-  "exit_protocol": "openai",
-  "model": "gpt-5.5",
-  "stream": false,
-  "body": "base64-request-body",
-  "headers": {},
-  "query": {},
-  "alt": ""
-}
+```go
+Do(context.Context, HTTPRequest) (HTTPResponse, error)
+DoStream(context.Context, HTTPRequest) (HTTPStreamResponse, error)
 ```
 
-## host_callback_id
+ABI 方法名是 `host.http.do` 与 `host.http.do_stream`。
 
-当插件在 `management.handle` 等宿主调用上下文中调用 `host.model.*` 时，应转发请求中的 `host_callback_id`。
+## 4. 细项说明
 
-宿主会用这个 ID 识别发起回调的插件，并在嵌套模型执行中跳过该插件自己的请求、响应和流式拦截器，避免递归调用自己。其他已启用插件仍可处理这次嵌套请求。
+「默认值」与台账 defaults 逐字相同。
 
-## 凭证文件回调
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.host-http-client.do | `Do`，ABI `host.http.do`。 |  | 参数 `HTTPRequest`，返回 `HTTPResponse`。 |
+| plugin.host-http-client.do-stream | `DoStream`，ABI `host.http.do_stream`。 |  | 参数 `HTTPRequest`，返回 `HTTPStreamResponse`。 |
+| HTTPRequest.Method | HTTP 方法。 |  | 字符串。 |
+| HTTPRequest.URL | 绝对上游地址。 |  | 字符串。 |
+| HTTPRequest.Headers | 请求头。 |  | `http.Header`。 |
+| HTTPRequest.Body | 原始正文。 |  | `[]byte`，JSON 中为 base64。 |
+| HTTPRequest.WireProfile | 可选的线上表示。 |  | 指针为空则不改。JSON 名 `wire_profile`。 |
+| HTTPWireProfile.HTTP1Only | 只用 HTTP/1.1，不协商 HTTP/2。 |  | JSON 名 `http1_only`。 |
+| HTTPWireProfile.DisableAutoCompression | 关闭透明解压和自动 `Accept-Encoding`。 |  | JSON 名 `disable_auto_compression`。 |
+| HTTPWireProfile.HeaderProfile | 希望的头名顺序和大小写。 |  | JSON 名 `header_profile`，`[]string`。 |
+| HTTPResponse.StatusCode | 上游状态码。 |  | 整数。 |
+| HTTPResponse.Headers | 上游响应头。 |  | `http.Header`。 |
+| HTTPResponse.Body | 原始响应正文。 |  | `[]byte`。 |
+| HTTPStreamResponse.StatusCode | 上游状态码。 |  | 整数。 |
+| HTTPStreamResponse.Headers | 上游响应头。 |  | `http.Header`。 |
+| HTTPStreamResponse.Chunks | 流式块，直到通道关闭。 |  | 元素为 `HTTPStreamChunk`。 |
+| HTTPStreamChunk.Payload | 一块原始字节。 |  | `[]byte`。 |
+| HTTPStreamChunk.Err | 这一块附带的错误。 |  | `error`。 |
 
-| 方法 | 作用 |
-| --- | --- |
-| `host.auth.list` | 列出宿主凭证记录。 |
-| `host.auth.get` | 按 auth index 读取物理凭证 JSON。 |
-| `host.auth.get_runtime` | 按 auth index 读取运行时凭证信息。 |
-| `host.auth.save` | 写入凭证 JSON 并更新运行时凭证记录。 |
+## 5. 常见错误与边界
 
-`examples/plugin/host-callback-auth-files` 展示了通过资源页面调用这些方法。
+两个方法都返回 `error`。ABI 失败信封的 `http_status` 省略或为 0 时按 HTTP 500 处理。
 
-## 流桥和日志
+`URL` 是绝对地址。`WireProfile` 为空指针时不附加线上配置。流式结果通过 `Chunks` 通道交付，通道关闭表示结束。
 
-| 方法 | 作用 |
-| --- | --- |
-| `host.stream.emit` | 执行器插件向宿主发送流式 chunk。 |
-| `host.stream.close` | 执行器插件关闭流。 |
-| `host.log` | 通过宿主日志输出。 |
+## 6. 相关功能
 
-## 开发注意
+执行器必须使用该客户端访问上游，见 [执行器](/cn/plugin/executor)。登录和刷新见 [凭证提供方](/cn/plugin/auth-provider)。
 
-- 流式回调使用后应显式调用对应 close 方法。
-- 不要通过宿主回调绕过插件自身的安全边界；插件仍是可信进程内代码。
-- 不要把凭证 JSON、token 或用户请求体写入日志。
-- 不要把读取凭证、写入凭证或其他特权宿主回调直接暴露成未鉴权的资源 GET query 参数。资源页需要提供这些操作的用户控件时，应由同源 JavaScript 读取受信任的管理中心存储，再调用带鉴权的 `/v0/management/...` 路由。
-- 能复用宿主模型执行链路时，优先用 `host.model.*`，不要复制宿主凭证到插件里。
+## 7. 使用经验
+
+暂无

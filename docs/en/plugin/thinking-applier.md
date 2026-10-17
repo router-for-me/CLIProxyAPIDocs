@@ -1,77 +1,64 @@
 ---
-outline: 'deep'
+title: Thinking Applier
+feature_ids:
+  - plugin.thinking-applier.identifier
+  - plugin.thinking-applier.apply-thinking
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Thinking Applier Capability
+# Thinking Applier
 
-The Thinking applier capability writes a thinking configuration that the host has already parsed, normalized, and validated into a provider payload. It preserves the architecture boundary of "canonical thinking configuration to provider-specific fields".
+`ThinkingApplier` writes an already normalized thinking configuration into the provider payload.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "thinking_applier": true
-  }
-}
+After the host finishes parsing the thinking mode, the plugin rewrites the provider fields in the body according to its own provider key.
+
+## 2. Scope and non-goals
+
+It does not parse the thinking suffix in the user request. It only receives an already normalized `ThinkingConfig`. The only modes are the four canonical values `budget`, `level`, `none`, and `auto`.
+
+## 3. How to configure or call it
+
+Set `capabilities.thinking_applier` to true.
+
+```go
+Identifier() string
+ApplyThinking(context.Context, ThinkingApplyRequest) (PayloadResponse, error)
 ```
 
-Source references:
+The ABI method names are `thinking.identifier` and `thinking.apply`. The identifier result field is `identifier`, and it should return the provider key handled by this applier.
 
-- `sdk/pluginapi/types.go`: `ThinkingApplier`, `ThinkingApplyRequest`, `ThinkingConfig`
-- `sdk/pluginabi/types.go`: `thinking.identifier`, `thinking.apply`
-- `internal/pluginhost/adapters.go`: Thinking applier registration and invocation
-- `internal/thinking/`: host thinking parsing, normalization, and validation flow
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `examples/plugin/thinking/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodThinkingIdentifier`, `MethodThinkingApply`
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.thinking-applier.identifier | `Identifier`, ABI `thinking.identifier`. |  | No parameters. Returns the provider key. Failure or blank is treated as an empty string. |
+| plugin.thinking-applier.apply-thinking | `ApplyThinking`, ABI `thinking.apply`. |  | Parameter `ThinkingApplyRequest`, return `PayloadResponse`. |
+| ThinkingApplyRequest.Provider | Provider key being applied. |  | Already normalized. |
+| ThinkingApplyRequest.Model | Associated model. |  | `ModelInfo`. Fields are in [Model Registrar](/plugin/model-registrar). |
+| ThinkingApplyRequest.Config | Parsed canonical thinking configuration. |  | `Mode`, `Budget`, `Level`. |
+| ThinkingApplyRequest.Body | Provider payload to rewrite. |  | `[]byte`. |
+| ThinkingConfig.Mode | Canonical mode. |  | `budget`, `level`, `none`, or `auto`. |
+| ThinkingConfig.Budget | Normalized token budget. |  | Integer. |
+| ThinkingConfig.Level | Normalized named level. |  | String. |
+| PayloadResponse.Body | Payload after the provider fields are written. |  | `[]byte`. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `thinking.identifier` | Returns the provider identifier handled by this plugin. |
-| `thinking.apply` | Applies the canonical thinking configuration to a provider payload. |
+When `ApplyThinking` returns `error`, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Request
+An empty identifier cannot be matched by provider. A `Mode` outside the four canonical values is not input this interface is supposed to parse again.
 
-```json
-{
-  "Provider": "plugin-example",
-  "Model": {
-    "ID": "plugin-example-model",
-    "Thinking": {
-      "Min": 0,
-      "Max": 32768,
-      "ZeroAllowed": true,
-      "DynamicAllowed": true,
-      "Levels": ["low", "medium", "high"]
-    }
-  },
-  "Config": {
-    "Mode": "budget",
-    "Budget": 1024,
-    "Level": ""
-  },
-  "Body": "base64-provider-payload"
-}
-```
+## 6. Related behavior
 
-`Config` is already the host-normalized configuration. The plugin does not need to parse suffixes or raw thinking input from the request body again.
+The thinking capability field `ThinkingSupport` on a model is in [Model Registrar](/plugin/model-registrar).
 
-## Response
+## 7. Field experience
 
-```json
-{
-  "Body": "base64-provider-payload-with-thinking"
-}
-```
-
-## Development Notes
-
-- A plugin should only handle the provider returned by its `thinking.identifier`.
-- Do not bypass host thinking validation; assume `Config` is already canonical.
-- Do not perform request translation, credential selection, or upstream execution inside the Thinking applier capability.
+None yet.
 

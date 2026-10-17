@@ -1,63 +1,57 @@
 ---
-outline: 'deep'
+title: 响应转换
+feature_ids:
+  - plugin.response-translator.translate-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 响应转换能力
+# 响应转换
 
-响应转换能力用于把规范响应转换回客户端请求的目标协议。它与 [请求转换能力](./request-translator) 对称，发生在上游响应返回后、交给客户端前。
+`ResponseTranslator` 把规范形响应载荷转换成另一种格式。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "response_translator": true
-  }
-}
+插件同时看到原始客户端请求、已转换的提供方请求和待转换的响应正文，返回目标格式的字节。
+
+## 2. 适用条件与不做的事
+
+只有 `TranslateResponse`。规范形收拢由 [响应规整](/cn/plugin/response-normalizer) 负责，并且转换前、转换后是两个登记槽，不是两个接口。成功响应的再改写见 [响应拦截](/cn/plugin/response-interceptor)。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.response_translator` 设为 true。
+
+```go
+TranslateResponse(context.Context, ResponseTransformRequest) (PayloadResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `response.translate`。
 
-- `sdk/pluginapi/types.go`：`ResponseTranslator`、`ResponseTransformRequest`、`PayloadResponse`
-- `sdk/pluginabi/types.go`：`response.translate`
-- `internal/pluginhost/adapters.go`：`TranslateResponse`、`callResponseTranslator`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `examples/plugin/response-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`：`MethodResponseTranslate`
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.response-translator.translate-response | `TranslateResponse`，ABI `response.translate`。 |  | 参数 `ResponseTransformRequest`，返回 `PayloadResponse`。 |
+| ResponseTransformRequest.FromFormat | 来源协议。 |  | 字符串。 |
+| ResponseTransformRequest.ToFormat | 目标协议。 |  | 字符串。 |
+| ResponseTransformRequest.Model | 模型 ID。 |  | 字符串。 |
+| ResponseTransformRequest.Stream | 响应是否为流式。 |  | 布尔。 |
+| ResponseTransformRequest.OriginalRequest | 原始客户端请求正文。 |  | `[]byte`。 |
+| ResponseTransformRequest.TranslatedRequest | 提供方请求正文。 |  | `[]byte`。 |
+| ResponseTransformRequest.Body | 待转换的响应载荷。 |  | `[]byte`。 |
+| PayloadResponse.Body | 转换后的载荷。 |  | `[]byte`。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `response.translate` | 将响应 `Body` 从 `FromFormat` 转换到 `ToFormat`。 |
+返回 `error` 时 ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。本方法不改状态码。
 
-## 请求
+## 6. 相关功能
 
-```json
-{
-  "FromFormat": "codex",
-  "ToFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "OriginalRequest": "base64-client-body",
-  "TranslatedRequest": "base64-provider-request",
-  "Body": "base64-upstream-response"
-}
-```
+转换前后的同一规整接口见 [响应规整](/cn/plugin/response-normalizer)。
 
-## 响应
+## 7. 使用经验
 
-```json
-{
-  "Body": "base64-client-response"
-}
-```
-
-## 开发注意
-
-- `OriginalRequest` 是客户端原始请求，`TranslatedRequest` 是发给上游的请求，可用于响应格式补全。
-- 响应转换应输出客户端协议需要的完整响应。
-- 流式响应是否可转换取决于宿主执行器和格式能力，插件应明确测试流式场景。
-
+暂无

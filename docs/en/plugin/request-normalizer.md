@@ -1,82 +1,56 @@
 ---
-outline: 'deep'
+title: Request normalization
+feature_ids:
+  - plugin.request-normalizer.normalize-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Request Normalizer Capability
+# Request normalization
 
-The request normalizer capability rewrites a request payload before it enters the execution path into a shape that later host stages can handle more easily. It is commonly used to fill defaults, fix provider-specific payloads, or implement lightweight request rewrites.
+`RequestNormalizer` folds a provider-specific request payload into canonical form.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "request_normalizer": true
-  }
-}
+The plugin receives the source format, target format, model, whether the response is streaming, and the body, and returns the canonical payload bytes.
+
+## 2. Scope and non-goals
+
+There is only `NormalizeRequest`. Turning canonical form into a provider format is [Request translation](/plugin/request-translator). Response normalization is a different interface.
+
+## 3. How to configure or call it
+
+Set `capabilities.request_normalizer` to true.
+
+```go
+NormalizeRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-Source references:
+The ABI method name is `request.normalize`. The parameters and return value use the same pair of structures as request translation.
 
-- `sdk/pluginapi/types.go`: `RequestNormalizer`, `RequestTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `request.normalize`
-- `internal/pluginhost/adapters.go`: `NormalizeRequest`, `callRequestNormalizer`
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `examples/plugin/request-normalizer/go/main.go`
-- `examples/plugin/codex-service-tier/go/main.go`
-- `examples/plugin/codex-service-tier/README.md`
-- `examples/plugin/simple/go/main.go`: `MethodRequestNormalize`
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.request-normalizer.normalize-request | `NormalizeRequest`, ABI `request.normalize`. |  | Parameter `RequestTransformRequest`, return `PayloadResponse`. |
+| RequestTransformRequest.FromFormat | Source protocol. |  | String. |
+| RequestTransformRequest.ToFormat | Target protocol. |  | String. |
+| RequestTransformRequest.Model | Model ID. |  | String. |
+| RequestTransformRequest.Stream | Whether streaming output is expected. |  | Boolean. |
+| RequestTransformRequest.Body | Payload to normalize. |  | `[]byte`. |
+| PayloadResponse.Body | Normalized payload. |  | `[]byte`. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `request.normalize` | Returns a new request body based on format, model, and stream flag. |
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Request
+## 6. Related behavior
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "codex",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+Turning the canonical form back out is in [Request translation](/plugin/request-translator).
 
-## Response
+## 7. Field experience
 
-```json
-{
-  "Body": "base64-normalized-body"
-}
-```
-
-## Example: Codex Service Tier
-
-`examples/plugin/codex-service-tier` is a request normalizer example closer to real usage. It reads the `fast` field from plugin configuration and modifies Codex requests when all of these conditions match:
-
-- `ToFormat` is `codex`
-- `Model` is `gpt-5.5`
-- `fast` is `true`
-
-Configuration example:
-
-```yaml
-plugins:
-  configs:
-    codex-service-tier:
-      enabled: true
-      priority: 1
-      fast: true
-```
-
-## Development Notes
-
-- Request normalization should stay narrow and predictable. It should not take on executor responsibilities.
-- An empty `Body` prevents the host from applying an effective rewrite. Return the original `Body` when the original content should be kept.
-- Plugin-owned configuration is passed to `plugin.register` and `plugin.reconfigure` through `config_yaml`; parse and cache it there.
-
+None yet.

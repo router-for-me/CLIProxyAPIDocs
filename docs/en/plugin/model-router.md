@@ -1,186 +1,86 @@
 ---
-outline: 'deep'
+title: Model Router
+feature_ids:
+  - plugin.model-router.route-model
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Model Router Capability
+# Model Router
 
-The model router capability lets a plugin choose where a matching model request should execute before the host resolves the requested model to a provider and before auth selection runs.
+`ModelRouter` decides who executes the request before model-to-provider resolution and credential selection.
 
-Use it when request content, headers, query parameters, or the original client model should decide between:
+## 1. What this solves
 
-- the router plugin's own executor;
-- another plugin executor;
-- a built-in provider path such as `codex`, `antigravity`, `xai`, or `claude`.
+The plugin can name its own executor, another plugin executor, or an existing built-in provider as the target of this request.
 
-## Capability Field
+## 2. Scope and non-goals
+
+There is only `RouteModel`. It does not replace the executor itself. When the target is `self`, this plugin still needs an [Executor](/plugin/executor). It also does not pick an ID from candidate credentials. That is [Scheduler](/plugin/scheduler).
+
+## 3. How to configure or call it
+
+Set `capabilities.model_router` to true.
 
 ```json
 {
-  "capabilities": {
-    "model_router": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-router",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-router"
+    },
+    "capabilities": {
+      "model_router": true
+    }
   }
 }
 ```
 
-If the router can route to its own executor, declare the executor capability too:
-
-```json
-{
-  "capabilities": {
-    "model_router": true,
-    "executor": true,
-    "executor_model_scope": "static",
-    "executor_input_formats": ["claude"],
-    "executor_output_formats": ["claude"]
-  }
-}
+```go
+RouteModel(context.Context, ModelRouteRequest) (ModelRouteResponse, error)
 ```
 
-Source references:
+The ABI method name is `model.route`. When `Handled` is true, `TargetKind` must be `self`, `executor`, or `provider`.
 
-- `sdk/pluginapi/types.go`: `ModelRouter`, `ModelRouteRequest`, `ModelRouteResponse`, `ModelRouteTargetKind`
-- `sdk/pluginabi/types.go`: `model.route`
-- `internal/pluginhost/model_router.go`: router priority, target validation, and built-in provider availability checks
-- `sdk/api/handlers/handlers.go`: request entry point before normal provider/auth resolution
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `examples/plugin/claude-web-search-router/go/main.go`
-- `examples/plugin/claude-web-search-router/go/fallback.go`
-
-## Methods
-
-| Method | Purpose |
-| --- | --- |
-| `model.route` | Returns a routing decision for the current client request. |
-
-## When It Runs
-
-The host asks enabled model routers before the normal model-to-provider lookup and auth selection. Higher-priority plugins run first. A router that returns `Handled: false`, an invalid target, or an unavailable target is skipped, and the host tries the next router. If no router handles the request, the normal host path continues.
-
-The request still uses the original client protocol. For example, a Claude-compatible request arrives with `SourceFormat: "claude"` and the raw Claude request body in `Body`.
-
-## Request
-
-```json
-{
-  "Plugin": {},
-  "PluginID": "claude-web-search-router",
-  "SourceFormat": "claude",
-  "RequestedModel": "claude-sonnet-4-6",
-  "Stream": true,
-  "Headers": {},
-  "Query": {},
-  "Body": "base64-client-body",
-  "Metadata": {},
-  "AvailableProviders": ["antigravity", "codex", "xai"]
-}
-```
-
-Important fields:
-
-| Field | Description |
-| --- | --- |
-| `PluginID` | Host-local ID of the router plugin being called. |
-| `SourceFormat` | Original client protocol format, such as `openai`, `claude`, or `gemini`. |
-| `RequestedModel` | Client-requested model before provider/auth resolution. |
-| `Stream` | Whether the client expects streaming output. |
-| `Headers` / `Query` | Inbound request headers and query parameters. |
-| `Body` | Raw client request body. In RPC JSON it is base64 encoded. |
-| `Metadata` | Best-effort request context snapshot. Treat it as read-only JSON-like data. |
-| `AvailableProviders` | Built-in provider keys that currently have registered auth. Use this before returning `TargetKind: "provider"`. |
-
-## Response
-
-Do not handle:
-
-```json
-{
-  "Handled": false
-}
-```
-
-Route to the same plugin's executor:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "self",
-  "Reason": "matched_web_search"
-}
-```
-
-Route to another plugin executor:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "executor",
-  "Target": "search-executor",
-  "Reason": "matched_search_executor"
-}
-```
-
-Route to a built-in provider:
-
-```json
-{
-  "Handled": true,
-  "TargetKind": "provider",
-  "Target": "codex",
-  "TargetModel": "gpt-5.4-mini",
-  "Reason": "matched_codex_web_search"
-}
-```
-
-## Target Kinds
-
-| TargetKind | Target | TargetModel | Behavior |
+| Field | Meaning | Default | Constraint |
 | --- | --- | --- | --- |
-| `self` | Ignored by the plugin; the host uses the current router plugin ID. | Ignored. | Executes the router plugin's own executor. |
-| `executor` | Target plugin ID. | Ignored. | Executes another plugin executor directly. |
-| `provider` | Built-in provider key. | Optional model override. | Continues through the built-in AuthManager and provider executor path. |
+| plugin.model-router.route-model | `RouteModel`, ABI `model.route`. |  | Parameter `ModelRouteRequest`, return `ModelRouteResponse`. |
+| ModelRouteRequest.Plugin | Plugin metadata. |  | `Metadata`. |
+| ModelRouteRequest.PluginID | Host-local plugin ID. |  | String. |
+| ModelRouteRequest.SourceFormat | Original client protocol. |  | String. |
+| ModelRouteRequest.RequestedModel | Client model before a provider and a credential are selected. |  | String. |
+| ModelRouteRequest.Stream | Whether streaming output is expected. |  | Boolean. |
+| ModelRouteRequest.Headers | Inbound headers. |  | `http.Header`. |
+| ModelRouteRequest.Query | Query parameters. |  | `url.Values`. |
+| ModelRouteRequest.Body | Original client body. |  | `[]byte`, base64 in JSON. |
+| ModelRouteRequest.Metadata | Context snapshot. |  | Read-only, understood as JSON values. |
+| ModelRouteRequest.AvailableProviders | Built-in provider keys that currently have registered credentials. |  | Read-only. When `TargetKind` is `provider`, the target may be chosen from this list. |
+| ModelRouteResponse.Handled | Whether a routing decision was made. |  | Not adopted when false. |
+| ModelRouteResponse.TargetKind | Target kind. |  | `self`, `executor`, `provider`. Any other value is invalid. |
+| ModelRouteResponse.Target | Target. |  | For `executor` it is a plugin ID. For `provider` it is a provider key, and blank is invalid. `self` uses the current router plugin ID. |
+| ModelRouteResponse.TargetModel | Model name on the provider path. |  | Meaningful only for `provider`. Empty keeps the model requested by the client. |
+| ModelRouteResponse.Reason | Optional diagnostic reason. |  | String. |
 
-Direct plugin executor routes run without selecting an auth record. The target executor must declare the executor capability, must allow static execution through `executor_model_scope: "static"` or `"both"`, and must support the request/response protocol formats for the current request.
+## 5. Common errors and limits
 
-Provider routes must target a provider that is present in `AvailableProviders`. If `TargetModel` is empty, the host keeps the original client-requested model. If the target provider needs a provider-native model name, set `TargetModel` explicitly instead of forwarding the client model name.
+When the method returns `error`, that routing attempt fails. When ABI `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Configuration Example
+`Handled` true with a kind other than the three, or a blank `Target` for `executor` or `provider`, is not a valid decision. A `provider` target key has surrounding whitespace removed and is converted to lowercase.
 
-The `claude-web-search-router` example uses ModelRouter to detect Claude Code built-in `web_search` requests and route them to built-in web-search-capable providers or to its own Tavily-backed executor.
+## 6. Related behavior
 
-```yaml
-plugins:
-  enabled: true
-  dir: "plugins"
-  configs:
-    claude-web-search-router:
-      enabled: true
-      priority: 20
-      route: fallback
-      antigravity_model: "gemini-3.1-flash-lite"
-      codex_model: "gpt-5.4-mini"
-      xai_model: "grok-4.3"
-      tavily_api_keys:
-        - "tvly-xxxxxxxx"
-      require_web_search_only: true
-```
+Execution is in [Executor](/plugin/executor). Credential selection is in [Scheduler](/plugin/scheduler).
 
-Example route behavior:
+## 7. Field experience
 
-| Route | Target |
-| --- | --- |
-| `antigravity_google` | `TargetKind: "provider"`, `Target: "antigravity"`, `TargetModel: antigravity_model` |
-| `codex_web_search` | `TargetKind: "provider"`, `Target: "codex"`, `TargetModel: codex_model` |
-| `xai_web_search` | `TargetKind: "provider"`, `Target: "xai"`, `TargetModel: xai_model` |
-| `tavily` | `TargetKind: "self"` so the plugin executor handles Tavily itself. |
-| `fallback` | `TargetKind: "self"` so the plugin executor can orchestrate fallback across configured backends. |
+None yet.
 
-## Development Notes
-
-- Return `Handled: false` for requests the plugin does not recognize so lower-priority routers and the normal host path can continue.
-- Keep `model.route` fast. It should classify and choose a target, not perform the full upstream request.
-- Use `AvailableProviders` before returning a built-in provider target.
-- Use `self` when the plugin executor needs to orchestrate fallback, call `host.model.*`, or use a plugin-owned external service.
-- Use `provider` when the request should continue through host-managed auth selection, request logging, usage accounting, and the built-in executor.
-- `model_router` is gated by the capability flag and the `model.route` method. It does not require a plugin schema version bump.

@@ -1,82 +1,55 @@
 ---
-outline: 'deep'
+title: 请求规整
+feature_ids:
+  - plugin.request-normalizer.normalize-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 请求规整能力
+# 请求规整
 
-请求规整能力用于把进入执行链路前的请求 payload 改写成宿主后续阶段更容易处理的形态。它常用于补充默认字段、修正特定 provider payload，或实现轻量请求改写。
+`RequestNormalizer` 把提供方特定的请求载荷收成规范形。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "request_normalizer": true
-  }
-}
+插件收到来源格式、目标格式、模型、是否流式和正文，返回规范载荷字节。
+
+## 2. 适用条件与不做的事
+
+只有 `NormalizeRequest`。从规范形转到提供方格式是 [请求转换](/cn/plugin/request-translator)。响应规整是另一个接口。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.request_normalizer` 设为 true。
+
+```go
+NormalizeRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `request.normalize`。参数和返回值与请求转换使用同一对结构。
 
-- `sdk/pluginapi/types.go`：`RequestNormalizer`、`RequestTransformRequest`、`PayloadResponse`
-- `sdk/pluginabi/types.go`：`request.normalize`
-- `internal/pluginhost/adapters.go`：`NormalizeRequest`、`callRequestNormalizer`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `examples/plugin/request-normalizer/go/main.go`
-- `examples/plugin/codex-service-tier/go/main.go`
-- `examples/plugin/codex-service-tier/README.md`
-- `examples/plugin/simple/go/main.go`：`MethodRequestNormalize`
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.request-normalizer.normalize-request | `NormalizeRequest`，ABI `request.normalize`。 |  | 参数 `RequestTransformRequest`，返回 `PayloadResponse`。 |
+| RequestTransformRequest.FromFormat | 来源协议。 |  | 字符串。 |
+| RequestTransformRequest.ToFormat | 目标协议。 |  | 字符串。 |
+| RequestTransformRequest.Model | 模型 ID。 |  | 字符串。 |
+| RequestTransformRequest.Stream | 是否期望流式输出。 |  | 布尔。 |
+| RequestTransformRequest.Body | 待规整载荷。 |  | `[]byte`。 |
+| PayloadResponse.Body | 规整后的载荷。 |  | `[]byte`。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `request.normalize` | 根据格式、模型和流式标记返回新的请求体。 |
+返回 `error` 时 ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
-## 请求
+## 6. 相关功能
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "codex",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+规范形再转出见 [请求转换](/cn/plugin/request-translator)。
 
-## 响应
+## 7. 使用经验
 
-```json
-{
-  "Body": "base64-normalized-body"
-}
-```
-
-## 示例：Codex service tier
-
-`examples/plugin/codex-service-tier` 是更接近真实用法的请求规整示例。它读取插件配置中的 `fast` 字段，在满足以下条件时修改 Codex 请求：
-
-- `ToFormat` 是 `codex`
-- `Model` 是 `gpt-5.5`
-- `fast` 为 `true`
-
-配置示例：
-
-```yaml
-plugins:
-  configs:
-    codex-service-tier:
-      enabled: true
-      priority: 1
-      fast: true
-```
-
-## 开发注意
-
-- 请求规整应保持小范围、可预测，不要承担执行器职责。
-- 返回空 `Body` 会让宿主无法应用有效改写；需要保持原文时返回原始 `Body`。
-- 插件自有配置通过 `config_yaml` 进入 `plugin.register` / `plugin.reconfigure`，应在那里解析后缓存。
-
+暂无

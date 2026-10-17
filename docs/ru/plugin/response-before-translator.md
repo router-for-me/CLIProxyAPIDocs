@@ -1,56 +1,13 @@
 ---
-outline: 'deep'
+title: Приведение ответа до преобразования
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+translation_pending: false
 ---
 
-# Возможность нормализации ответа перед преобразованием
+# Приведение ответа до преобразования
 
-Возможность нормализации ответа перед преобразованием изменяет upstream-ответ до встроенного преобразования ответа хостом. Она подходит для исправления provider-native payload перед передачей его хосту или response translator плагина.
+У этого слота больше нет отдельного интерфейса. И до, и после преобразования реализуется один и тот же `ResponseNormalizer.NormalizeResponse`. См. [Приведение ответа](/ru/plugin/response-normalizer).
 
-## Поле возможности
-
-```json
-{
-  "capabilities": {
-    "response_before_translator": true
-  }
-}
-```
-
-Исходный код:
-
-- `sdk/pluginapi/types.go`: `ResponseNormalizer`, `ResponseTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `response.normalize_before`
-- `internal/pluginhost/adapters.go`: этап перед преобразованием в `NormalizeResponse`
-
-Примеры:
-
-- `examples/plugin/response-normalizer/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodResponseNormalizeBefore`
-
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `response.normalize_before` | До преобразования ответа возвращает нормализованное тело ответа. |
-
-## Запрос и ответ
-
-Запрос использует `ResponseTransformRequest`, ответ использует `PayloadResponse`:
-
-```json
-{
-  "Body": "base64-normalized-provider-response"
-}
-```
-
-## Отличие от нормализации после преобразования
-
-- `response_before_translator` обрабатывает provider-native ответы.
-- [Возможность нормализации ответа после преобразования](./response-after-translator) обрабатывает ответы, уже переведённые в клиентский протокол.
-
-## Замечания по разработке
-
-- Подходит для исправления отсутствующих upstream-полей и совместимости с нестандартными ответами provider.
-- Не выводите формат клиентского протокола, если текущий `ToFormat` на этом этапе не является этим форматом.
-- Если нужно поддержать оба этапа, можно объявить обе возможности.
-
+Переключатель регистрации по-прежнему `response_before_translator`. Соответствующее имя метода ABI — `response.normalize_before`.

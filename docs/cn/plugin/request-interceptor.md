@@ -1,78 +1,74 @@
 ---
-outline: 'deep'
+title: 请求拦截
+feature_ids:
+  - plugin.request-interceptor.intercept-request-before-auth
+  - plugin.request-interceptor.intercept-request-after-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 请求拦截能力
+# 请求拦截
 
-请求拦截能力用于在执行上游请求前改写请求头或请求体。它有两个阶段：选凭证前和选凭证后。
+`RequestInterceptor` 在选出凭证之前和之后改写即将执行的请求。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "request_interceptor": true
-  }
-}
+插件可以替换部分头和正文、删掉头、改路径，或在请求到达执行器之前终止并给出下游响应。
+
+## 2. 适用条件与不做的事
+
+两个方法共用 `RequestInterceptRequest` 与 `RequestInterceptResponse`。凭证选择前 `ToFormat` 为空；选择后 `Model` 是选中的上游模型。不负责流式块，也不负责用量。
+
+`Body`、`Headers`、`Metadata` 按只读对待。正文修改必须放在返回值里。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.request_interceptor` 设为 true。
+
+```go
+InterceptRequestBeforeAuth(context.Context, RequestInterceptRequest) (RequestInterceptResponse, error)
+InterceptRequestAfterAuth(context.Context, RequestInterceptRequest) (RequestInterceptResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `request.intercept_before` 与 `request.intercept_after`。
 
-- `sdk/pluginapi/types.go`：`RequestInterceptor`、`RequestInterceptRequest`、`RequestInterceptResponse`
-- `sdk/pluginabi/types.go`：`request.intercept_before`、`request.intercept_after`
-- `internal/pluginhost/adapters.go`：`InterceptRequestBeforeAuth`、`InterceptRequestAfterAuth`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `internal/pluginhost/adapters_test.go`：请求拦截链、跳过来源插件和错误处理测试
-- `examples/plugin/antigravity-web-search/go/main.go`：基于当前拦截器 seam 的真实迁移示例
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.request-interceptor.intercept-request-before-auth | `InterceptRequestBeforeAuth`，ABI `request.intercept_before`。 |  | 凭证选择前调用。 |
+| plugin.request-interceptor.intercept-request-after-auth | `InterceptRequestAfterAuth`，ABI `request.intercept_after`。 |  | 凭证选择后调用。 |
+| RequestInterceptRequest.RequestID | 一次模型执行的 ID。 |  | 与完成事件关联。 |
+| RequestInterceptRequest.TraceID | 入站 HTTP 的追踪 ID，可空。 |  | 字符串。 |
+| RequestInterceptRequest.SourceFormat | 客户端原始协议。 |  | 字符串。 |
+| RequestInterceptRequest.ToFormat | 选中的上游协议。 |  | 选择凭证前为空。 |
+| RequestInterceptRequest.Model | 当前执行模型。 |  | 选择后是上游模型。 |
+| RequestInterceptRequest.RequestedModel | 别名或模型池改写前的客户端模型。 |  | 字符串。 |
+| RequestInterceptRequest.Stream | 是否流式。 |  | 布尔。 |
+| RequestInterceptRequest.Headers | 当前上游请求头。 |  | 只读。 |
+| RequestInterceptRequest.Body | 当前载荷。 |  | 只读。修改放在响应 `Body`。 |
+| RequestInterceptRequest.Metadata | 上下文快照。 |  | 只读，按 JSON 值理解。 |
+| RequestInterceptResponse.Path | 可选的目标路径。 |  | 例如 `/v1/images/generations`。空白表示不改。 |
+| RequestInterceptResponse.Headers | 替换同名头。 |  | 未提到的头保留。 |
+| RequestInterceptResponse.Body | 替换正文。 |  | 只有非空时才替换。 |
+| RequestInterceptResponse.ClearHeaders | 先删除的头名。 |  | 在 `Headers` 应用之前删除。 |
+| RequestInterceptResponse.Terminate | 停止后续拦截并阻止到达执行器。 |  | 为 true 时使用下面三个下游字段。 |
+| RequestInterceptResponse.StatusCode | 终止时的下游状态码。 |  | 小于 200 或大于 599 时改为 403。 |
+| RequestInterceptResponse.ResponseHeaders | 终止时的下游头。 |  | `http.Header`。 |
+| RequestInterceptResponse.ResponseBody | 终止时的下游正文。 |  | `[]byte`。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `request.intercept_before` | 在凭证选择前改写请求。此时 `ToFormat` 可能为空。 |
-| `request.intercept_after` | 在凭证选择后改写请求。此时模型和上游格式已更具体。 |
+方法返回 `error` 时 ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
-## 请求
+空 `Body` 不替换现有正文。`Terminate` 的状态码超出 200 到 599 时，下游看到 403。终止后的完成事件结果是 `rejected`，见 [请求生命周期](/cn/plugin/request-lifecycle)。
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "ToFormat": "codex",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "Stream": false,
-  "Headers": {},
-  "Body": "base64-body",
-  "Metadata": {}
-}
-```
+## 6. 相关功能
 
-## 响应
+完成通知见 [请求生命周期](/cn/plugin/request-lifecycle)。协议转换见 [请求转换](/cn/plugin/request-translator)。
 
-```json
-{
-  "Headers": {
-    "X-Plugin": ["example"]
-  },
-  "Body": "base64-new-body",
-  "ClearHeaders": ["X-Old-Header"]
-}
-```
+## 7. 使用经验
 
-语义：
-
-- `Headers` 会覆盖同名 header，但保留未提到的 header。
-- `Body` 非空时替换当前 body。
-- `ClearHeaders` 会先删除指定 header，再应用 `Headers`。
-
-## 递归保护
-
-当插件通过 `host.model.*` 发起嵌套模型请求并传递 `host_callback_id` 时，宿主会跳过发起插件自己的请求拦截器，避免递归调用自己。其他插件的请求拦截器仍可处理嵌套请求。
-
-## 开发注意
-
-- `Metadata` 是宿主上下文快照，应视为只读。
-- 选凭证前不要依赖凭证字段；选凭证后再处理需要凭证上下文的改写。
-- 不要在请求拦截器里直接调用上游模型；需要模型请求时使用 [宿主回调](./host-callbacks)。
+暂无

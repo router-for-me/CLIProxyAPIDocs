@@ -1,65 +1,55 @@
 ---
-outline: 'deep'
+title: 请求转换
+feature_ids:
+  - plugin.request-translator.translate-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# 请求转换能力
+# 请求转换
 
-请求转换能力用于把规范请求转换成目标提供方协议。它位于请求执行前的协议转换阶段，适合把 CLIProxyAPI 已经规范化后的请求体翻译成上游需要的 payload。
+`RequestTranslator` 把已是规范形的请求载荷转换成另一种格式。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "request_translator": true
-  }
-}
+插件按来源格式、目标格式、模型、是否流式和正文，返回转换后的原始字节。
+
+## 2. 适用条件与不做的事
+
+只有 `TranslateRequest`。把提供方请求收成规范形是 [请求规整](/cn/plugin/request-normalizer)，不是本接口。响应不在本页。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.request_translator` 设为 true。
+
+```go
+TranslateRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `request.translate`。
 
-- `sdk/pluginapi/types.go`：`RequestTranslator`、`RequestTransformRequest`、`PayloadResponse`
-- `sdk/pluginabi/types.go`：`request.translate`
-- `internal/pluginhost/adapters.go`：`TranslateRequest`、`callRequestTranslator`
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `examples/plugin/request-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`：`MethodRequestTranslate`
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| plugin.request-translator.translate-request | `TranslateRequest`，ABI `request.translate`。 |  | 参数 `RequestTransformRequest`，返回 `PayloadResponse`。 |
+| RequestTransformRequest.FromFormat | 来源协议。 |  | 字符串。 |
+| RequestTransformRequest.ToFormat | 目标协议。 |  | 字符串。 |
+| RequestTransformRequest.Model | 模型 ID。 |  | 字符串。 |
+| RequestTransformRequest.Stream | 是否期望流式输出。 |  | 布尔。 |
+| RequestTransformRequest.Body | 待转换载荷。 |  | `[]byte`，JSON 中为 base64。 |
+| PayloadResponse.Body | 转换后的载荷。 |  | `[]byte`。 |
 
-## 方法
+## 5. 常见错误与边界
 
-| 方法 | 作用 |
-| --- | --- |
-| `request.translate` | 将 `Body` 从 `FromFormat` 转换到 `ToFormat`。 |
+返回 `error` 时 ABI `ok` 为 false。`http_status` 省略或为 0 时按 HTTP 500 处理。本方法不改凭证，也不终止请求。
 
-## 请求
+## 6. 相关功能
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "anthropic",
-  "Model": "claude-sonnet",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+反向收成规范形见 [请求规整](/cn/plugin/request-normalizer)。改写即将发出的请求见 [请求拦截](/cn/plugin/request-interceptor)。
 
-## 响应
+## 7. 使用经验
 
-```json
-{
-  "Body": "base64-translated-body"
-}
-```
-
-## 与请求规整的区别
-
-- [请求规整能力](./request-normalizer) 负责把提供方或特殊入口请求规整到宿主可理解的规范格式。
-- 请求转换能力负责把规范格式转换到目标上游协议。
-
-## 开发注意
-
-- 只处理自己明确支持的格式组合；不能处理时返回错误或不要声明该能力。
-- `Body` 必须是完整有效的目标协议 payload。
-- 不要在转换器里做凭证选择或上游 HTTP 请求；这些属于调度器和执行器阶段。
+暂无

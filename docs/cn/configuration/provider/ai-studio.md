@@ -1,25 +1,50 @@
-# AI Studio 使用说明
+---
+title: AI Studio WebSocket 认证
+feature_ids:
+  - oauth.providers.aistudio-ws-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+---
 
-您可以将本服务 (CLIProxyAPI) 作为后端，配合 [这个 AI Studio 应用](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL) 使用。请遵循以下步骤进行配置：
+# AI Studio WebSocket 认证
 
-1.  **启动 CLIProxyAPI 服务**：确保您的 CLIProxyAPI 实例正在本地或远程运行。
-2.  **访问 AI Studio 应用**：在浏览器中登录您的 Google 账户，然后打开以下链接：
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
+## 1. 这段解决什么问题
 
-## 连接配置
+决定 WebSocket API 是否要求认证。
 
-默认情况下，AI Studio 应用会尝试连接到本地的 CLIProxyAPI (`ws://127.0.0.1:8317`)。
+## 2. 适用条件与不做的事
 
--   **连接到远程服务**：
-    如果您需要连接到远程部署的 CLIProxyAPI，请修改 AI Studio 应用中的 `config.ts` 文件，更新 `WEBSOCKET_PROXY_URL` 的值。
-    -   如果您的远程服务启用了 SSL，请使用 `wss://` 协议。
-    -   如果未启用 SSL，请使用 `ws://` 协议。
+本页不再介绍第三方 AI Studio 应用。只保留钉住代码里的 ws-auth。
 
-## 认证配置
+## 3. 怎么配置或怎么调用
 
-默认情况下，CLIProxyAPI 的 WebSocket 连接不要求认证。
+```yaml
+oauth:
+  providers:
+    aistudio:
+      ws-auth: true
+```
 
--   **在 CLIProxyAPI 服务端启用认证**：
-    在您的 `config.yaml` 文件中，将 `ws_auth` 设置为 `true`。
--   **在 AI Studio 客户端配置认证**：
-    在 AI Studio 应用的 `config.ts` 文件中，设置 `JWT_TOKEN` 的值为您的认证令牌。
+旧文件仍可写根上的 `ws-auth`。示例把这个开关对应到 `/v1/ws`。
+
+## 4. 细项说明
+
+「默认值」与台账 defaults 逐字相同。
+
+| 字段 | 含义 | 默认值 | 约束 |
+| --- | --- | --- | --- |
+| oauth.providers.aistudio.ws-auth | oauth.providers.aistudio.ws-auth | false | oauth.providers.aistudio.ws-auth |
+
+## 5. 常见错误与边界
+
+载入器在解析 YAML 前把该值设为 true，所以省略等于开启认证。只有显式 false 才关闭。表中的默认值原文仍是台账里的 false，那是字段零值，不是载入结果。
+
+## 6. 相关功能
+
+登录和别名见 [OAuth 目录、别名与排除](/cn/accounts/oauth)。
+
+## 7. 使用经验
+
+- [图像改走 AI Studio](/cn/experience/accounts#exp-accounts-aistudio-for-images)
+- [HTTPS 页面使用 wss](/cn/experience/accounts#exp-accounts-aistudio-wss)
+- [Gemini 图像和结构化输出走原生路由](/cn/experience/api#exp-api-gemini-native-route)

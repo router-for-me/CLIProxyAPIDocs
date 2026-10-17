@@ -1,89 +1,74 @@
 ---
-outline: 'deep'
+title: Host Callbacks
+feature_ids:
+  - plugin.host-http-client.do
+  - plugin.host-http-client.do-stream
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
 # Host Callbacks
 
-Host callbacks are the mechanism for a plugin to call CLIProxyAPI host capabilities. They are not plugin capability fields, but they are important for executor, Management API, credential, and resource-page plugins.
+`HostHTTPClient` is the public HTTP client the host gives to a plugin. This page covers only the two methods assigned here.
 
-## Method List
+## 1. What this solves
 
-Source references:
+The plugin sends non-streaming or streaming upstream requests through the host, so it follows the host transport policy. When request logging is on, the executor also uses it to keep the outbound request and the raw upstream response.
 
-- `sdk/pluginabi/types.go`: all `host.*` method names
-- `sdk/pluginapi/types.go`: request and response structures for HTTP, model execution, and credential files
-- `internal/pluginhost/host_callbacks.go`: host callback implementation
+## 2. Scope and non-goals
 
-Example references:
+There are only `Do` and `DoStream`. Other host callbacks that are not assigned to this page are not described here, and the host's private implementation is not described either.
 
-- `examples/plugin/host-callback/go/main.go`
-- `examples/plugin/host-callback-auth-files/go/main.go`
-- `examples/plugin/host-model-callback/go/main.go`
+The call sites appear in the request structures for credential login, refresh, model discovery by credential, the executor, and quota queries. The field name is always `HTTPClient`, and the `json` tag is `-`, so it does not appear in the ABI request JSON. A Go plugin calls this interface directly.
 
-## HTTP Callbacks
+## 3. How to configure or call it
 
-| Method | Purpose |
-| --- | --- |
-| `host.http.do` | Executes a normal HTTP request through the host. |
-| `host.http.do_stream` | Executes a streaming HTTP request through the host. |
-| `host.http.stream_read` | Reads an HTTP stream held by the host. |
-| `host.http.stream_close` | Closes an HTTP stream held by the host. |
+This is not a capability the plugin turns on in `capabilities`. It is the client passed in by the host.
 
-Plugins should prefer these methods for external HTTP services so proxy settings, transport policy, and request logging remain managed by the host.
-
-## Model Execution Callbacks
-
-| Method | Purpose |
-| --- | --- |
-| `host.model.execute` | Starts a non-streaming model request. |
-| `host.model.execute_stream` | Starts a streaming model request and returns `stream_id`. |
-| `host.model.stream_read` | Reads a model stream chunk. |
-| `host.model.stream_close` | Closes a model stream. |
-
-Core request fields:
-
-```json
-{
-  "entry_protocol": "openai",
-  "exit_protocol": "openai",
-  "model": "gpt-5.5",
-  "stream": false,
-  "body": "base64-request-body",
-  "headers": {},
-  "query": {},
-  "alt": ""
-}
+```go
+Do(context.Context, HTTPRequest) (HTTPResponse, error)
+DoStream(context.Context, HTTPRequest) (HTTPStreamResponse, error)
 ```
 
-## host_callback_id
+The ABI method names are `host.http.do` and `host.http.do_stream`.
 
-When a plugin calls `host.model.*` from a host-invoked context such as `management.handle`, it should forward the request's `host_callback_id`.
+## 4. Details
 
-The host uses this ID to identify the plugin that originated the callback. During nested model execution, it skips that plugin's own request, response, and stream interceptors to avoid recursion. Other enabled plugins may still handle the nested request.
+The Default column matches the ledger `defaults` verbatim.
 
-## Credential File Callbacks
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.host-http-client.do | `Do`, ABI `host.http.do`. |  | Parameter `HTTPRequest`, return `HTTPResponse`. |
+| plugin.host-http-client.do-stream | `DoStream`, ABI `host.http.do_stream`. |  | Parameter `HTTPRequest`, return `HTTPStreamResponse`. |
+| HTTPRequest.Method | HTTP method. |  | String. |
+| HTTPRequest.URL | Absolute upstream address. |  | String. |
+| HTTPRequest.Headers | Request headers. |  | `http.Header`. |
+| HTTPRequest.Body | Raw body. |  | `[]byte`, base64 in JSON. |
+| HTTPRequest.WireProfile | Optional on-the-wire representation. |  | A nil pointer changes nothing. JSON name `wire_profile`. |
+| HTTPWireProfile.HTTP1Only | Use only HTTP/1.1 and do not negotiate HTTP/2. |  | JSON name `http1_only`. |
+| HTTPWireProfile.DisableAutoCompression | Turn off transparent decompression and automatic `Accept-Encoding`. |  | JSON name `disable_auto_compression`. |
+| HTTPWireProfile.HeaderProfile | Desired header-name order and case. |  | JSON name `header_profile`, `[]string`. |
+| HTTPResponse.StatusCode | Upstream status code. |  | Integer. |
+| HTTPResponse.Headers | Upstream response headers. |  | `http.Header`. |
+| HTTPResponse.Body | Raw response body. |  | `[]byte`. |
+| HTTPStreamResponse.StatusCode | Upstream status code. |  | Integer. |
+| HTTPStreamResponse.Headers | Upstream response headers. |  | `http.Header`. |
+| HTTPStreamResponse.Chunks | Streaming chunks until the channel closes. |  | Elements are `HTTPStreamChunk`. |
+| HTTPStreamChunk.Payload | One chunk of raw bytes. |  | `[]byte`. |
+| HTTPStreamChunk.Err | Error attached to this chunk. |  | `error`. |
 
-| Method | Purpose |
-| --- | --- |
-| `host.auth.list` | Lists host credential records. |
-| `host.auth.get` | Reads a physical credential JSON file by auth index. |
-| `host.auth.get_runtime` | Reads runtime credential information by auth index. |
-| `host.auth.save` | Writes credential JSON and updates the runtime credential record. |
+## 5. Common errors and limits
 
-`examples/plugin/host-callback-auth-files` shows how to call these methods from a resource page.
+Both methods return `error`. When `http_status` on the ABI failure envelope is omitted or 0, it is treated as HTTP 500.
 
-## Stream Bridge And Logging
+`URL` is an absolute address. A nil `WireProfile` pointer adds no on-the-wire configuration. The streaming result is delivered through the `Chunks` channel, and closing the channel means the end.
 
-| Method | Purpose |
-| --- | --- |
-| `host.stream.emit` | Lets an executor plugin send a streaming chunk to the host. |
-| `host.stream.close` | Lets an executor plugin close a stream. |
-| `host.log` | Writes through the host logger. |
+## 6. Related behavior
 
-## Development Notes
+The executor must use this client to reach upstream. See [Executor](/plugin/executor). Login and refresh are in [Credential Provider](/plugin/auth-provider).
 
-- Explicitly call the matching close method after using a streaming callback.
-- Do not use host callbacks to bypass the plugin's own security boundary; a plugin is still trusted in-process code.
-- Do not write credential JSON, tokens, or user request bodies to logs.
-- Do not expose credential-reading, credential-writing, or other privileged host callbacks directly through unauthenticated resource GET query parameters. If a resource page needs a user-facing control for those actions, let its same-origin JavaScript read the trusted Management Center storage and call an authenticated `/v0/management/...` route.
-- When the host model execution path can be reused, prefer `host.model.*` instead of copying host credentials into the plugin.
+## 7. Field experience
+
+None yet.
+

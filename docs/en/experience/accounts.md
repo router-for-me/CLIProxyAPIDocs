@@ -1,0 +1,251 @@
+---
+title: "Accounts and upstream"
+related_feature_ids:
+  - api-keys.claude.api-key
+  - api-keys.claude.base-url
+  - api-keys.claude.excluded-models
+  - api-keys.claude.models-alias
+  - api-keys.claude.models-display-name
+  - api-keys.claude.models-force-mapping
+  - api-keys.claude.models-is-compat
+  - api-keys.codex.api-key
+  - api-keys.codex.base-url
+  - api-keys.codex.excluded-models
+  - api-keys.codex.models-is-compat
+  - api-keys.codex.priority
+  - api-keys.codex.websockets
+  - api-keys.gemini.api-key
+  - api-keys.gemini.base-url
+  - api-keys.gemini.excluded-models
+  - api-keys.openai-compatibility.api-key-entries-api-key
+  - api-keys.openai-compatibility.api-key-entries-proxy-url
+  - api-keys.openai-compatibility.base-url
+  - api-keys.openai-compatibility.disabled
+  - api-keys.openai-compatibility.headers
+  - api-keys.openai-compatibility.models-alias
+  - api-keys.openai-compatibility.models-force-mapping
+  - api-keys.openai-compatibility.models-name
+  - api-keys.openai-compatibility.prefix
+  - api-keys.openai-compatibility.request-scoped-errors-action
+  - api-keys.vertex.base-url
+  - api-keys.xai.base-url
+  - auth.claude.login
+  - cli.server.antigravity-login
+  - cli.server.codex-login
+  - cli.server.kimi-login
+  - cli.server.no-browser
+  - cli.server.xai-login
+  - models.catalog.value
+  - models.codex-catalog.value
+  - oauth.auth-auto-refresh-workers.value
+  - oauth.auth-dir.value
+  - oauth.excluded-models.value
+  - oauth.model-alias.alias
+  - oauth.model-alias.name
+  - oauth.providers.aistudio-ws-auth
+  - oauth.providers.codex-header-defaults-user-agent
+  - oauth.request-scoped-errors.action
+  - oauth.request-scoped-errors.status
+  - quota-exceeded.switch-project.value
+  - requests.proxy-url.value
+  - route.v1.get-models
+  - route.v1.post-chat-completions
+  - route.v1.post-images-generations
+  - route.v1.post-messages
+  - route.v1.post-responses
+  - routing.strategy.value
+  - upstream.claude.disable-claude-cloak-mode
+  - upstream.codex.disable-codex-cloaking
+source_issues:
+  - 5
+  - 10
+  - 14
+  - 20
+  - 88
+  - 96
+  - 154
+  - 238
+  - 240
+  - 314
+  - 316
+  - 442
+  - 513
+  - 656
+  - 717
+  - 777
+  - 873
+  - 875
+  - 902
+  - 920
+  - 927
+  - 934
+  - 988
+  - 1022
+  - 1056
+  - 1066
+  - 1074
+  - 1184
+  - 1301
+  - 1324
+  - 1327
+  - 1432
+  - 1457
+  - 1478
+  - 1481
+  - 1510
+  - 1553
+  - 1709
+  - 1737
+  - 1751
+  - 1753
+  - 1979
+  - 2188
+  - 2214
+  - 2789
+  - 2921
+  - 2977
+  - 3000
+  - 3013
+  - 3045
+  - 3057
+  - 3073
+  - 3185
+  - 3206
+  - 3257
+  - 3259
+  - 3299
+  - 3300
+  - 3408
+  - 3419
+  - 3501
+  - 3509
+  - 3518
+  - 3538
+  - 3557
+  - 3563
+  - 3589
+  - 3593
+  - 3607
+  - 3700
+  - 3709
+  - 3713
+  - 3757
+  - 3762
+  - 3778
+  - 3779
+  - 3793
+  - 3915
+  - 3933
+  - 3954
+  - 3965
+  - 3972
+  - 3992
+  - 4008
+  - 4155
+  - 4171
+  - 4184
+  - 4222
+  - 4272
+  - 4300
+  - 4310
+  - 4330
+  - 4354
+  - 4372
+  - 4375
+  - 4455
+  - 4471
+  - 4482
+  - 4503
+  - 4506
+  - 4543
+  - 4694
+  - 4772
+  - 4877
+  - 5118
+  - 5119
+  - 5167
+  - 5195
+  - 5327
+  - 5349
+  - 5426
+  - 5448
+  - 5715
+  - 5730
+  - 5735
+  - 6004
+  - 6016
+  - 6064
+  - 6081
+  - 6239
+  - 6412
+  - 6439
+  - 6512
+  - 6553
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
+
+# Accounts and upstream
+
+## Scope and limits
+
+The practices on this page are checked only against configuration, routes, or commands that still exist in pinned commit `911f49cbd49f4fe2516979754a7488a3fd14fe64`. This page is not an official behavior promise. Keys, cookies, email addresses, authorization files, and user request bodies were not copied in.
+
+## Short practices
+
+- <a id="exp-accounts-codex-login-again"></a>**Log in to Codex again after the plan or token changes** (`exp.accounts.codex-login-again`). Symptom: After Plus, Pro, Team, or the refresh token changes, the old credential still looks like a free account or returns 401. Action: Run --codex-login again. The new file is saved separately and does not rewrite the old file in place. An expired refresh token is not repaired automatically. When the quota endpoint reports unauthorized, replace it with a new OAuth credential rather than a non-OAuth file. Source issues: [#2188](https://github.com/router-for-me/CLIProxyAPI/issues/2188)、[#3013](https://github.com/router-for-me/CLIProxyAPI/issues/3013)、[#3045](https://github.com/router-for-me/CLIProxyAPI/issues/3045)、[#3259](https://github.com/router-for-me/CLIProxyAPI/issues/3259)、[#3509](https://github.com/router-for-me/CLIProxyAPI/issues/3509)、[#3538](https://github.com/router-for-me/CLIProxyAPI/issues/3538)、[#3793](https://github.com/router-for-me/CLIProxyAPI/issues/3793)、[#4330](https://github.com/router-for-me/CLIProxyAPI/issues/4330)、[#4455](https://github.com/router-for-me/CLIProxyAPI/issues/4455)、[#4482](https://github.com/router-for-me/CLIProxyAPI/issues/4482)、[#4877](https://github.com/router-for-me/CLIProxyAPI/issues/4877)、[#6512](https://github.com/router-for-me/CLIProxyAPI/issues/6512)。. Official pages: [Codex login](/accounts/codex)、[Model catalogs](/introduction/models)、[OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-codex-keep-workspaces"></a>**Keep two workspaces for the same Codex account** (`exp.accounts.codex-keep-workspaces`). Symptom: Plus and Team logins for the same account overwrite each other. Action: After each successful --codex-login, rename the auth file, then log in to the other workspace. Both credentials can then stay in auth-dir at the same time. Source issues: [#875](https://github.com/router-for-me/CLIProxyAPI/issues/875)。. Official pages: [Codex login](/accounts/codex)、[OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-codex-callback-enter"></a>**Return to the terminal and confirm after the Codex callback succeeds** (`exp.accounts.codex-callback-enter`). Symptom: The browser only shows localhost success, but the credential was not written. Action: This means the callback has already finished. Return to the terminal that ran --codex-login and press Enter. Only then is the credential saved. Source issues: [#988](https://github.com/router-for-me/CLIProxyAPI/issues/988)。. Official pages: [Codex login](/accounts/codex).
+- <a id="exp-accounts-antigravity-instead-of-gemini-cli"></a>**Use Antigravity login for a Google account** (`exp.accounts.antigravity-instead-of-gemini-cli`). Symptom: The old Gemini CLI or Gemini Web login no longer works. Action: The pinned version does not have those native logins. A Google account uses --antigravity-login. For image generation, do not look again for the removed Gemini Web login. Source issues: [#316](https://github.com/router-for-me/CLIProxyAPI/issues/316)、[#3709](https://github.com/router-for-me/CLIProxyAPI/issues/3709)、[#3915](https://github.com/router-for-me/CLIProxyAPI/issues/3915)、[#3933](https://github.com/router-for-me/CLIProxyAPI/issues/3933)、[#3954](https://github.com/router-for-me/CLIProxyAPI/issues/3954)、[#3972](https://github.com/router-for-me/CLIProxyAPI/issues/3972)。. Official pages: [Antigravity login](/accounts/antigravity).
+- <a id="exp-accounts-antigravity-login-again"></a>**Log in to Antigravity again after the credential fails** (`exp.accounts.antigravity-login-again`). Symptom: project_id is missing, the result is 400 or 429, or the same file is being copied to a second machine. Action: Delete that credential and run --antigravity-login again so it discovers the project again. Do not copy the same file to two servers that run at the same time, or refresh will conflict. Source issues: [#442](https://github.com/router-for-me/CLIProxyAPI/issues/442)、[#902](https://github.com/router-for-me/CLIProxyAPI/issues/902)、[#1022](https://github.com/router-for-me/CLIProxyAPI/issues/1022)、[#4008](https://github.com/router-for-me/CLIProxyAPI/issues/4008)、[#4300](https://github.com/router-for-me/CLIProxyAPI/issues/4300)。. Official pages: [Antigravity login](/accounts/antigravity)、[OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-antigravity-wait-for-callback"></a>**Keep waiting for the callback during Antigravity login** (`exp.accounts.antigravity-wait-for-callback`). Symptom: --antigravity-login stops, and it is unclear whether to paste a URL or press Enter. Action: Pressing Enter continues waiting for the browser callback. It does not paste the callback address. Add --no-browser when the link must be opened manually. Source issues: [#934](https://github.com/router-for-me/CLIProxyAPI/issues/934)。. Official pages: [Antigravity login](/accounts/antigravity).
+- <a id="exp-accounts-antigravity-user-agent"></a>**Set User-Agent on the Antigravity credential** (`exp.accounts.antigravity-user-agent`). Symptom: You want to change the User-Agent sent by this Antigravity credential. Action: After login, fill User-Agent only in that credential's user_agent field. Do not write a key, cookie, or authorization file. This does not guarantee that upstream will stop returning 403. Source issues: [#4272](https://github.com/router-for-me/CLIProxyAPI/issues/4272)。. Official pages: [Antigravity login](/accounts/antigravity).
+- <a id="exp-accounts-xai-device-login"></a>**Log in to xAI with a device code** (`exp.accounts.xai-device-login`). Symptom: A Grok Build, Grok CLI, or SuperGrok subscription needs to connect to the current version. Action: Use --xai-login. The pinned version uses a device code and no longer uses the older browser flow. Source issues: [#3408](https://github.com/router-for-me/CLIProxyAPI/issues/3408)、[#3419](https://github.com/router-for-me/CLIProxyAPI/issues/3419)、[#3518](https://github.com/router-for-me/CLIProxyAPI/issues/3518)、[#3557](https://github.com/router-for-me/CLIProxyAPI/issues/3557)、[#4155](https://github.com/router-for-me/CLIProxyAPI/issues/4155)。. Official pages: [xAI login](/accounts/xai).
+- <a id="exp-accounts-kimi-international-login"></a>**Log in to Kimi on the international site** (`exp.accounts.kimi-international-login`). Symptom: Kimi OAuth on the domestic site returns 404. Action: Use --kimi-login to finish login on the international site. Do not switch to the domestic site address that returns 404. Source issues: [#1553](https://github.com/router-for-me/CLIProxyAPI/issues/1553)。. Official pages: [Kimi login](/accounts/kimi).
+- <a id="exp-accounts-openai-compatible-provider"></a>**Connect a third party through the OpenAI-compatible section** (`exp.accounts.openai-compatible-provider`). Symptom: Z.AI, Ollama, Mistral, GLM, Kimi, MiniMax, iFlow, or a similar service is not a built-in OAuth provider. Action: Under api-keys, fill base-url, api-key, and the model's name or alias in openai-compatibility. A Claude-shaped relay uses claude's api-key and base-url instead. Do not add extra headers unless upstream requires them. Use the base URL from the provider's documentation. Source issues: [#10](https://github.com/router-for-me/CLIProxyAPI/issues/10)、[#20](https://github.com/router-for-me/CLIProxyAPI/issues/20)、[#96](https://github.com/router-for-me/CLIProxyAPI/issues/96)、[#656](https://github.com/router-for-me/CLIProxyAPI/issues/656)、[#920](https://github.com/router-for-me/CLIProxyAPI/issues/920)、[#1432](https://github.com/router-for-me/CLIProxyAPI/issues/1432)、[#1737](https://github.com/router-for-me/CLIProxyAPI/issues/1737)、[#3185](https://github.com/router-for-me/CLIProxyAPI/issues/3185)、[#3299](https://github.com/router-for-me/CLIProxyAPI/issues/3299)、[#4354](https://github.com/router-for-me/CLIProxyAPI/issues/4354)。. Official pages: [Upstream API keys](/accounts/api-keys-api)、[Upstream base URLs](/accounts/api-keys-base)、[Upstream model aliases](/accounts/api-keys-models).
+- <a id="exp-accounts-openai-base-url-v1"></a>**Include the version segment in an OpenAI-compatible base URL** (`exp.accounts.openai-base-url-v1`). Symptom: The model list succeeds, but a call or the responses stream fails authentication or the response is empty. Action: The openai-compatibility base-url must include the /v1 segment the provider requires. Do not stop at the host name. Source issues: [#1066](https://github.com/router-for-me/CLIProxyAPI/issues/1066)、[#1478](https://github.com/router-for-me/CLIProxyAPI/issues/1478)。. Official pages: [Upstream base URLs](/accounts/api-keys-base)、[Responses](/api/responses).
+- <a id="exp-accounts-base-url-no-extra-slash"></a>**Do not add another slash after the version segment of a base URL** (`exp.accounts.base-url-no-extra-slash`). Symptom: A Codex or OpenAI-compatible base-url has an extra trailing slash. Action: Write base-url according to that provider's template. Do not keep a slash after the version segment. Source issues: [#238](https://github.com/router-for-me/CLIProxyAPI/issues/238)。. Official pages: [Upstream base URLs](/accounts/api-keys-base).
+- <a id="exp-accounts-codex-api-key-base-url"></a>**Put a responses upstream on the Codex API key** (`exp.accounts.codex-api-key-base-url`). Symptom: The third party accepts only the responses protocol, and putting it in the chat-completions compatibility section fails. Action: Configure that upstream on codex's api-key and base-url. base-url includes /v1, or the responses path given in the provider documentation. openai-compatibility means chat completions only. Source issues: [#1709](https://github.com/router-for-me/CLIProxyAPI/issues/1709)、[#1979](https://github.com/router-for-me/CLIProxyAPI/issues/1979)、[#2921](https://github.com/router-for-me/CLIProxyAPI/issues/2921)、[#5195](https://github.com/router-for-me/CLIProxyAPI/issues/5195)。. Official pages: [Upstream API keys](/accounts/api-keys-api)、[Upstream base URLs](/accounts/api-keys-base)、[Responses](/api/responses).
+- <a id="exp-accounts-claude-base-url-host-only"></a>**Do not repeat /v1 in a Claude base URL** (`exp.accounts.claude-base-url-host-only`). Symptom: An Anthropic-compatible address was written as a full path that includes /v1. Action: claude's base-url is only the host. The proxy appends the messages path itself. Writing /v1 in the base URL again becomes /v1/v1/messages. Source issues: [#3778](https://github.com/router-for-me/CLIProxyAPI/issues/3778)。. Official pages: [Upstream base URLs](/accounts/api-keys-base).
+- <a id="exp-accounts-dedicated-auth-dir"></a>**Point the credential directory at a dedicated path** (`exp.accounts.dedicated-auth-dir`). Symptom: Startup treats unrelated files as credentials, or Windows cannot read a file that was just saved. Action: Set oauth.auth-dir to a directory that holds only credentials. On Windows use an absolute path, so the file written by login is the file the service loads. Source issues: [#5](https://github.com/router-for-me/CLIProxyAPI/issues/5)、[#14](https://github.com/router-for-me/CLIProxyAPI/issues/14)。. Official pages: [OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-move-auth-file"></a>**Move a file out of the directory to disable a credential** (`exp.accounts.move-auth-file`). Symptom: You want to disable a credential without deleting it. Action: Moving the file out of auth-dir disables it. Moving it back to the original directory restores it. Source issues: [#717](https://github.com/router-for-me/CLIProxyAPI/issues/717)。. Official pages: [OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-copy-auth-dir"></a>**Copy credentials as a whole directory** (`exp.accounts.copy-auth-dir`). Symptom: The panel can download only a few credentials at a time. Action: Copy the whole auth-dir directory on the server. Do not rely on downloading them one by one from the panel. Source issues: [#1074](https://github.com/router-for-me/CLIProxyAPI/issues/1074)、[#3593](https://github.com/router-for-me/CLIProxyAPI/issues/3593)。. Official pages: [OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-alias-client-model"></a>**Map the client model name to the real model with an alias** (`exp.accounts.alias-client-model`). Symptom: The client still requests an old id, a name with a gemini- prefix, or a name from another channel. Action: In oauth-model-alias, point the client id at the model that credential actually provides. When no alias is configured, the proxy does not rewrite the model name in the request. An alias does not turn one upstream model into several different models. Source issues: [#873](https://github.com/router-for-me/CLIProxyAPI/issues/873)、[#1056](https://github.com/router-for-me/CLIProxyAPI/issues/1056)、[#1184](https://github.com/router-for-me/CLIProxyAPI/issues/1184)、[#1481](https://github.com/router-for-me/CLIProxyAPI/issues/1481)、[#1510](https://github.com/router-for-me/CLIProxyAPI/issues/1510)、[#3073](https://github.com/router-for-me/CLIProxyAPI/issues/3073)、[#3300](https://github.com/router-for-me/CLIProxyAPI/issues/3300)、[#3607](https://github.com/router-for-me/CLIProxyAPI/issues/3607)、[#4506](https://github.com/router-for-me/CLIProxyAPI/issues/4506)、[#5118](https://github.com/router-for-me/CLIProxyAPI/issues/5118)。. Official pages: [Antigravity login](/accounts/antigravity)、[OAuth directory, aliases, and exclusions](/accounts/oauth)、[OpenAI Chat](/api/openai-chat)、[Claude Messages](/api/claude-messages)、[Routing strategy](/routing/strategy).
+- <a id="exp-accounts-refresh-workers-zero"></a>**A refresh worker count of 0 still uses the default** (`exp.accounts.refresh-workers-zero`). Symptom: auth-auto-refresh-workers is set to 0 in the expectation that automatic refresh stops. Action: Both 0 and a negative number keep the default of 16 workers. They do not turn refresh off. Only a value greater than 0 replaces the default worker count. Source issues: [#6439](https://github.com/router-for-me/CLIProxyAPI/issues/6439)。. Official pages: [Antigravity login](/accounts/antigravity)、[OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-gemini-custom-base-url"></a>**A custom Gemini address has two ways to be written** (`exp.accounts.gemini-custom-base-url`). Symptom: Gemini requests need to go to a custom endpoint. Action: You can write openai-compatibility's base-url, or use the native gemini base-url. An empty compatibility base URL is removed during normalization. Source issues: [#88](https://github.com/router-for-me/CLIProxyAPI/issues/88)。. Official pages: [Upstream base URLs](/accounts/api-keys-base).
+- <a id="exp-accounts-codex-login-for-claude-code"></a>**Claude Code uses Codex login rather than a raw token** (`exp.accounts.codex-login-for-claude-code`). Symptom: After a raw Codex token file is placed in auth-dir, Claude Code still fails. Action: Run --codex-login first to create the credential, then let Claude Code call /v1/messages. A raw token file is not a usable auth-dir credential. Source issues: [#154](https://github.com/router-for-me/CLIProxyAPI/issues/154)。. Official pages: [Codex login](/accounts/codex)、[Claude Messages](/api/claude-messages).
+- <a id="exp-accounts-aistudio-for-images"></a>**Send images through AI Studio** (`exp.accounts.aistudio-for-images`). Symptom: The old Gemini CLI image model is no longer available. Action: Do not go back to an old proxy version. Image calls use the AI Studio provider instead. Source issues: [#240](https://github.com/router-for-me/CLIProxyAPI/issues/240)。. Official pages: [AI Studio WebSocket authentication](/configuration/provider/ai-studio).
+- <a id="exp-accounts-exclude-model"></a>**Exclude a model on a single credential** (`exp.accounts.exclude-model`). Symptom: A same-named model is also selected from a credential you do not want to use, or one file should not expose a model. Action: Write the model to hide in that OAuth credential, or in excluded-models for the matching provider. GET /v1/models hides it along with that credential. Do not use a global exclusion to handle a single file. Source issues: [#314](https://github.com/router-for-me/CLIProxyAPI/issues/314)、[#1753](https://github.com/router-for-me/CLIProxyAPI/issues/1753)、[#2214](https://github.com/router-for-me/CLIProxyAPI/issues/2214)、[#3501](https://github.com/router-for-me/CLIProxyAPI/issues/3501)、[#3779](https://github.com/router-for-me/CLIProxyAPI/issues/3779)、[#4171](https://github.com/router-for-me/CLIProxyAPI/issues/4171)、[#4184](https://github.com/router-for-me/CLIProxyAPI/issues/4184)。. Official pages: [Per-key excluded models](/accounts/api-keys-excluded)、[Codex login](/accounts/codex)、[Model catalogs](/introduction/models)、[OAuth directory, aliases, and exclusions](/accounts/oauth)、[OpenAI Chat](/api/openai-chat).
+- <a id="exp-accounts-aistudio-wss"></a>**Use wss on an HTTPS page** (`exp.accounts.aistudio-wss`). Symptom: A remote AI Studio page fails to connect over HTTPS. Action: Use wss for the WebSocket address. Do not use plaintext ws. Source issues: [#513](https://github.com/router-for-me/CLIProxyAPI/issues/513)。. Official pages: [AI Studio WebSocket authentication](/configuration/provider/ai-studio).
+- <a id="exp-accounts-alias-matches-request"></a>**An alias joins rotation only when it matches the requested model name** (`exp.accounts.alias-matches-request`). Symptom: A Claude API credential does not enter rotation. Action: That credential enters routing.strategy only when the model name or alias matches the request. alias maps the upstream model name. Source issues: [#777](https://github.com/router-for-me/CLIProxyAPI/issues/777)。. Official pages: [Upstream model aliases](/accounts/api-keys-models)、[Quota compatibility switches](/routing/quota-exceeded)、[Routing strategy](/routing/strategy).
+- <a id="exp-accounts-multiple-keys-one-provider"></a>**Add several keys under the same base URL** (`exp.accounts.multiple-keys-one-provider`). Symptom: One upstream address needs several keys. Action: Add more key entries under that provider, following the example. The OpenAI-compatible section uses api-key-entries. Claude keys are sibling entries, not the nested list used by the compatibility section. Source issues: [#927](https://github.com/router-for-me/CLIProxyAPI/issues/927)、[#1457](https://github.com/router-for-me/CLIProxyAPI/issues/1457)、[#3563](https://github.com/router-for-me/CLIProxyAPI/issues/3563)。. Official pages: [Upstream API keys](/accounts/api-keys-api).
+- <a id="exp-accounts-trace-key-proxy"></a>**Check the proxy on the key first when the response is malformed** (`exp.accounts.trace-key-proxy`). Symptom: An OpenAI-compatible response cannot be parsed. Action: Look first at proxy-url on that key entry. Do not write a second base URL in the same field. Source issues: [#1301](https://github.com/router-for-me/CLIProxyAPI/issues/1301)。. Official pages: [Upstream API keys](/accounts/api-keys-api)、[Outbound requests](/routing/requests-value).
+- <a id="exp-accounts-compat-base-and-alias"></a>**A compatible provider needs both a base URL and an alias** (`exp.accounts.compat-base-and-alias`). Symptom: An OpenAI-compatible provider is refused at load. Action: Fill both base-url and the model alias, following the example. Missing either one removes the entry during normalization. Source issues: [#1324](https://github.com/router-for-me/CLIProxyAPI/issues/1324)。. Official pages: [Upstream base URLs](/accounts/api-keys-base)、[Upstream model aliases](/accounts/api-keys-models).
+- <a id="exp-accounts-kimi-user-agent"></a>**A Kimi compatibility call needs a User-Agent** (`exp.accounts.kimi-user-agent`). Symptom: Kimi For Coding rejects the key. Action: Set the client User-Agent in headers for that openai-compatibility provider, and fill the correct base-url. Source issues: [#1327](https://github.com/router-for-me/CLIProxyAPI/issues/1327)。. Official pages: [Upstream base URLs](/accounts/api-keys-base)、[Upstream extra headers](/accounts/api-keys-headers).
+- <a id="exp-accounts-disable-compat-provider"></a>**Use disabled to turn off a compatible provider** (`exp.accounts.disable-compat-provider`). Symptom: One OpenAI-compatible provider is unstable, but you do not want to delete the configuration. Action: Set that provider's disabled to true, or comment out the whole section. The pinned version keeps this switch. Source issues: [#1751](https://github.com/router-for-me/CLIProxyAPI/issues/1751)、[#2977](https://github.com/router-for-me/CLIProxyAPI/issues/2977)、[#3206](https://github.com/router-for-me/CLIProxyAPI/issues/3206)。. Official pages: [Disable an OpenAI-compatible provider](/accounts/api-keys-disabled).
+- <a id="exp-accounts-claude-cloak-off"></a>**Turn Claude cloak off when disguise is not needed** (`exp.accounts.claude-cloak-off`). Symptom: OAuth rewrote the system prompt, or prompt caching does not match what was expected. Action: Set upstream.claude.disable-claude-cloak-mode to true, or set cloak_mode to never on the credential. Cloaking aligns only with one tested Claude Code version. Other versions are treated as third-party clients. Source issues: [#2789](https://github.com/router-for-me/CLIProxyAPI/issues/2789)、[#5715](https://github.com/router-for-me/CLIProxyAPI/issues/5715)、[#5730](https://github.com/router-for-me/CLIProxyAPI/issues/5730)。. Official pages: [Claude login](/accounts/claude)、[Claude upstream behavior](/accounts/upstream).
+- <a id="exp-accounts-codex-client-user-agent"></a>**A Codex client must match the User-Agent default** (`exp.accounts.codex-client-user-agent`). Symptom: Raw responses succeed, but the same model fails inside the Codex client. Action: Make oauth.providers.codex header-defaults.user-agent match that client. Source issues: [#3000](https://github.com/router-for-me/CLIProxyAPI/issues/3000)。. Official pages: [Codex login](/accounts/codex)、[Codex provider options](/configuration/provider/codex)、[Responses](/api/responses).
+- <a id="exp-accounts-codex-oauth-for-images"></a>**Built-in images use Codex OAuth** (`exp.accounts.codex-oauth-for-images`). Symptom: The image route asks for a local OpenAI API key. Action: Both built-in image generation and the Codex desktop app use --codex-login. It is an image tool on responses, not a local editor, and it does not use a local OpenAI API key. A free account may be skipped. Source issues: [#3057](https://github.com/router-for-me/CLIProxyAPI/issues/3057)、[#3700](https://github.com/router-for-me/CLIProxyAPI/issues/3700)、[#3713](https://github.com/router-for-me/CLIProxyAPI/issues/3713)、[#4222](https://github.com/router-for-me/CLIProxyAPI/issues/4222)、[#4375](https://github.com/router-for-me/CLIProxyAPI/issues/4375)。. Official pages: [Codex login](/accounts/codex)、[Images, speech, and video](/api/media)、[Responses](/api/responses).
+- <a id="exp-accounts-codex-goal-mode"></a>**Codex goal mode needs three settings together** (`exp.accounts.codex-goal-mode`). Symptom: Goal mode stays on an account that is already exhausted. Action: Set that Codex credential's priority and websockets together with routing.strategy round-robin. Source issues: [#3257](https://github.com/router-for-me/CLIProxyAPI/issues/3257)。. Official pages: [Credential priority](/accounts/api-keys-priority)、[Responses WebSocket transport](/accounts/api-keys-websockets)、[Routing strategy](/routing/strategy).
+- <a id="exp-accounts-kimi-oauth-instead-of-broken-key"></a>**Replace a failed Kimi key with OAuth** (`exp.accounts.kimi-oauth-instead-of-broken-key`). Symptom: The Kimi API key no longer works, and the report also does not have enough key configuration. Action: Switch to --kimi-login. Do not keep debugging the old key when the key material is missing. Source issues: [#3589](https://github.com/router-for-me/CLIProxyAPI/issues/3589)。. Official pages: [Kimi login](/accounts/kimi).
+- <a id="exp-accounts-codex-auth-file-shape"></a>**A Codex credential file cannot contain comments** (`exp.accounts.codex-auth-file-shape`). Symptom: A hand-edited auth.json cannot be loaded. Action: Credential JSON cannot contain comments. The key the client uses must be this proxy's access.api-keys, not the upstream token in this file. Source issues: [#3757](https://github.com/router-for-me/CLIProxyAPI/issues/3757)。. Official pages: [Codex login](/accounts/codex).
+- <a id="exp-accounts-rotate-vertex-key"></a>**Rotate a Vertex credential that upstream judged to violate policy** (`exp.accounts.rotate-vertex-key`). Symptom: Google says this Vertex service account violates policy. Action: Rotate that service account. The proxy has no configuration key that can skip this upstream judgment. Source issues: [#3762](https://github.com/router-for-me/CLIProxyAPI/issues/3762)。. Official pages: [Upstream base URLs](/accounts/api-keys-base).
+- <a id="exp-accounts-force-mapping-alias"></a>**force-mapping changes the response model to the alias** (`exp.accounts.force-mapping-alias`). Symptom: The model name in the response is still the original upstream name. Action: After force-mapping is turned on for that model, the model field in the response is written as alias. Source issues: [#3965](https://github.com/router-for-me/CLIProxyAPI/issues/3965)。. Official pages: [Upstream model aliases](/accounts/api-keys-models).
+- <a id="exp-accounts-codex-refresh-security"></a>**Advanced account security makes Codex refresh more often** (`exp.accounts.codex-refresh-security`). Symptom: The Codex credential refreshes very often. Action: This comes from ChatGPT advanced account security, not from a refresh-interval key in the proxy. Source issues: [#3992](https://github.com/router-for-me/CLIProxyAPI/issues/3992)。. Official pages: [Codex login](/accounts/codex).
+- <a id="exp-accounts-codex-websocket-or-http"></a>**Codex can use the client WebSocket or the proxy WebSocket** (`exp.accounts.codex-websocket-or-http`). Symptom: HTTP responses is missing the first event, or the conversation cannot continue on the proxy. Action: Use the client WebSocket or the proxy websockets. HTTP responses is stateless and does not keep the conversation on the proxy. Source issues: [#4310](https://github.com/router-for-me/CLIProxyAPI/issues/4310)、[#5735](https://github.com/router-for-me/CLIProxyAPI/issues/5735)。. Official pages: [Responses WebSocket transport](/accounts/api-keys-websockets)、[Responses](/api/responses).
+- <a id="exp-accounts-xai-api-key-fallback"></a>**On an xAI 403, switch to an API key** (`exp.accounts.xai-api-key-fallback`). Symptom: SuperGrok OAuth returns 403. Action: This is an xAI server-side limit. Temporarily use xAI's api-key and base-url instead of continuing with this OAuth. Source issues: [#4372](https://github.com/router-for-me/CLIProxyAPI/issues/4372)。. Official pages: [Upstream base URLs](/accounts/api-keys-base)、[xAI login](/accounts/xai).
+- <a id="exp-accounts-display-name-field"></a>**Display name and alias are two fields** (`exp.accounts.display-name-field`). Symptom: You want a display name for a Claude API key model. Action: Use the display-name that model already has. Do not write it into alias. Source issues: [#4471](https://github.com/router-for-me/CLIProxyAPI/issues/4471)。. Official pages: [Upstream model aliases](/accounts/api-keys-models).
+- <a id="exp-accounts-compat-preserves-signed-thinking"></a>**A compatible model keeps signed thinking** (`exp.accounts.compat-preserves-signed-thinking`). Symptom: Signed thinking from a third-party Claude is dropped. Action: After the model is marked is-compat, signed thinking is kept. For an incompatible upstream, foreign encrypted reasoning is removed on purpose. Source issues: [#4772](https://github.com/router-for-me/CLIProxyAPI/issues/4772)、[#5167](https://github.com/router-for-me/CLIProxyAPI/issues/5167)。. Official pages: [Upstream model aliases](/accounts/api-keys-models)、[Claude Messages](/api/claude-messages).
+- <a id="exp-accounts-list-compat-models"></a>**A compatible model appears in the list only after it is written into configuration** (`exp.accounts.list-compat-models`). Symptom: GET /v1/models does not have the third-party model. Action: First write name under openai-compatibility models. The list is a local OpenAI shape. It does not attach a context limit and does not pass through upstream modality fields. A name without a prefix is exposed through alias, not by adding another list switch. Source issues: [#4543](https://github.com/router-for-me/CLIProxyAPI/issues/4543)、[#5119](https://github.com/router-for-me/CLIProxyAPI/issues/5119)、[#5327](https://github.com/router-for-me/CLIProxyAPI/issues/5327)、[#5349](https://github.com/router-for-me/CLIProxyAPI/issues/5349)、[#6081](https://github.com/router-for-me/CLIProxyAPI/issues/6081)。. Official pages: [Upstream model aliases](/accounts/api-keys-models)、[Model-name prefix](/accounts/api-keys-prefix)、[OpenAI Chat](/api/openai-chat).
+- <a id="exp-accounts-request-scoped-error-action"></a>**Handle a specific 429 with a request-scoped error rule** (`exp.accounts.request-scoped-error-action`). Symptom: A 429 for Claude extra usage is treated as ordinary rate limiting. Action: Match the status and action in oauth-request-scoped-errors, or in request-scoped-errors on the compatible provider. The action is continue, stop, or cool down the current credential. It does not increase the same-provider retry count. Source issues: [#5426](https://github.com/router-for-me/CLIProxyAPI/issues/5426)、[#6004](https://github.com/router-for-me/CLIProxyAPI/issues/6004)。. Official pages: [Retry and request-scoped errors](/accounts/api-keys-request)、[OAuth directory, aliases, and exclusions](/accounts/oauth).
+- <a id="exp-accounts-codex-desktop-proxy"></a>**The desktop app points at the proxy in its own way** (`exp.accounts.codex-desktop-proxy`). Symptom: Speed control in the Codex desktop app disappears. Action: Point that client at this proxy using the client's own proxy method. Speed control belongs to the client. The proxy has no matching switch. Source issues: [#5448](https://github.com/router-for-me/CLIProxyAPI/issues/5448)。. Official pages: [Codex login](/accounts/codex).
+- <a id="exp-accounts-codex-cloak-and-user-agent"></a>**On a 503, check both Codex cloaking and User-Agent** (`exp.accounts.codex-cloak-and-user-agent`). Symptom: One Codex model returns 503. Action: Set upstream.codex.disable-codex-cloaking to true and set the Codex header-defaults user-agent. This does not guarantee that upstream will stop returning 503. Source issues: [#6064](https://github.com/router-for-me/CLIProxyAPI/issues/6064)。. Official pages: [Codex provider options](/configuration/provider/codex).
+- <a id="exp-accounts-provider-headers"></a>**Headers of a compatible provider apply only to that provider** (`exp.accounts.provider-headers`). Symptom: Another upstream did not carry the User-Agent or session header that was seen. Action: Set them in headers for that openai-compatibility provider. Those headers are not applied automatically to other providers. Source issues: [#4694](https://github.com/router-for-me/CLIProxyAPI/issues/4694)、[#6239](https://github.com/router-for-me/CLIProxyAPI/issues/6239)。. Official pages: [Upstream extra headers](/accounts/api-keys-headers).
+- <a id="exp-accounts-antigravity-hides-unusable-models"></a>**Antigravity hides models the account cannot use** (`exp.accounts.antigravity-hides-unusable-models`). Symptom: The model list is larger than what the account can actually call. Action: An Antigravity credential loads Google's model list and hides models that account cannot use. Web search also appears only on models that expose Google search. Source issues: [#4503](https://github.com/router-for-me/CLIProxyAPI/issues/4503)、[#6412](https://github.com/router-for-me/CLIProxyAPI/issues/6412)。. Official pages: [Antigravity login](/accounts/antigravity)、[Model catalogs](/introduction/models)、[Responses](/api/responses).
+- <a id="exp-accounts-claude-manual-login"></a>**Use manual login when there is no browser** (`exp.accounts.claude-manual-login`). Symptom: Claude login on a server cannot open the localhost callback. Action: Add --no-browser and use the manual login flow. A free membership cannot finish Claude OAuth. This proxy supports only OAuth login. Source issues: [#6016](https://github.com/router-for-me/CLIProxyAPI/issues/6016)、[#6553](https://github.com/router-for-me/CLIProxyAPI/issues/6553)。. Official pages: [Claude login](/accounts/claude)、[Command-line flags](/introduction/install).
+
+## Standalone pages
+
+This area has no practice that needs its own page.
+

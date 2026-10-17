@@ -1,89 +1,74 @@
 ---
-outline: 'deep'
+title: Callback хоста
+feature_ids:
+  - plugin.host-http-client.do
+  - plugin.host-http-client.do-stream
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
 # Callback хоста
 
-Callback хоста — это механизм, по которому плагин вызывает возможности хоста CLIProxyAPI. Это не поле возможности плагина, но он важен для executor, Management API, учётных данных и плагинов с ресурсными страницами.
+`HostHTTPClient` — публичный HTTP-клиент, который хост передаёт плагину. На этой странице только два метода, назначенные сюда.
 
-## Список методов
+## 1. Какую задачу решает этот раздел
 
-Исходный код:
+Плагин отправляет непотоковые или потоковые запросы upstream через хост и тем самым следует транспортной политике хоста. Когда журнал запросов включён, исполнитель также оставляет через него исходящий запрос и исходный ответ upstream.
 
-- `sdk/pluginabi/types.go`: все имена методов `host.*`
-- `sdk/pluginapi/types.go`: структуры запросов и ответов для HTTP, выполнения моделей и файлов учётных данных
-- `internal/pluginhost/host_callbacks.go`: реализация callback хоста
+## 2. Когда применимо и чего здесь нет
 
-Примеры:
+Есть только `Do` и `DoStream`. Другие callback хоста, не назначенные этой странице, здесь не описаны. Частная реализация хоста тоже не описывается.
 
-- `examples/plugin/host-callback/go/main.go`
-- `examples/plugin/host-callback-auth-files/go/main.go`
-- `examples/plugin/host-model-callback/go/main.go`
+Точки вызова есть в структурах запроса входа по учётным данным, обновления, обнаружения моделей по учётным данным, исполнителя и запроса квоты. Имя поля всегда `HTTPClient`, а тег `json` равен `-`, поэтому в JSON запроса ABI его нет. Плагин на Go вызывает этот интерфейс напрямую.
 
-## HTTP callback
+## 3. Как настроить или вызвать
 
-| Метод | Назначение |
-| --- | --- |
-| `host.http.do` | Выполняет обычный HTTP-запрос через хост. |
-| `host.http.do_stream` | Выполняет стриминговый HTTP-запрос через хост. |
-| `host.http.stream_read` | Читает HTTP-поток, удерживаемый хостом. |
-| `host.http.stream_close` | Закрывает HTTP-поток, удерживаемый хостом. |
+Это не возможность, которую плагин включает в `capabilities`. Это клиент, который передаёт хост.
 
-Плагинам следует предпочитать эти методы для внешних HTTP-сервисов, чтобы proxy, транспортная политика и логирование запросов оставались под управлением хоста.
-
-## Callback выполнения моделей
-
-| Метод | Назначение |
-| --- | --- |
-| `host.model.execute` | Запускает нестриминговый запрос модели. |
-| `host.model.execute_stream` | Запускает стриминговый запрос модели и возвращает `stream_id`. |
-| `host.model.stream_read` | Читает chunk потока модели. |
-| `host.model.stream_close` | Закрывает поток модели. |
-
-Основные поля запроса:
-
-```json
-{
-  "entry_protocol": "openai",
-  "exit_protocol": "openai",
-  "model": "gpt-5.5",
-  "stream": false,
-  "body": "base64-request-body",
-  "headers": {},
-  "query": {},
-  "alt": ""
-}
+```go
+Do(context.Context, HTTPRequest) (HTTPResponse, error)
+DoStream(context.Context, HTTPRequest) (HTTPStreamResponse, error)
 ```
 
-## host_callback_id
+Имена методов ABI — `host.http.do` и `host.http.do_stream`.
 
-Когда плагин вызывает `host.model.*` из контекста, вызванного хостом, например `management.handle`, он должен переслать `host_callback_id` из запроса.
+## 4. Подробности
 
-Хост использует этот ID, чтобы определить плагин-источник callback. При вложенном выполнении модели он пропускает собственные request, response и stream interceptor этого плагина, чтобы избежать рекурсии. Другие включённые плагины всё ещё могут обработать вложенный запрос.
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-## Callback файлов учётных данных
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.host-http-client.do | `Do`, ABI `host.http.do`. |  | Параметр `HTTPRequest`, возврат `HTTPResponse`. |
+| plugin.host-http-client.do-stream | `DoStream`, ABI `host.http.do_stream`. |  | Параметр `HTTPRequest`, возврат `HTTPStreamResponse`. |
+| HTTPRequest.Method | Метод HTTP. |  | Строка. |
+| HTTPRequest.URL | Абсолютный адрес upstream. |  | Строка. |
+| HTTPRequest.Headers | Заголовки запроса. |  | `http.Header`. |
+| HTTPRequest.Body | Исходное тело. |  | `[]byte`, в JSON это base64. |
+| HTTPRequest.WireProfile | Необязательное представление на проводе. |  | Пустой указатель ничего не меняет. Имя JSON `wire_profile`. |
+| HTTPWireProfile.HTTP1Only | Только HTTP/1.1, без согласования HTTP/2. |  | Имя JSON `http1_only`. |
+| HTTPWireProfile.DisableAutoCompression | Выключить прозрачную распаковку и автоматический `Accept-Encoding`. |  | Имя JSON `disable_auto_compression`. |
+| HTTPWireProfile.HeaderProfile | Желаемый порядок и регистр имён заголовков. |  | Имя JSON `header_profile`, `[]string`. |
+| HTTPResponse.StatusCode | Код состояния upstream. |  | Целое число. |
+| HTTPResponse.Headers | Заголовки ответа upstream. |  | `http.Header`. |
+| HTTPResponse.Body | Исходное тело ответа. |  | `[]byte`. |
+| HTTPStreamResponse.StatusCode | Код состояния upstream. |  | Целое число. |
+| HTTPStreamResponse.Headers | Заголовки ответа upstream. |  | `http.Header`. |
+| HTTPStreamResponse.Chunks | Потоковые блоки, пока канал не закрыт. |  | Элементы — `HTTPStreamChunk`. |
+| HTTPStreamChunk.Payload | Один блок исходных байтов. |  | `[]byte`. |
+| HTTPStreamChunk.Err | Ошибка, приложенная к этому блоку. |  | `error`. |
 
-| Метод | Назначение |
-| --- | --- |
-| `host.auth.list` | Перечисляет записи учётных данных хоста. |
-| `host.auth.get` | Читает физический JSON учётных данных по auth index. |
-| `host.auth.get_runtime` | Читает runtime-информацию об учётных данных по auth index. |
-| `host.auth.save` | Записывает JSON учётных данных и обновляет runtime-запись. |
+## 5. Типичные ошибки и границы
 
-`examples/plugin/host-callback-auth-files` показывает вызов этих методов из ресурсной страницы.
+Оба метода возвращают `error`. Если `http_status` в конверте ошибки ABI опущен или равен 0, он считается HTTP 500.
 
-## Мост потоков и логирование
+`URL` — абсолютный адрес. Пустой указатель `WireProfile` не добавляет конфигурацию провода. Потоковый результат доставляется через канал `Chunks`, закрытие канала означает конец.
 
-| Метод | Назначение |
-| --- | --- |
-| `host.stream.emit` | Позволяет executor plugin отправить стриминговый chunk хосту. |
-| `host.stream.close` | Позволяет executor plugin закрыть поток. |
-| `host.log` | Пишет через логгер хоста. |
+## 6. Связанные возможности
 
-## Замечания по разработке
+Исполнитель должен использовать этот клиент для доступа к upstream. См. [Исполнитель](/ru/plugin/executor). Вход и обновление описаны в разделе [Провайдер учётных данных](/ru/plugin/auth-provider).
 
-- После использования streaming callback явно вызывайте соответствующий close-метод.
-- Не используйте callback хоста для обхода собственных границ безопасности плагина; плагин всё равно является доверенным кодом внутри процесса.
-- Не пишите в логи JSON учётных данных, token или тела пользовательских запросов.
-- Не раскрывайте callbacks хоста, которые читают учётные данные, записывают учётные данные или выполняют другие привилегированные действия, напрямую через неаутентифицированные query parameters resource GET. Если resource page нужен пользовательский контрол для таких действий, пусть её same-origin JavaScript читает доверенное хранилище Management Center и вызывает аутентифицированный маршрут `/v0/management/...`.
-- Если можно переиспользовать путь выполнения модели хоста, предпочитайте `host.model.*` и не копируйте учётные данные хоста в плагин.
+## 7. Практический опыт
+
+Пока нет.
+

@@ -1,0 +1,251 @@
+---
+title: "Учётные записи и upstream"
+related_feature_ids:
+  - api-keys.claude.api-key
+  - api-keys.claude.base-url
+  - api-keys.claude.excluded-models
+  - api-keys.claude.models-alias
+  - api-keys.claude.models-display-name
+  - api-keys.claude.models-force-mapping
+  - api-keys.claude.models-is-compat
+  - api-keys.codex.api-key
+  - api-keys.codex.base-url
+  - api-keys.codex.excluded-models
+  - api-keys.codex.models-is-compat
+  - api-keys.codex.priority
+  - api-keys.codex.websockets
+  - api-keys.gemini.api-key
+  - api-keys.gemini.base-url
+  - api-keys.gemini.excluded-models
+  - api-keys.openai-compatibility.api-key-entries-api-key
+  - api-keys.openai-compatibility.api-key-entries-proxy-url
+  - api-keys.openai-compatibility.base-url
+  - api-keys.openai-compatibility.disabled
+  - api-keys.openai-compatibility.headers
+  - api-keys.openai-compatibility.models-alias
+  - api-keys.openai-compatibility.models-force-mapping
+  - api-keys.openai-compatibility.models-name
+  - api-keys.openai-compatibility.prefix
+  - api-keys.openai-compatibility.request-scoped-errors-action
+  - api-keys.vertex.base-url
+  - api-keys.xai.base-url
+  - auth.claude.login
+  - cli.server.antigravity-login
+  - cli.server.codex-login
+  - cli.server.kimi-login
+  - cli.server.no-browser
+  - cli.server.xai-login
+  - models.catalog.value
+  - models.codex-catalog.value
+  - oauth.auth-auto-refresh-workers.value
+  - oauth.auth-dir.value
+  - oauth.excluded-models.value
+  - oauth.model-alias.alias
+  - oauth.model-alias.name
+  - oauth.providers.aistudio-ws-auth
+  - oauth.providers.codex-header-defaults-user-agent
+  - oauth.request-scoped-errors.action
+  - oauth.request-scoped-errors.status
+  - quota-exceeded.switch-project.value
+  - requests.proxy-url.value
+  - route.v1.get-models
+  - route.v1.post-chat-completions
+  - route.v1.post-images-generations
+  - route.v1.post-messages
+  - route.v1.post-responses
+  - routing.strategy.value
+  - upstream.claude.disable-claude-cloak-mode
+  - upstream.codex.disable-codex-cloaking
+source_issues:
+  - 5
+  - 10
+  - 14
+  - 20
+  - 88
+  - 96
+  - 154
+  - 238
+  - 240
+  - 314
+  - 316
+  - 442
+  - 513
+  - 656
+  - 717
+  - 777
+  - 873
+  - 875
+  - 902
+  - 920
+  - 927
+  - 934
+  - 988
+  - 1022
+  - 1056
+  - 1066
+  - 1074
+  - 1184
+  - 1301
+  - 1324
+  - 1327
+  - 1432
+  - 1457
+  - 1478
+  - 1481
+  - 1510
+  - 1553
+  - 1709
+  - 1737
+  - 1751
+  - 1753
+  - 1979
+  - 2188
+  - 2214
+  - 2789
+  - 2921
+  - 2977
+  - 3000
+  - 3013
+  - 3045
+  - 3057
+  - 3073
+  - 3185
+  - 3206
+  - 3257
+  - 3259
+  - 3299
+  - 3300
+  - 3408
+  - 3419
+  - 3501
+  - 3509
+  - 3518
+  - 3538
+  - 3557
+  - 3563
+  - 3589
+  - 3593
+  - 3607
+  - 3700
+  - 3709
+  - 3713
+  - 3757
+  - 3762
+  - 3778
+  - 3779
+  - 3793
+  - 3915
+  - 3933
+  - 3954
+  - 3965
+  - 3972
+  - 3992
+  - 4008
+  - 4155
+  - 4171
+  - 4184
+  - 4222
+  - 4272
+  - 4300
+  - 4310
+  - 4330
+  - 4354
+  - 4372
+  - 4375
+  - 4455
+  - 4471
+  - 4482
+  - 4503
+  - 4506
+  - 4543
+  - 4694
+  - 4772
+  - 4877
+  - 5118
+  - 5119
+  - 5167
+  - 5195
+  - 5327
+  - 5349
+  - 5426
+  - 5448
+  - 5715
+  - 5730
+  - 5735
+  - 6004
+  - 6016
+  - 6064
+  - 6081
+  - 6239
+  - 6412
+  - 6439
+  - 6512
+  - 6553
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
+
+# Учётные записи и upstream
+
+## Версия и границы
+
+Практики на этой странице сверены только с конфигурацией, маршрутами или командами, которые ещё есть в закреплённом коммите `911f49cbd49f4fe2516979754a7488a3fd14fe64`. Эта страница не является официальным обещанием поведения. Ключи, cookie, адреса электронной почты, файлы авторизации и тела запросов пользователей сюда не копировались.
+
+## Короткие практики
+
+- <a id="exp-accounts-codex-login-again"></a>**Войдите в Codex снова после смены тарифа или токена** (`exp.accounts.codex-login-again`). Явление: После смены Plus, Pro, Team или refresh token старые учётные данные всё ещё выглядят как бесплатная учётная запись или возвращают 401. Действие: Снова выполните --codex-login. Новый файл сохраняется отдельно и не переписывает старый на месте. Просроченный refresh token автоматически не чинится. Если интерфейс квоты сообщает unauthorized, тоже замените данные новыми учётными данными OAuth, а не файлом не OAuth. Источники issue: [#2188](https://github.com/router-for-me/CLIProxyAPI/issues/2188)、[#3013](https://github.com/router-for-me/CLIProxyAPI/issues/3013)、[#3045](https://github.com/router-for-me/CLIProxyAPI/issues/3045)、[#3259](https://github.com/router-for-me/CLIProxyAPI/issues/3259)、[#3509](https://github.com/router-for-me/CLIProxyAPI/issues/3509)、[#3538](https://github.com/router-for-me/CLIProxyAPI/issues/3538)、[#3793](https://github.com/router-for-me/CLIProxyAPI/issues/3793)、[#4330](https://github.com/router-for-me/CLIProxyAPI/issues/4330)、[#4455](https://github.com/router-for-me/CLIProxyAPI/issues/4455)、[#4482](https://github.com/router-for-me/CLIProxyAPI/issues/4482)、[#4877](https://github.com/router-for-me/CLIProxyAPI/issues/4877)、[#6512](https://github.com/router-for-me/CLIProxyAPI/issues/6512)。. Официальные страницы: [Вход Codex](/ru/accounts/codex)、[Каталоги моделей](/ru/introduction/models)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-codex-keep-workspaces"></a>**Сохраните две рабочие области одной учётной записи Codex** (`exp.accounts.codex-keep-workspaces`). Явление: Входы Plus и Team одной учётной записи затирают друг друга. Действие: После каждого успешного --codex-login переименуйте файл auth, затем войдите в другую рабочую область. Тогда обе учётные записи останутся в auth-dir одновременно. Источники issue: [#875](https://github.com/router-for-me/CLIProxyAPI/issues/875)。. Официальные страницы: [Вход Codex](/ru/accounts/codex)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-codex-callback-enter"></a>**После успешного callback Codex вернитесь в терминал и подтвердите** (`exp.accounts.codex-callback-enter`). Явление: Браузер показывает только успех localhost, но учётные данные не записаны. Действие: Это значит, что callback уже завершён. Вернитесь в терминал, где выполнялся --codex-login, и нажмите Enter. Только тогда учётные данные сохраняются. Источники issue: [#988](https://github.com/router-for-me/CLIProxyAPI/issues/988)。. Официальные страницы: [Вход Codex](/ru/accounts/codex).
+- <a id="exp-accounts-antigravity-instead-of-gemini-cli"></a>**Для учётной записи Google используйте вход Antigravity** (`exp.accounts.antigravity-instead-of-gemini-cli`). Явление: Старый вход Gemini CLI или Gemini Web больше не работает. Действие: В закреплённой версии этих собственных входов нет. Учётная запись Google использует --antigravity-login. Для генерации изображений больше не ищите удалённый вход Gemini Web. Источники issue: [#316](https://github.com/router-for-me/CLIProxyAPI/issues/316)、[#3709](https://github.com/router-for-me/CLIProxyAPI/issues/3709)、[#3915](https://github.com/router-for-me/CLIProxyAPI/issues/3915)、[#3933](https://github.com/router-for-me/CLIProxyAPI/issues/3933)、[#3954](https://github.com/router-for-me/CLIProxyAPI/issues/3954)、[#3972](https://github.com/router-for-me/CLIProxyAPI/issues/3972)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity).
+- <a id="exp-accounts-antigravity-login-again"></a>**Войдите в Antigravity снова, когда учётные данные перестали действовать** (`exp.accounts.antigravity-login-again`). Явление: Нет project_id, ответ 400 или 429, либо тот же файл копируют на вторую машину. Действие: Удалите эти учётные данные и снова выполните --antigravity-login, чтобы проект обнаружился заново. Не копируйте один и тот же файл на два сервера, которые работают одновременно, иначе обновление конфликтует. Источники issue: [#442](https://github.com/router-for-me/CLIProxyAPI/issues/442)、[#902](https://github.com/router-for-me/CLIProxyAPI/issues/902)、[#1022](https://github.com/router-for-me/CLIProxyAPI/issues/1022)、[#4008](https://github.com/router-for-me/CLIProxyAPI/issues/4008)、[#4300](https://github.com/router-for-me/CLIProxyAPI/issues/4300)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-antigravity-wait-for-callback"></a>**При входе Antigravity продолжайте ждать callback** (`exp.accounts.antigravity-wait-for-callback`). Явление: --antigravity-login останавливается, и неясно, вставлять URL или нажимать Enter. Действие: Enter продолжает ожидание callback браузера, а не вставляет адрес callback. Если ссылку нужно открыть вручную, добавьте --no-browser. Источники issue: [#934](https://github.com/router-for-me/CLIProxyAPI/issues/934)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity).
+- <a id="exp-accounts-antigravity-user-agent"></a>**Задайте User-Agent в учётных данных Antigravity** (`exp.accounts.antigravity-user-agent`). Явление: Нужно изменить User-Agent, который отправляют эти учётные данные Antigravity. Действие: После входа заполните User-Agent только в поле user_agent этих учётных данных. Не записывайте ключ, cookie или файл авторизации. Это не гарантирует, что upstream перестанет возвращать 403. Источники issue: [#4272](https://github.com/router-for-me/CLIProxyAPI/issues/4272)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity).
+- <a id="exp-accounts-xai-device-login"></a>**Войдите в xAI по коду устройства** (`exp.accounts.xai-device-login`). Явление: Подписку Grok Build, Grok CLI или SuperGrok нужно подключить к текущей версии. Действие: Используйте --xai-login. Закреплённая версия идёт через код устройства и больше не использует более старый браузерный поток. Источники issue: [#3408](https://github.com/router-for-me/CLIProxyAPI/issues/3408)、[#3419](https://github.com/router-for-me/CLIProxyAPI/issues/3419)、[#3518](https://github.com/router-for-me/CLIProxyAPI/issues/3518)、[#3557](https://github.com/router-for-me/CLIProxyAPI/issues/3557)、[#4155](https://github.com/router-for-me/CLIProxyAPI/issues/4155)。. Официальные страницы: [Вход xAI](/ru/accounts/xai).
+- <a id="exp-accounts-kimi-international-login"></a>**Входите в Kimi через международный сайт** (`exp.accounts.kimi-international-login`). Явление: OAuth Kimi на внутреннем сайте возвращает 404. Действие: Используйте --kimi-login, чтобы завершить вход на международном сайте. Не переходите на адрес внутреннего сайта, который даёт 404. Источники issue: [#1553](https://github.com/router-for-me/CLIProxyAPI/issues/1553)。. Официальные страницы: [Вход Kimi](/ru/accounts/kimi).
+- <a id="exp-accounts-openai-compatible-provider"></a>**Подключайте сторонний сервис через раздел, совместимый с OpenAI** (`exp.accounts.openai-compatible-provider`). Явление: Z.AI, Ollama, Mistral, GLM, Kimi, MiniMax, iFlow или похожий сервис не является встроенным провайдером OAuth. Действие: В openai-compatibility внутри api-keys заполните base-url, api-key и name или alias модели. Ретранслятор в форме Claude использует api-key и base-url у claude. Не добавляйте лишние headers, если upstream их не требует. Адрес берите из документации провайдера. Источники issue: [#10](https://github.com/router-for-me/CLIProxyAPI/issues/10)、[#20](https://github.com/router-for-me/CLIProxyAPI/issues/20)、[#96](https://github.com/router-for-me/CLIProxyAPI/issues/96)、[#656](https://github.com/router-for-me/CLIProxyAPI/issues/656)、[#920](https://github.com/router-for-me/CLIProxyAPI/issues/920)、[#1432](https://github.com/router-for-me/CLIProxyAPI/issues/1432)、[#1737](https://github.com/router-for-me/CLIProxyAPI/issues/1737)、[#3185](https://github.com/router-for-me/CLIProxyAPI/issues/3185)、[#3299](https://github.com/router-for-me/CLIProxyAPI/issues/3299)、[#4354](https://github.com/router-for-me/CLIProxyAPI/issues/4354)。. Официальные страницы: [Ключи upstream API](/ru/accounts/api-keys-api)、[Базовые URL upstream](/ru/accounts/api-keys-base)、[Псевдонимы моделей upstream](/ru/accounts/api-keys-models).
+- <a id="exp-accounts-openai-base-url-v1"></a>**В базовом URL, совместимом с OpenAI, оставьте сегмент версии** (`exp.accounts.openai-base-url-v1`). Явление: Список моделей успешен, но вызов или поток responses не проходит аутентификацию либо ответ пуст. Действие: base-url у openai-compatibility должен содержать сегмент /v1, которого требует провайдер. Не останавливайтесь на имени хоста. Источники issue: [#1066](https://github.com/router-for-me/CLIProxyAPI/issues/1066)、[#1478](https://github.com/router-for-me/CLIProxyAPI/issues/1478)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-base-url-no-extra-slash"></a>**Не добавляйте ещё одну косую черту после сегмента версии базового URL** (`exp.accounts.base-url-no-extra-slash`). Явление: У base-url Codex или совместимого с OpenAI лишняя конечная косая черта. Действие: Пишите base-url по шаблону этого провайдера. После сегмента версии косую черту не оставляйте. Источники issue: [#238](https://github.com/router-for-me/CLIProxyAPI/issues/238)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base).
+- <a id="exp-accounts-codex-api-key-base-url"></a>**Пишите upstream responses в API-ключ Codex** (`exp.accounts.codex-api-key-base-url`). Явление: Сторонняя сторона принимает только протокол responses, и запись в совместимый раздел дополнения чата не работает. Действие: Настройте этот upstream в api-key и base-url у codex. base-url содержит /v1 или путь responses из документации провайдера. openai-compatibility означает только дополнение чата. Источники issue: [#1709](https://github.com/router-for-me/CLIProxyAPI/issues/1709)、[#1979](https://github.com/router-for-me/CLIProxyAPI/issues/1979)、[#2921](https://github.com/router-for-me/CLIProxyAPI/issues/2921)、[#5195](https://github.com/router-for-me/CLIProxyAPI/issues/5195)。. Официальные страницы: [Ключи upstream API](/ru/accounts/api-keys-api)、[Базовые URL upstream](/ru/accounts/api-keys-base)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-claude-base-url-host-only"></a>**Не повторяйте /v1 в базовом URL Claude** (`exp.accounts.claude-base-url-host-only`). Явление: Совместимый с Anthropic адрес записан как полный путь с /v1. Действие: base-url у claude — только хост. Прокси сам добавляет путь сообщений. Если в базовом URL снова записать /v1, получится /v1/v1/messages. Источники issue: [#3778](https://github.com/router-for-me/CLIProxyAPI/issues/3778)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base).
+- <a id="exp-accounts-dedicated-auth-dir"></a>**Укажите каталог учётных данных на отдельный путь** (`exp.accounts.dedicated-auth-dir`). Явление: При запуске посторонние файлы принимаются за учётные данные, или Windows не читает только что сохранённый файл. Действие: Задайте oauth.auth-dir каталогом, в котором лежат только учётные данные. В Windows используйте абсолютный путь, чтобы файл, записанный входом, был тем файлом, который загружает служба. Источники issue: [#5](https://github.com/router-for-me/CLIProxyAPI/issues/5)、[#14](https://github.com/router-for-me/CLIProxyAPI/issues/14)。. Официальные страницы: [Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-move-auth-file"></a>**Вынесите файл из каталога, чтобы отключить учётные данные** (`exp.accounts.move-auth-file`). Явление: Нужно отключить учётные данные, не удаляя их. Действие: Вынос файла из auth-dir отключает их. Возврат в исходный каталог восстанавливает. Источники issue: [#717](https://github.com/router-for-me/CLIProxyAPI/issues/717)。. Официальные страницы: [Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-copy-auth-dir"></a>**Копируйте учётные данные целым каталогом** (`exp.accounts.copy-auth-dir`). Явление: Панель за один раз скачивает лишь немного учётных данных. Действие: На сервере копируйте весь каталог auth-dir. Не полагайтесь на поочерёдное скачивание через панель. Источники issue: [#1074](https://github.com/router-for-me/CLIProxyAPI/issues/1074)、[#3593](https://github.com/router-for-me/CLIProxyAPI/issues/3593)。. Официальные страницы: [Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-alias-client-model"></a>**Сопоставьте имя модели клиента с настоящей моделью через псевдоним** (`exp.accounts.alias-client-model`). Явление: Клиент всё ещё запрашивает старый id, имя с префиксом gemini- или имя другого канала. Действие: В oauth-model-alias укажите id клиента на модель, которую эти учётные данные реально предоставляют. Если псевдоним не задан, прокси не переписывает имя модели в запросе. Псевдоним не превращает одну модель upstream в несколько разных моделей. Источники issue: [#873](https://github.com/router-for-me/CLIProxyAPI/issues/873)、[#1056](https://github.com/router-for-me/CLIProxyAPI/issues/1056)、[#1184](https://github.com/router-for-me/CLIProxyAPI/issues/1184)、[#1481](https://github.com/router-for-me/CLIProxyAPI/issues/1481)、[#1510](https://github.com/router-for-me/CLIProxyAPI/issues/1510)、[#3073](https://github.com/router-for-me/CLIProxyAPI/issues/3073)、[#3300](https://github.com/router-for-me/CLIProxyAPI/issues/3300)、[#3607](https://github.com/router-for-me/CLIProxyAPI/issues/3607)、[#4506](https://github.com/router-for-me/CLIProxyAPI/issues/4506)、[#5118](https://github.com/router-for-me/CLIProxyAPI/issues/5118)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth)、[OpenAI Chat](/ru/api/openai-chat)、[Claude Messages](/ru/api/claude-messages)、[Стратегия маршрутизации](/ru/routing/strategy).
+- <a id="exp-accounts-refresh-workers-zero"></a>**Нулевое число потоков обновления всё равно использует значение по умолчанию** (`exp.accounts.refresh-workers-zero`). Явление: auth-auto-refresh-workers записан как 0 в расчёте, что автоматическое обновление остановится. Действие: И 0, и отрицательное число сохраняют 16 потоков по умолчанию и не выключают обновление. Только значение больше 0 заменяет число потоков по умолчанию. Источники issue: [#6439](https://github.com/router-for-me/CLIProxyAPI/issues/6439)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-gemini-custom-base-url"></a>**У собственного адреса Gemini есть два способа записи** (`exp.accounts.gemini-custom-base-url`). Явление: Запросы Gemini нужно отправлять на собственную конечную точку. Действие: Можно записать base-url у openai-compatibility или использовать собственный base-url gemini. Пустой совместимый базовый URL при упорядочивании убирается. Источники issue: [#88](https://github.com/router-for-me/CLIProxyAPI/issues/88)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base).
+- <a id="exp-accounts-codex-login-for-claude-code"></a>**Claude Code использует вход Codex, а не исходный токен** (`exp.accounts.codex-login-for-claude-code`). Явление: После помещения исходного файла токена Codex в auth-dir Claude Code всё равно не работает. Действие: Сначала выполните --codex-login, чтобы создать учётные данные, затем пусть Claude Code вызывает /v1/messages. Исходный файл токена не является пригодными учётными данными auth-dir. Источники issue: [#154](https://github.com/router-for-me/CLIProxyAPI/issues/154)。. Официальные страницы: [Вход Codex](/ru/accounts/codex)、[Claude Messages](/ru/api/claude-messages).
+- <a id="exp-accounts-aistudio-for-images"></a>**Изображения направляйте через AI Studio** (`exp.accounts.aistudio-for-images`). Явление: Старая модель изображений Gemini CLI больше недоступна. Действие: Не возвращайтесь к старой версии прокси. Вызовы изображений переведите на провайдер AI Studio. Источники issue: [#240](https://github.com/router-for-me/CLIProxyAPI/issues/240)。. Официальные страницы: [Аутентификация WebSocket AI Studio](/ru/configuration/provider/ai-studio).
+- <a id="exp-accounts-exclude-model"></a>**Исключите модель на одних учётных данных** (`exp.accounts.exclude-model`). Явление: Одноимённая модель выбирается и у учётных данных, которые использовать не нужно, или один файл не должен открывать какую-то модель. Действие: Запишите скрываемую модель в эти учётные данные OAuth или в excluded-models соответствующего провайдера. GET /v1/models скроет её вместе с этими учётными данными. Не используйте глобальное исключение для одного файла. Источники issue: [#314](https://github.com/router-for-me/CLIProxyAPI/issues/314)、[#1753](https://github.com/router-for-me/CLIProxyAPI/issues/1753)、[#2214](https://github.com/router-for-me/CLIProxyAPI/issues/2214)、[#3501](https://github.com/router-for-me/CLIProxyAPI/issues/3501)、[#3779](https://github.com/router-for-me/CLIProxyAPI/issues/3779)、[#4171](https://github.com/router-for-me/CLIProxyAPI/issues/4171)、[#4184](https://github.com/router-for-me/CLIProxyAPI/issues/4184)。. Официальные страницы: [Исключённые модели ключа](/ru/accounts/api-keys-excluded)、[Вход Codex](/ru/accounts/codex)、[Каталоги моделей](/ru/introduction/models)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth)、[OpenAI Chat](/ru/api/openai-chat).
+- <a id="exp-accounts-aistudio-wss"></a>**На странице HTTPS используйте wss** (`exp.accounts.aistudio-wss`). Явление: Удалённая страница AI Studio не подключается по HTTPS. Действие: Для адреса WebSocket используйте wss. Не используйте открытый ws. Источники issue: [#513](https://github.com/router-for-me/CLIProxyAPI/issues/513)。. Официальные страницы: [Аутентификация WebSocket AI Studio](/ru/configuration/provider/ai-studio).
+- <a id="exp-accounts-alias-matches-request"></a>**Псевдоним участвует в ротации, только если совпадает с запрошенным именем модели** (`exp.accounts.alias-matches-request`). Явление: Учётные данные Claude API не входят в ротацию. Действие: Эти учётные данные входят в routing.strategy, только если имя модели или alias совпадает с запросом. alias сопоставляет имя модели upstream. Источники issue: [#777](https://github.com/router-for-me/CLIProxyAPI/issues/777)。. Официальные страницы: [Псевдонимы моделей upstream](/ru/accounts/api-keys-models)、[Совместимые переключатели квоты](/ru/routing/quota-exceeded)、[Стратегия маршрутизации](/ru/routing/strategy).
+- <a id="exp-accounts-multiple-keys-one-provider"></a>**Добавьте несколько ключей под одним базовым URL** (`exp.accounts.multiple-keys-one-provider`). Явление: По одному адресу upstream нужно разместить несколько ключей. Действие: По примеру добавьте под этим провайдером несколько записей ключей. Раздел, совместимый с OpenAI, использует api-key-entries. Ключи Claude — соседние записи, а не вложенный список, как в совместимом разделе. Источники issue: [#927](https://github.com/router-for-me/CLIProxyAPI/issues/927)、[#1457](https://github.com/router-for-me/CLIProxyAPI/issues/1457)、[#3563](https://github.com/router-for-me/CLIProxyAPI/issues/3563)。. Официальные страницы: [Ключи upstream API](/ru/accounts/api-keys-api).
+- <a id="exp-accounts-trace-key-proxy"></a>**При искажённом ответе сначала проверьте прокси на ключе** (`exp.accounts.trace-key-proxy`). Явление: Ответ, совместимый с OpenAI, не разбирается. Действие: Сначала посмотрите proxy-url этой записи ключа. Не записывайте второй базовый URL в то же поле. Источники issue: [#1301](https://github.com/router-for-me/CLIProxyAPI/issues/1301)。. Официальные страницы: [Ключи upstream API](/ru/accounts/api-keys-api)、[Исходящие запросы](/ru/routing/requests-value).
+- <a id="exp-accounts-compat-base-and-alias"></a>**Совместимому провайдеру нужны и базовый URL, и псевдоним** (`exp.accounts.compat-base-and-alias`). Явление: Провайдер, совместимый с OpenAI, отклоняется при загрузке. Действие: По примеру заполните и base-url, и alias модели. Отсутствие любого из них убирает запись при упорядочивании. Источники issue: [#1324](https://github.com/router-for-me/CLIProxyAPI/issues/1324)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base)、[Псевдонимы моделей upstream](/ru/accounts/api-keys-models).
+- <a id="exp-accounts-kimi-user-agent"></a>**Совместимому вызову Kimi нужен User-Agent** (`exp.accounts.kimi-user-agent`). Явление: Kimi For Coding отклоняет ключ. Действие: В headers этого провайдера openai-compatibility задайте User-Agent клиента и заполните правильный base-url. Источники issue: [#1327](https://github.com/router-for-me/CLIProxyAPI/issues/1327)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base)、[Дополнительные заголовки upstream](/ru/accounts/api-keys-headers).
+- <a id="exp-accounts-disable-compat-provider"></a>**Выключайте совместимого провайдера через disabled** (`exp.accounts.disable-compat-provider`). Явление: Один провайдер, совместимый с OpenAI, нестабилен, но конфигурацию удалять не нужно. Действие: Задайте disabled этого провайдера равным true или закомментируйте весь раздел. Закреплённая версия сохраняет этот переключатель. Источники issue: [#1751](https://github.com/router-for-me/CLIProxyAPI/issues/1751)、[#2977](https://github.com/router-for-me/CLIProxyAPI/issues/2977)、[#3206](https://github.com/router-for-me/CLIProxyAPI/issues/3206)。. Официальные страницы: [Отключение провайдера, совместимого с OpenAI](/ru/accounts/api-keys-disabled).
+- <a id="exp-accounts-claude-cloak-off"></a>**Выключите маскировку Claude, если она не нужна** (`exp.accounts.claude-cloak-off`). Явление: OAuth переписал системную подсказку, или кэш подсказки не совпал с ожиданием. Действие: Задайте upstream.claude.disable-claude-cloak-mode равным true или поставьте cloak_mode равным never в учётных данных. Маскировка выравнивается только с одной проверенной версией Claude Code. Другие версии обрабатываются как сторонние клиенты. Источники issue: [#2789](https://github.com/router-for-me/CLIProxyAPI/issues/2789)、[#5715](https://github.com/router-for-me/CLIProxyAPI/issues/5715)、[#5730](https://github.com/router-for-me/CLIProxyAPI/issues/5730)。. Официальные страницы: [Вход Claude](/ru/accounts/claude)、[Поведение Claude upstream](/ru/accounts/upstream).
+- <a id="exp-accounts-codex-client-user-agent"></a>**Клиент Codex должен совпадать со значением User-Agent по умолчанию** (`exp.accounts.codex-client-user-agent`). Явление: Исходные responses успешны, но та же модель в клиенте Codex не работает. Действие: Сделайте header-defaults.user-agent у oauth.providers.codex совпадающим с этим клиентом. Источники issue: [#3000](https://github.com/router-for-me/CLIProxyAPI/issues/3000)。. Официальные страницы: [Вход Codex](/ru/accounts/codex)、[Параметры провайдера Codex](/ru/configuration/provider/codex)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-codex-oauth-for-images"></a>**Встроенные изображения используют OAuth Codex** (`exp.accounts.codex-oauth-for-images`). Явление: Маршрут изображений требует локальный API-ключ OpenAI. Действие: И встроенная генерация изображений, и настольное приложение Codex используют --codex-login. Это инструмент изображений на responses, а не локальный редактор, и он не использует локальный API-ключ OpenAI. Бесплатная учётная запись может быть пропущена. Источники issue: [#3057](https://github.com/router-for-me/CLIProxyAPI/issues/3057)、[#3700](https://github.com/router-for-me/CLIProxyAPI/issues/3700)、[#3713](https://github.com/router-for-me/CLIProxyAPI/issues/3713)、[#4222](https://github.com/router-for-me/CLIProxyAPI/issues/4222)、[#4375](https://github.com/router-for-me/CLIProxyAPI/issues/4375)。. Официальные страницы: [Вход Codex](/ru/accounts/codex)、[Изображения, речь и видео](/ru/api/media)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-codex-goal-mode"></a>**Режиму goal у Codex нужны три настройки сразу** (`exp.accounts.codex-goal-mode`). Явление: Режим goal остаётся на учётной записи, которая уже исчерпана. Действие: Одновременно задайте priority и websockets этих учётных данных Codex и round-robin у routing.strategy. Источники issue: [#3257](https://github.com/router-for-me/CLIProxyAPI/issues/3257)。. Официальные страницы: [Приоритет учётных данных](/ru/accounts/api-keys-priority)、[Транспорт WebSocket Responses](/ru/accounts/api-keys-websockets)、[Стратегия маршрутизации](/ru/routing/strategy).
+- <a id="exp-accounts-kimi-oauth-instead-of-broken-key"></a>**Негодный ключ Kimi замените на OAuth** (`exp.accounts.kimi-oauth-instead-of-broken-key`). Явление: API-ключ Kimi уже непригоден, и в отчёте тоже недостаточно конфигурации ключа. Действие: Перейдите на --kimi-login. Не продолжайте отладку старого ключа, если материала ключа нет. Источники issue: [#3589](https://github.com/router-for-me/CLIProxyAPI/issues/3589)。. Официальные страницы: [Вход Kimi](/ru/accounts/kimi).
+- <a id="exp-accounts-codex-auth-file-shape"></a>**Файл учётных данных Codex не может содержать комментарии** (`exp.accounts.codex-auth-file-shape`). Явление: Исправленный вручную auth.json не загружается. Действие: JSON учётных данных не может содержать комментарии. Ключ, который использует клиент, должен быть access.api-keys этого прокси, а не токен upstream в этом файле. Источники issue: [#3757](https://github.com/router-for-me/CLIProxyAPI/issues/3757)。. Официальные страницы: [Вход Codex](/ru/accounts/codex).
+- <a id="exp-accounts-rotate-vertex-key"></a>**Смените учётные данные Vertex, которые upstream счёл нарушением** (`exp.accounts.rotate-vertex-key`). Явление: Google сообщает, что эта служебная учётная запись Vertex нарушает политику. Действие: Смените эту служебную учётную запись. У прокси нет ключа конфигурации, который пропускает это решение upstream. Источники issue: [#3762](https://github.com/router-for-me/CLIProxyAPI/issues/3762)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base).
+- <a id="exp-accounts-force-mapping-alias"></a>**force-mapping меняет модель в ответе на псевдоним** (`exp.accounts.force-mapping-alias`). Явление: Имя модели в ответе всё ещё исходное имя upstream. Действие: После включения force-mapping у этой модели поле модели в ответе записывается как alias. Источники issue: [#3965](https://github.com/router-for-me/CLIProxyAPI/issues/3965)。. Официальные страницы: [Псевдонимы моделей upstream](/ru/accounts/api-keys-models).
+- <a id="exp-accounts-codex-refresh-security"></a>**Повышенная безопасность учётной записи заставляет Codex обновляться чаще** (`exp.accounts.codex-refresh-security`). Явление: Учётные данные Codex обновляются очень часто. Действие: Это происходит из повышенной безопасности учётной записи ChatGPT, а не из ключа интервала обновления в прокси. Источники issue: [#3992](https://github.com/router-for-me/CLIProxyAPI/issues/3992)。. Официальные страницы: [Вход Codex](/ru/accounts/codex).
+- <a id="exp-accounts-codex-websocket-or-http"></a>**Codex может использовать WebSocket клиента или прокси** (`exp.accounts.codex-websocket-or-http`). Явление: У HTTP responses нет первого события, или диалог нельзя продолжить на прокси. Действие: Используйте WebSocket клиента или websockets прокси. HTTP responses не имеет состояния и не удерживает диалог на прокси. Источники issue: [#4310](https://github.com/router-for-me/CLIProxyAPI/issues/4310)、[#5735](https://github.com/router-for-me/CLIProxyAPI/issues/5735)。. Официальные страницы: [Транспорт WebSocket Responses](/ru/accounts/api-keys-websockets)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-xai-api-key-fallback"></a>**При 403 у xAI перейдите на API-ключ** (`exp.accounts.xai-api-key-fallback`). Явление: OAuth SuperGrok возвращает 403. Действие: Это ограничение на стороне сервера xAI. Временно используйте api-key и base-url xAI, а не продолжайте этот OAuth. Источники issue: [#4372](https://github.com/router-for-me/CLIProxyAPI/issues/4372)。. Официальные страницы: [Базовые URL upstream](/ru/accounts/api-keys-base)、[Вход xAI](/ru/accounts/xai).
+- <a id="exp-accounts-display-name-field"></a>**Отображаемое имя и псевдоним — два поля** (`exp.accounts.display-name-field`). Явление: Нужно отображаемое имя для модели ключа Claude API. Действие: Используйте уже имеющийся у этой модели display-name. Не записывайте его в alias. Источники issue: [#4471](https://github.com/router-for-me/CLIProxyAPI/issues/4471)。. Официальные страницы: [Псевдонимы моделей upstream](/ru/accounts/api-keys-models).
+- <a id="exp-accounts-compat-preserves-signed-thinking"></a>**Совместимая модель сохраняет подписанное мышление** (`exp.accounts.compat-preserves-signed-thinking`). Явление: Подписанное мышление стороннего Claude отбрасывается. Действие: После пометки модели как is-compat подписанное мышление сохраняется. У несовместимого upstream чужое зашифрованное рассуждение намеренно убирается. Источники issue: [#4772](https://github.com/router-for-me/CLIProxyAPI/issues/4772)、[#5167](https://github.com/router-for-me/CLIProxyAPI/issues/5167)。. Официальные страницы: [Псевдонимы моделей upstream](/ru/accounts/api-keys-models)、[Claude Messages](/ru/api/claude-messages).
+- <a id="exp-accounts-list-compat-models"></a>**Совместимая модель появляется в списке только после записи в конфигурацию** (`exp.accounts.list-compat-models`). Явление: В GET /v1/models нет сторонней модели. Действие: Сначала запишите name в models у openai-compatibility. Список имеет локальную форму OpenAI. Он не прикрепляет предел контекста и не пропускает поля модальности upstream. Имя без префикса открывается через alias, а не через ещё один переключатель списка. Источники issue: [#4543](https://github.com/router-for-me/CLIProxyAPI/issues/4543)、[#5119](https://github.com/router-for-me/CLIProxyAPI/issues/5119)、[#5327](https://github.com/router-for-me/CLIProxyAPI/issues/5327)、[#5349](https://github.com/router-for-me/CLIProxyAPI/issues/5349)、[#6081](https://github.com/router-for-me/CLIProxyAPI/issues/6081)。. Официальные страницы: [Псевдонимы моделей upstream](/ru/accounts/api-keys-models)、[Префикс имени модели](/ru/accounts/api-keys-prefix)、[OpenAI Chat](/ru/api/openai-chat).
+- <a id="exp-accounts-request-scoped-error-action"></a>**Обрабатывайте конкретный 429 правилом ошибки уровня запроса** (`exp.accounts.request-scoped-error-action`). Явление: 429 дополнительного использования Claude считается обычным ограничением частоты. Действие: Сопоставьте состояние и действие в oauth-request-scoped-errors или в request-scoped-errors совместимого провайдера. Действие — продолжить, остановить или охладить текущие учётные данные. Число повторов того же провайдера не увеличивается. Источники issue: [#5426](https://github.com/router-for-me/CLIProxyAPI/issues/5426)、[#6004](https://github.com/router-for-me/CLIProxyAPI/issues/6004)。. Официальные страницы: [Повторы и ошибки уровня запроса](/ru/accounts/api-keys-request)、[Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+- <a id="exp-accounts-codex-desktop-proxy"></a>**Настольное приложение указывает на прокси своим способом** (`exp.accounts.codex-desktop-proxy`). Явление: Управление скоростью в настольном приложении Codex пропадает. Действие: Направьте этот клиент на этот прокси его собственным способом прокси. Управление скоростью принадлежит клиенту. У прокси нет соответствующего переключателя. Источники issue: [#5448](https://github.com/router-for-me/CLIProxyAPI/issues/5448)。. Официальные страницы: [Вход Codex](/ru/accounts/codex).
+- <a id="exp-accounts-codex-cloak-and-user-agent"></a>**При 503 одновременно проверьте маскировку Codex и User-Agent** (`exp.accounts.codex-cloak-and-user-agent`). Явление: Одна модель Codex возвращает 503. Действие: Задайте upstream.codex.disable-codex-cloaking равным true и задайте user-agent в header-defaults Codex. Это не гарантирует, что upstream перестанет возвращать 503. Источники issue: [#6064](https://github.com/router-for-me/CLIProxyAPI/issues/6064)。. Официальные страницы: [Параметры провайдера Codex](/ru/configuration/provider/codex).
+- <a id="exp-accounts-provider-headers"></a>**Заголовки совместимого провайдера действуют только на него** (`exp.accounts.provider-headers`). Явление: Другой upstream не получил увиденный User-Agent или заголовок сеанса. Действие: Задайте их в headers этого провайдера openai-compatibility. Эти заголовки автоматически не переносятся на других провайдеров. Источники issue: [#4694](https://github.com/router-for-me/CLIProxyAPI/issues/4694)、[#6239](https://github.com/router-for-me/CLIProxyAPI/issues/6239)。. Официальные страницы: [Дополнительные заголовки upstream](/ru/accounts/api-keys-headers).
+- <a id="exp-accounts-antigravity-hides-unusable-models"></a>**Antigravity скрывает модели, которыми учётная запись не может пользоваться** (`exp.accounts.antigravity-hides-unusable-models`). Явление: Список моделей больше, чем то, что учётная запись реально может вызвать. Действие: Учётные данные Antigravity загружают список моделей Google и скрывают модели, которыми эта учётная запись не может пользоваться. Веб-поиск тоже появляется только у моделей, которые открывают поиск Google. Источники issue: [#4503](https://github.com/router-for-me/CLIProxyAPI/issues/4503)、[#6412](https://github.com/router-for-me/CLIProxyAPI/issues/6412)。. Официальные страницы: [Вход Antigravity](/ru/accounts/antigravity)、[Каталоги моделей](/ru/introduction/models)、[Responses](/ru/api/responses).
+- <a id="exp-accounts-claude-manual-login"></a>**Без браузера используйте ручной вход** (`exp.accounts.claude-manual-login`). Явление: Вход Claude на сервере не может открыть callback localhost. Действие: Добавьте --no-browser и используйте ручной поток входа. Бесплатное членство не может завершить OAuth Claude. Этот прокси поддерживает только вход OAuth. Источники issue: [#6016](https://github.com/router-for-me/CLIProxyAPI/issues/6016)、[#6553](https://github.com/router-for-me/CLIProxyAPI/issues/6553)。. Официальные страницы: [Вход Claude](/ru/accounts/claude)、[Параметры командной строки](/ru/introduction/install).
+
+## Отдельные страницы
+
+В этой области нет практики, которой нужна отдельная страница.
+

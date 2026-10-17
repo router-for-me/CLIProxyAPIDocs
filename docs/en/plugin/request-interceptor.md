@@ -1,79 +1,76 @@
 ---
-outline: 'deep'
+title: Request Interceptor
+feature_ids:
+  - plugin.request-interceptor.intercept-request-before-auth
+  - plugin.request-interceptor.intercept-request-after-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Request Interceptor Capability
+# Request Interceptor
 
-The request interceptor capability rewrites request headers or bodies before an upstream request is executed. It has two stages: before credential selection and after credential selection.
+`RequestInterceptor` rewrites the request that is about to execute, both before and after a credential is selected.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "request_interceptor": true
-  }
-}
+The plugin can replace some headers and the body, delete headers, change the path, or stop the request before it reaches the executor and supply a downstream response.
+
+## 2. Scope and non-goals
+
+Both methods share `RequestInterceptRequest` and `RequestInterceptResponse`. Before credential selection, `ToFormat` is empty. After selection, `Model` is the selected upstream model. It does not handle streaming chunks and does not handle usage.
+
+`Body`, `Headers`, and `Metadata` are treated as read-only. Body changes must be placed in the return value.
+
+## 3. How to configure or call it
+
+Set `capabilities.request_interceptor` to true.
+
+```go
+InterceptRequestBeforeAuth(context.Context, RequestInterceptRequest) (RequestInterceptResponse, error)
+InterceptRequestAfterAuth(context.Context, RequestInterceptRequest) (RequestInterceptResponse, error)
 ```
 
-Source references:
+The ABI method names are `request.intercept_before` and `request.intercept_after`.
 
-- `sdk/pluginapi/types.go`: `RequestInterceptor`, `RequestInterceptRequest`, `RequestInterceptResponse`
-- `sdk/pluginabi/types.go`: `request.intercept_before`, `request.intercept_after`
-- `internal/pluginhost/adapters.go`: `InterceptRequestBeforeAuth`, `InterceptRequestAfterAuth`
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `internal/pluginhost/adapters_test.go`: tests for request interceptor chains, source-plugin skipping, and error handling
-- `examples/plugin/antigravity-web-search/go/main.go`: real migration example based on the current interceptor seam
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.request-interceptor.intercept-request-before-auth | `InterceptRequestBeforeAuth`, ABI `request.intercept_before`. |  | Called before credential selection. |
+| plugin.request-interceptor.intercept-request-after-auth | `InterceptRequestAfterAuth`, ABI `request.intercept_after`. |  | Called after credential selection. |
+| RequestInterceptRequest.RequestID | ID of one model execution. |  | Associated with the completion event. |
+| RequestInterceptRequest.TraceID | Trace ID of the inbound HTTP request. It may be empty. |  | String. |
+| RequestInterceptRequest.SourceFormat | Original client protocol. |  | String. |
+| RequestInterceptRequest.ToFormat | Selected upstream protocol. |  | Empty before a credential is selected. |
+| RequestInterceptRequest.Model | Current execution model. |  | After selection it is the upstream model. |
+| RequestInterceptRequest.RequestedModel | Client model before an alias or model pool rewrites it. |  | String. |
+| RequestInterceptRequest.Stream | Whether it is streaming. |  | Boolean. |
+| RequestInterceptRequest.Headers | Current upstream request headers. |  | Read-only. |
+| RequestInterceptRequest.Body | Current payload. |  | Read-only. Changes go in the response `Body`. |
+| RequestInterceptRequest.Metadata | Context snapshot. |  | Read-only, understood as JSON values. |
+| RequestInterceptResponse.Path | Optional target path. |  | For example `/v1/images/generations`. Blank means no change. |
+| RequestInterceptResponse.Headers | Replace headers of the same name. |  | Headers not mentioned are kept. |
+| RequestInterceptResponse.Body | Replace the body. |  | Replaced only when non-empty. |
+| RequestInterceptResponse.ClearHeaders | Header names to delete first. |  | Deleted before `Headers` is applied. |
+| RequestInterceptResponse.Terminate | Stop later interceptors and keep the request from reaching the executor. |  | When true, the three downstream fields below are used. |
+| RequestInterceptResponse.StatusCode | Downstream status code on termination. |  | Changed to 403 when less than 200 or greater than 599. |
+| RequestInterceptResponse.ResponseHeaders | Downstream headers on termination. |  | `http.Header`. |
+| RequestInterceptResponse.ResponseBody | Downstream body on termination. |  | `[]byte`. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `request.intercept_before` | Rewrites the request before credential selection. `ToFormat` may be empty at this point. |
-| `request.intercept_after` | Rewrites the request after credential selection. The model and upstream format are more specific at this point. |
+When a method returns `error`, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Request
+An empty `Body` does not replace the existing body. When the `Terminate` status code is outside 200 through 599, downstream sees 403. The completion event after termination has the result `rejected`. See [Request Lifecycle](/plugin/request-lifecycle).
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "ToFormat": "codex",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "Stream": false,
-  "Headers": {},
-  "Body": "base64-body",
-  "Metadata": {}
-}
-```
+## 6. Related behavior
 
-## Response
+Completion notification is in [Request Lifecycle](/plugin/request-lifecycle). Protocol translation is in [Request Translator](/plugin/request-translator).
 
-```json
-{
-  "Headers": {
-    "X-Plugin": ["example"]
-  },
-  "Body": "base64-new-body",
-  "ClearHeaders": ["X-Old-Header"]
-}
-```
+## 7. Field experience
 
-Semantics:
-
-- `Headers` overrides headers with the same name while preserving headers that are not mentioned.
-- A non-empty `Body` replaces the current body.
-- `ClearHeaders` removes the specified headers before applying `Headers`.
-
-## Recursion Guard
-
-When a plugin starts a nested model request through `host.model.*` and passes `host_callback_id`, the host skips that originating plugin's own request interceptors to avoid recursive self-calls. Request interceptors from other plugins can still handle the nested request.
-
-## Development Notes
-
-- `Metadata` is a host context snapshot and should be treated as read-only.
-- Do not depend on credential fields before credential selection. Handle credential-context rewrites after credential selection.
-- Do not call upstream models directly from a request interceptor. Use [host callbacks](./host-callbacks) when a model request is needed.
+None yet.
 

@@ -1,107 +1,89 @@
 ---
-outline: 'deep'
+title: Model Provider
+feature_ids:
+  - plugin.model-provider.static-models
+  - plugin.model-provider.models-for-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Model Provider Capability
+# Model Provider
 
-The model provider capability provides static models and dynamically discovers models for a specific credential record. It is a better fit than a model registrar for OAuth, file credentials, or plugins that need to access upstream model lists.
+`ModelProvider` supplies static models and models discovered from one credential.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "model_provider": true
-  }
-}
-```
+The static list does not depend on a login credential. `ModelsForAuth` uses that credential to query the provider for models and can also hand back an updated credential.
 
-Source references:
+## 2. Scope and non-goals
 
-- `sdk/pluginapi/types.go`: `ModelProvider`, `StaticModelRequest`, `AuthModelRequest`, `ModelResponse`
-- `sdk/pluginabi/types.go`: `model.static`, `model.for_auth`
-- `internal/pluginhost/adapters.go`: `RegisterModels`, `ModelsForAuth`
+Both methods must be implemented. One-time registration during development is [Model Registrar](/plugin/model-registrar), not this interface. This interface does not execute chat requests.
 
-Example references:
+If the same plugin also has an executor, `executor_model_scope` decides which side is available for static models and OAuth credential models: `static`, `oauth`, or `both`. An empty value is treated as `both`. That field belongs to executor registration. See [Executor](/plugin/executor).
 
-- `examples/plugin/model/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodModelStatic`, `MethodModelForAuth`
+## 3. How to configure or call it
 
-## Methods
-
-| Method | Purpose |
-| --- | --- |
-| `model.static` | Returns static model lists that do not depend on a specific credential. |
-| `model.for_auth` | Returns model lists for a credential record and may also return credential updates. |
-
-## Static Model Request
-
-`model.static` receives `StaticModelRequest`:
+Set `capabilities.model_provider` to true.
 
 ```json
 {
-  "Plugin": {},
-  "Host": {
-    "AuthDir": "~/.cli-proxy-api",
-    "ProxyURL": "",
-    "ForceModelPrefix": false
-  }
-}
-```
-
-## Discovering Models By Credential
-
-`model.for_auth` receives `AuthModelRequest`:
-
-```json
-{
-  "AuthID": "auth-1",
-  "AuthProvider": "plugin-example",
-  "StorageJSON": "base64-json",
-  "Metadata": {},
-  "Attributes": {},
-  "Host": {}
-}
-```
-
-If the plugin needs to call an upstream model API, use the `host.http.*` bridge associated with the host HTTP client in the request so proxy settings, transport policy, and request logging remain managed by the host.
-
-## Response
-
-Both `model.static` and `model.for_auth` return `ModelResponse`:
-
-```json
-{
-  "Provider": "plugin-example",
-  "Models": [
-    {
-      "ID": "plugin-example-model",
-      "Object": "model",
-      "OwnedBy": "plugin-example",
-      "DisplayName": "Plugin Example Model",
-      "SupportedGenerationMethods": ["chat"],
-      "ContextLength": 8192,
-      "MaxCompletionTokens": 1024,
-      "UserDefined": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-model-provider",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-model-provider"
+    },
+    "capabilities": {
+      "model_provider": true
     }
-  ],
-  "AuthUpdate": {}
+  }
 }
 ```
 
-`AuthUpdate` can update credential data during model discovery, such as account information, project ID, or the next refresh time returned by upstream.
+```go
+StaticModels(context.Context, StaticModelRequest) (ModelResponse, error)
+ModelsForAuth(context.Context, AuthModelRequest) (ModelResponse, error)
+```
 
-## Relationship With Executors
+The ABI method names are `model.static` and `model.for_auth`. Fields without a tag use the Go exported name. `[]byte` is base64.
 
-If the plugin also declares the [executor capability](./executor), `executor_model_scope` controls the registration path for the model provider:
+## 4. Details
 
-- `static`: only registers static models.
-- `oauth`: only handles models discovered by credential.
-- `both` or an empty value: supports both model types.
+The Default column matches the ledger `defaults` verbatim.
 
-## Development Notes
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.model-provider.static-models | `StaticModels`, ABI `model.static`. |  | Parameter `StaticModelRequest`, return `ModelResponse`. |
+| plugin.model-provider.models-for-auth | `ModelsForAuth`, ABI `model.for_auth`. |  | Parameter `AuthModelRequest`, return `ModelResponse`. |
+| StaticModelRequest.Plugin | Plugin metadata. |  | `Metadata`. |
+| StaticModelRequest.Host | Host configuration summary. |  | `AuthDir`, `ProxyURL`, `ForceModelPrefix`, `OAuthModelAlias`, `ExcludedModels`. |
+| AuthModelRequest.Plugin | Plugin metadata. |  | `Metadata`. |
+| AuthModelRequest.AuthID | Credential ID used for discovery. |  | String. |
+| AuthModelRequest.AuthProvider | Credential provider. |  | String. |
+| AuthModelRequest.StorageJSON | Plugin persisted data. |  | `[]byte`. |
+| AuthModelRequest.Metadata | Host-mutable metadata. |  | `map[string]any`. |
+| AuthModelRequest.Attributes | Immutable attributes. |  | `map[string]string`. |
+| AuthModelRequest.Host | Host configuration summary. |  | `HostConfigSummary`. |
+| AuthModelRequest.HTTPClient | Host HTTP client. |  | Ignored by JSON. See [Host Callbacks](/plugin/host-callbacks). |
+| ModelResponse.Provider | Provider that owns the models. |  | String. |
+| ModelResponse.Models | Complete discovered model set. |  | `[]ModelInfo`. The fields are the same `ModelInfo` as in [Model Registrar](/plugin/model-registrar). |
+| ModelResponse.AuthUpdate | Credential that discovery needs to write back. |  | `AuthData`. Keep it empty when no update is needed. |
 
-- `model.for_auth` should only handle credential providers it recognizes.
-- If `Provider` is empty, the host tries to use the provider of the current credential.
-- Returning an error from dynamic discovery makes the host treat discovery for that credential as handled but failed.
+## 5. Common errors and limits
+
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
+
+`Models` is the complete set. `HTTPClient` does not enter JSON.
+
+## 6. Related behavior
+
+One-time registration is in [Model Registrar](/plugin/model-registrar). The credential shape is in [Credential Provider](/plugin/auth-provider).
+
+## 7. Field experience
+
+None yet.
 

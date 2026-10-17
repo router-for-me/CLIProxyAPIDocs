@@ -1,122 +1,82 @@
 ---
-outline: 'deep'
+title: Management API
+feature_ids:
+  - plugin.management-api.register-management
+  - plugin.management-handler.handle-management
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность Management API
+# Management API
 
-Возможность Management API позволяет плагину регистрировать собственные management endpoints и браузерные ресурсные страницы. Она подходит для страниц статуса, диагностики, помощников настройки или специальных действий плагина.
+На этой странице два публичных интерфейса, уже назначенных сюда: `ManagementAPI` регистрирует маршруты, а `ManagementHandler` обрабатывает попавший запрос.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "management_api": true
-  }
-}
+Под префиксом, который дал хост, плагин объявляет точные маршруты управления и маршруты браузерных ресурсов и при поступлении запроса возвращает код состояния, заголовки и тело.
+
+## 2. Когда применимо и чего здесь нет
+
+Собственный API управления хоста он не реализует. `BasePath` в запросе регистрации — единственный префикс, под которым плагин может повесить маршруты управления. Значение — `/v0/management`. `ResourceBasePath` — это `/v0/resource/plugins/` плюс ID плагина.
+
+Маршруты ресурсов не проходят аутентификацию управления. Объявление управления GET с непустым `Menu` одновременно не регистрирует конечную точку управления. Оно регистрируется только как маршрут ресурса.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.management_api` равным true.
+
+```go
+RegisterManagement(context.Context, ManagementRegistrationRequest) (ManagementRegistrationResponse, error)
+HandleManagement(context.Context, ManagementRequest) (ManagementResponse, error)
 ```
 
-Исходный код:
+Имена методов ABI — `management.register` и `management.handle`. `Handler` каждого `ManagementRoute` и `ResourceRoute` реализует второй интерфейс.
 
-- `sdk/pluginapi/types.go`: `ManagementAPI`, `ManagementRegistrationRequest`, `ManagementRoute`, `ResourceRoute`, `ManagementRequest`, `ManagementResponse`
-- `sdk/pluginabi/types.go`: `management.register`, `management.handle`
-- `internal/pluginhost/management.go`: регистрация management routes и resource routes, границы аутентификации
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/management-api/go/main.go`
-- `examples/plugin/host-callback/go/main.go`
-- `examples/plugin/host-model-callback/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodManagementRegister`, `MethodManagementHandle`
-
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `management.register` | Регистрирует management routes и браузерные ресурсы плагина. |
-| `management.handle` | Обрабатывает HTTP-запросы, сопоставленные маршрутам плагина. |
-
-## Типы маршрутов
-
-| Тип | Поле регистрации | Открытый путь | Аутентификация |
+| Поле | Значение | По умолчанию | Ограничение |
 | --- | --- | --- | --- |
-| Management API плагина | `Routes` | `/v0/management/...` | Требует management key. |
-| Браузерная ресурсная страница | `Resources` | `/v0/resource/plugins/<pluginID>/...` | Сам resource request не проходит management-аутентификацию. В same-origin deployment Management Center доверенный JavaScript страницы может прочитать сохранённый management key и вызывать `/v0/management/...`. |
+| plugin.management-api.register-management | `RegisterManagement`, ABI `management.register`. |  | Параметр `ManagementRegistrationRequest`. |
+| plugin.management-handler.handle-management | `HandleManagement`, ABI `management.handle`. |  | Параметр `ManagementRequest`, возврат `ManagementResponse`. |
+| ManagementRegistrationRequest.Plugin | Метаданные плагина. |  | `Metadata`. |
+| ManagementRegistrationRequest.BasePath | Префикс маршрутов управления. |  | Фиксирован как `/v0/management`. |
+| ManagementRegistrationRequest.ResourceBasePath | Префикс ресурсов. |  | `/v0/resource/plugins/<pluginID>`. |
+| ManagementRegistrationResponse.Routes | Точные маршруты управления, которые нужно открыть. |  | `[]ManagementRoute`. |
+| ManagementRegistrationResponse.Resources | Браузерные ресурсы. |  | Вешаются под префиксом ресурсов. |
+| ManagementRoute.Method | Метод HTTP. |  | Пустое значение считается GET. Пробел делает весь маршрут недействительным. |
+| ManagementRoute.Path | Точный путь. |  | Относительному пути добавляется `/`, затем он вешается под `/v0/management`. У пути, который уже имеет этот префикс, префикс сначала снимается, затем путь вешается снова. |
+| ManagementRoute.Menu | Заголовок меню ресурса старого вида. |  | Если метод GET и значение непустое, конечная точка `/v0/management` не регистрируется. Регистрация идёт только как маршрут ресурса. |
+| ManagementRoute.Description | Описание меню старого вида. |  | Строка. |
+| ManagementRoute.Handler | Объект, обрабатывающий этот маршрут. |  | Не может быть пустым, иначе маршрут недействителен. |
+| ResourceRoute.Path | Точный путь ресурса. |  | Вешается под префиксом ресурсов этого плагина. |
+| ResourceRoute.Menu | Заголовок меню интерфейса управления. |  | Запрос ресурса — GET. |
+| ResourceRoute.Description | Описание интерфейса. |  | Строка. |
+| ResourceRoute.Handler | Объект обработки ресурса. |  | Не может быть пустым. Запрос ресурса не несёт аутентификацию управления. |
+| ManagementRequest.Method | Фактический метод HTTP. |  | Строка. |
+| ManagementRequest.Path | Путь запроса. |  | Строка. |
+| ManagementRequest.Headers | Заголовки запроса. |  | `http.Header`. |
+| ManagementRequest.Query | Параметры запроса. |  | `url.Values`. |
+| ManagementRequest.Body | Исходное тело. |  | `[]byte`. GET ресурса тело не использует. |
+| ManagementResponse.StatusCode | Код состояния HTTP. |  | 0 считается 200. |
+| ManagementResponse.Headers | Заголовки ответа. |  | `http.Header`. |
+| ManagementResponse.Body | Исходное тело ответа. |  | Строка JSON при контракте 6 и выше не экранируется как HTML. Ниже 6 экранирование остаётся. Текущая версия — 6. |
 
-## Ответ регистрации
+## 5. Типичные ошибки и границы
 
-```json
-{
-  "Routes": [
-    {
-      "Method": "POST",
-      "Path": "/plugins/example/run"
-    }
-  ],
-  "Resources": [
-    {
-      "Path": "/status",
-      "Menu": "Example Plugin",
-      "Description": "Shows example plugin status."
-    }
-  ]
-}
-```
+Когда функция обработки возвращает `error`, запрос управления получает HTTP 502, а тело — `plugin management handler failed`. Запрос ресурса тоже 502, тело — `plugin resource handler failed`.
 
-Итоговый пример пути ресурса:
+Следующие маршруты не регистрируются: пустой путь, метод с пробелом, итоговый путь не под соответствующим префиксом, путь с пробелом, `:` или `*`. Путь ресурса также отклоняет `..`. При конфликте с зарезервированным маршрутом или с путём ресурса плагина более высокого приоритета эта запись пропускается. Объявление управления GET с непустым `Menu` не входит в `/v0/management` и регистрируется только как маршрут ресурса.
 
-```text
-/v0/resource/plugins/example/status
-```
+Собственный `error` метода регистрации всё ещё идёт через конверт ABI. Если `http_status` опущен или равен 0, он считается HTTP 500.
 
-## Обработка запросов
+## 6. Связанные возможности
 
-`management.handle` получает:
+Уже существующие маршруты плоскости управления хоста на этой странице не описаны. Установка плагина описана в разделе [Загрузка плагинов и магазин](/ru/operations/plugins).
 
-```json
-{
-  "Method": "GET",
-  "Path": "/v0/resource/plugins/example/status",
-  "Headers": {},
-  "Query": {},
-  "Body": "base64-body"
-}
-```
+## 7. Практический опыт
 
-Ответ:
+Пока нет.
 
-```json
-{
-  "StatusCode": 200,
-  "Headers": {
-    "Content-Type": ["text/html; charset=utf-8"]
-  },
-  "Body": "base64-html"
-}
-```
-
-## Границы аутентификации
-
-- Plugin management API под `/v0/management/...` требует management key.
-- `/v0/resource/plugins/<pluginID>/...` — браузерный ресурсный путь. GET-запрос, который отдаёт страницу, не использует аутентификацию Management API.
-- В same-origin deployment resource page плагина может читать `localStorage` Management Center и использовать сохранённый management key. Установка и включение такого плагина являются решением доверять браузерному коду плагина.
-- Cross-origin deployment не может полагаться на такой доступ к хранилищу. Страницы плагина должны обрабатывать отсутствие или недоступность management state.
-- Устаревшие GET management route с `Menu` хост переносит в resource route, чтобы не раскрывать страницы меню как management API.
-
-## Шаблон доверенной resource page
-
-Для привилегированных действий предпочитайте такую структуру:
-
-1. Отдайте UI плагина как resource page.
-2. Пусть JavaScript страницы читает same-origin хранилище Management Center, когда оно доступно.
-3. Используйте полученный management key для вызова собственного маршрута плагина `/v0/management/...` с `Authorization: Bearer <management-key>`.
-
-Не привязывайте чувствительные действия напрямую к неаутентифицированным resource GET-запросам. Если resource route читает query parameters и сразу меняет конфигурацию, читает файлы учётных данных или вызывает привилегированные host callbacks, это действие становится доступным как только доступен URL ресурса.
-
-## Замечания по разработке
-
-- Management routes плагина не могут перекрывать существующие маршруты хоста `/v0/management`.
-- Resource path не может содержать пробелы, `:`, `*` или `..`.
-- При возврате HTML всё равно не выводите на страницу secret, token или JSON учётных данных.
-- Скрипты resource page плагина должны поставляться вместе со страницей. Загрузка сторонних скриптов даёт этим скриптам доступ к same-origin management-хранилищу.
-- Если нужно вызвать возможности модели, HTTP или файлов учётных данных хоста, используйте [callback хоста](./host-callbacks).

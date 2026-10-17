@@ -1,50 +1,46 @@
-# xAI / Grok (OAuth Login)
+---
+title: xAI search tool
+feature_ids:
+  - upstream.xai.inject-x-search
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
 
-CLIProxyAPI supports Grok Build accounts through xAI OAuth. After login, the account is exposed as the `xai` provider and uses the xAI API base URL `https://api.x.ai/v1` by default.
+# xAI search tool
 
-## Login
+## 1. What this solves
 
-```bash
-./cli-proxy-api --xai-login
-```
+When a request has not declared x_search, the proxy adds xAI's native search tool.
 
-Options: add `--no-browser` to print the login URL instead of opening a browser. The local OAuth callback listens on `127.0.0.1:56121/callback` by default.
+## 2. Scope and non-goals
 
-If the default callback port is unavailable, override it:
+Login and API keys are not on this page. After injection, it is also added to tool_choice.allowed_tools when that applies.
 
-```bash
-./cli-proxy-api --xai-login --oauth-callback-port <port>
-```
-
-In a remote or headless environment, follow the SSH tunnel instructions printed by the command. If the CLI asks for a manual callback token, paste only the token value, not the full callback URL.
-
-## Supported APIs
-
-- Text models are routed to xAI's Responses API and can be called through the OpenAI-compatible endpoints such as `/v1/responses` and `/v1/chat/completions`.
-- Image requests use `/v1/images/generations` and `/v1/images/edits` with `grok-imagine-image` or `grok-imagine-image-quality`.
-- Video requests use `/v1/videos`, `/v1/videos/generations`, `/v1/videos/edits`, `/v1/videos/extensions`, and `/v1/videos/{request_id}` with `grok-imagine-video`.
-
-For xAI image and video models, model names can be used directly or with an `xai/`, `x-ai/`, or `grok/` prefix.
-
-## Model Controls
-
-Use the `xai` channel under `oauth-model-alias` to expose a different client-visible model name:
+## 3. How to configure or call it
 
 ```yaml
-oauth-model-alias:
+upstream:
   xai:
-    - name: "grok-4.3"
-      alias: "grok-latest"
+    inject-x-search: false
 ```
 
-Use the same channel under `oauth-excluded-models` to hide models from listing and routing:
+## 4. Details
 
-```yaml
-oauth-excluded-models:
-  xai:
-    - "grok-3-mini"
-```
+The Default column matches the ledger `defaults` verbatim.
 
-## Request Notes
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| upstream.xai.inject-x-search | Whether to inject xAI's x_search when the request did not declare it. | false | When true, it is injected only if the request did not declare x_search, and it is also added to tool_choice.allowed_tools when that applies. |
 
-CLIProxyAPI normalizes xAI Responses requests before sending them upstream. Unsupported continuation/cache fields are removed, tool definitions are adjusted for xAI compatibility, and reasoning settings are kept only for Grok models that support reasoning effort.
+## 5. Common errors and limits
+
+false, or omitting it, injects nothing. true injects only when the request itself did not declare that tool.
+
+## 6. Related behavior
+
+Login is in [xAI login](/accounts/xai).
+
+## 7. Field experience
+
+None yet.

@@ -1,66 +1,56 @@
 ---
-outline: 'deep'
+title: Request translation
+feature_ids:
+  - plugin.request-translator.translate-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Request Translator Capability
+# Request translation
 
-The request translator capability converts a canonical request into the target provider protocol. It runs in the protocol translation stage before request execution and is suitable for translating a CLIProxyAPI-normalized request body into the upstream payload.
+`RequestTranslator` converts a request payload that is already in canonical form into another format.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "request_translator": true
-  }
-}
+From the source format, target format, model, whether the response is streaming, and the body, the plugin returns the translated raw bytes.
+
+## 2. Scope and non-goals
+
+There is only `TranslateRequest`. Folding a provider request into canonical form is [Request normalization](/plugin/request-normalizer), not this interface. Responses are not on this page.
+
+## 3. How to configure or call it
+
+Set `capabilities.request_translator` to true.
+
+```go
+TranslateRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-Source references:
+The ABI method name is `request.translate`.
 
-- `sdk/pluginapi/types.go`: `RequestTranslator`, `RequestTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `request.translate`
-- `internal/pluginhost/adapters.go`: `TranslateRequest`, `callRequestTranslator`
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `examples/plugin/request-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodRequestTranslate`
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.request-translator.translate-request | `TranslateRequest`, ABI `request.translate`. |  | Parameter `RequestTransformRequest`, return `PayloadResponse`. |
+| RequestTransformRequest.FromFormat | Source protocol. |  | String. |
+| RequestTransformRequest.ToFormat | Target protocol. |  | String. |
+| RequestTransformRequest.Model | Model ID. |  | String. |
+| RequestTransformRequest.Stream | Whether streaming output is expected. |  | Boolean. |
+| RequestTransformRequest.Body | Payload to translate. |  | `[]byte`, base64 in JSON. |
+| PayloadResponse.Body | Translated payload. |  | `[]byte`. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `request.translate` | Converts `Body` from `FromFormat` to `ToFormat`. |
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500. This method does not change credentials and does not stop the request.
 
-## Request
+## 6. Related behavior
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "anthropic",
-  "Model": "claude-sonnet",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+Folding back into canonical form is in [Request normalization](/plugin/request-normalizer). Rewriting a request that is about to be sent is in [Request interceptor](/plugin/request-interceptor).
 
-## Response
+## 7. Field experience
 
-```json
-{
-  "Body": "base64-translated-body"
-}
-```
-
-## Difference From Request Normalization
-
-- The [request normalizer capability](./request-normalizer) normalizes provider or special-entry requests into a canonical format the host understands.
-- The request translator capability converts the canonical format into the target upstream protocol.
-
-## Development Notes
-
-- Only handle format combinations that are explicitly supported. Return an error or do not declare the capability if a combination cannot be handled.
-- `Body` must be a complete and valid target protocol payload.
-- Do not perform credential selection or upstream HTTP requests inside a translator. Those belong to the scheduler and executor stages.
-
+None yet.

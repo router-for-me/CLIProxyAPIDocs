@@ -1,7 +1,11 @@
-# Claude Code (Anthropic через OAuth):
+---
+title: Указатель
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+translation_pending: false
+---
 
-```bash
-./cli-proxy-api --claude-login
-```
+# Указатель
 
-Опции: добавьте `--no-browser`, чтобы вывести URL для входа вместо открытия браузера. Локальный OAuth callback использует port `54545`.
+Вход Claude OAuth перенесён в раздел [Вход Claude](/ru/accounts/claude). Ключи upstream, адреса и псевдонимы моделей описаны в разделах [Ключи upstream API](/ru/accounts/api-keys-api), [Базовые URL upstream](/ru/accounts/api-keys-base) и [Псевдонимы моделей upstream](/ru/accounts/api-keys-models). Эта страница больше не регистрирует возможности.

@@ -1,76 +1,82 @@
 ---
-outline: 'deep'
+title: Frontend Authentication Provider
+feature_ids:
+  - plugin.frontend-auth-provider.identifier
+  - plugin.frontend-auth-provider.authenticate
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Frontend Authentication Provider Capability
+# Frontend Authentication Provider
 
-The frontend authentication provider capability authenticates client requests before they enter the proxy flow. It answers "who may call CLIProxyAPI" and does not handle upstream credential selection.
+`FrontendAuthProvider` performs frontend authentication before a request enters proxy handling.
 
-## Capability Field
+## 1. What this solves
+
+The plugin inspects the inbound method, path, headers, query, and body, decides whether to accept the request, and supplies a principal identifier plus attributes available downstream.
+
+## 2. Scope and non-goals
+
+It does not parse upstream credential files. That is [Credential Provider](/plugin/auth-provider). The exclusive switch is not a method. See [Frontend Authentication Exclusive Mode](/plugin/frontend-auth-exclusive).
+
+## 3. How to configure or call it
+
+Set `capabilities.frontend_auth_provider` to true. To require exclusive mode, also add `frontend_auth_provider_exclusive`. That switch is not explained on this page.
 
 ```json
 {
-  "capabilities": {
-    "frontend_auth_provider": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-frontend-auth",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-frontend-auth"
+    },
+    "capabilities": {
+      "frontend_auth_provider": true
+    }
   }
 }
 ```
 
-Source references:
-
-- `sdk/pluginapi/types.go`: `FrontendAuthProvider`, `FrontendAuthRequest`, `FrontendAuthResponse`
-- `sdk/pluginabi/types.go`: `frontend_auth.identifier`, `frontend_auth.authenticate`
-- `internal/pluginhost/adapters.go`: `RegisterFrontendAuthProviders`
-
-Example references:
-
-- `examples/plugin/frontend-auth/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodFrontendAuthIdentifier`, `MethodFrontendAuthAuthenticate`
-
-## Methods
-
-| Method | Purpose |
-| --- | --- |
-| `frontend_auth.identifier` | Returns the stable identifier of this frontend authentication provider. |
-| `frontend_auth.authenticate` | Determines whether authentication succeeds from the HTTP request content. |
-
-## Request
-
-`frontend_auth.authenticate` receives:
-
-```json
-{
-  "Method": "POST",
-  "Path": "/v1/chat/completions",
-  "Headers": {
-    "Authorization": ["Bearer ..."]
-  },
-  "Query": {},
-  "Body": "base64-body"
-}
+```go
+Identifier() string
+Authenticate(context.Context, FrontendAuthRequest) (FrontendAuthResponse, error)
 ```
 
-## Response
+The ABI method names are `frontend_auth.identifier` and `frontend_auth.authenticate`. The field on the identifier result object is `identifier`. The example is `examples/plugin/frontend-auth`.
 
-```json
-{
-  "Authenticated": true,
-  "Principal": "user-or-client-id",
-  "Metadata": {
-    "provider": "example-frontend-auth-go"
-  }
-}
-```
+## 4. Details
 
-`Principal` is the authenticated subject. `Metadata` can carry identity attributes for downstream use.
+The Default column matches the ledger `defaults` verbatim.
 
-## Relationship With Built-In API Keys
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.frontend-auth-provider.identifier | `Identifier`, ABI `frontend_auth.identifier`. |  | No parameters. Returns a string. Failure or blank is treated as an empty string. |
+| plugin.frontend-auth-provider.authenticate | `Authenticate`, ABI `frontend_auth.authenticate`. |  | Parameter `FrontendAuthRequest`, return `FrontendAuthResponse`. |
+| FrontendAuthRequest.Method | HTTP method. |  | String. |
+| FrontendAuthRequest.Path | Request path. |  | String. |
+| FrontendAuthRequest.Headers | Inbound headers. |  | `http.Header`. |
+| FrontendAuthRequest.Query | Query parameters. |  | `url.Values`. |
+| FrontendAuthRequest.Body | Raw body. |  | `[]byte`, base64 in JSON. |
+| FrontendAuthResponse.Authenticated | Whether the request is accepted. |  | Boolean. |
+| FrontendAuthResponse.Principal | Authenticated principal identifier. |  | String. |
+| FrontendAuthResponse.Metadata | Identity attributes handed downstream. |  | `map[string]string`. |
 
-A normal frontend authentication provider works together with existing host authentication methods. Only when [frontend authentication exclusive mode](./frontend-auth-exclusive) is declared can the plugin become the only frontend authentication source after it is selected.
+## 5. Common errors and limits
 
-## Development Notes
+When `Authenticate` returns `error`, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-- Frontend authentication only authenticates client requests and should not read or return upstream credentials.
-- Be careful with body size and sensitive information when authenticating from the request body. Do not log the raw body.
-- When a plugin returns `Authenticated: false`, the host continues through the current authentication chain or rejects the request, depending on whether exclusive mode is enabled.
+`Authenticated` set to false means the request was not accepted. That is not the same path as the method returning an error.
+
+## 6. Related behavior
+
+The exclusive boolean is in [Frontend Authentication Exclusive Mode](/plugin/frontend-auth-exclusive). Upstream credentials are in [Credential Provider](/plugin/auth-provider).
+
+## 7. Field experience
+
+None yet.
 

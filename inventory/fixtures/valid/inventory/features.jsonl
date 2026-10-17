@@ -1,0 +1,1 @@
+{"id":"server.port.value","kind":"config","title":"Server port","source":"internal/config/config.go Port","behavior":"The server listens on the configured TCP port.","defaults":"8317","canonical_page":"docs/cn/operations/server.md","legacy_urls":["/configuration/basic"],"status":"covered","pinned_commit":"0123456789abcdef0123456789abcdef01234567","translation_ready":false}

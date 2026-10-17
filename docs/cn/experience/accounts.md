@@ -1,0 +1,248 @@
+---
+title: "账号与上游 使用经验"
+related_feature_ids:
+  - api-keys.claude.api-key
+  - api-keys.claude.base-url
+  - api-keys.claude.excluded-models
+  - api-keys.claude.models-alias
+  - api-keys.claude.models-display-name
+  - api-keys.claude.models-force-mapping
+  - api-keys.claude.models-is-compat
+  - api-keys.codex.api-key
+  - api-keys.codex.base-url
+  - api-keys.codex.excluded-models
+  - api-keys.codex.models-is-compat
+  - api-keys.codex.priority
+  - api-keys.codex.websockets
+  - api-keys.gemini.api-key
+  - api-keys.gemini.base-url
+  - api-keys.gemini.excluded-models
+  - api-keys.openai-compatibility.api-key-entries-api-key
+  - api-keys.openai-compatibility.api-key-entries-proxy-url
+  - api-keys.openai-compatibility.base-url
+  - api-keys.openai-compatibility.disabled
+  - api-keys.openai-compatibility.headers
+  - api-keys.openai-compatibility.models-alias
+  - api-keys.openai-compatibility.models-force-mapping
+  - api-keys.openai-compatibility.models-name
+  - api-keys.openai-compatibility.prefix
+  - api-keys.openai-compatibility.request-scoped-errors-action
+  - api-keys.vertex.base-url
+  - api-keys.xai.base-url
+  - auth.claude.login
+  - cli.server.antigravity-login
+  - cli.server.codex-login
+  - cli.server.kimi-login
+  - cli.server.no-browser
+  - cli.server.xai-login
+  - models.catalog.value
+  - models.codex-catalog.value
+  - oauth.auth-auto-refresh-workers.value
+  - oauth.auth-dir.value
+  - oauth.excluded-models.value
+  - oauth.model-alias.alias
+  - oauth.model-alias.name
+  - oauth.providers.aistudio-ws-auth
+  - oauth.providers.codex-header-defaults-user-agent
+  - oauth.request-scoped-errors.action
+  - oauth.request-scoped-errors.status
+  - quota-exceeded.switch-project.value
+  - requests.proxy-url.value
+  - route.v1.get-models
+  - route.v1.post-chat-completions
+  - route.v1.post-images-generations
+  - route.v1.post-messages
+  - route.v1.post-responses
+  - routing.strategy.value
+  - upstream.claude.disable-claude-cloak-mode
+  - upstream.codex.disable-codex-cloaking
+source_issues:
+  - 5
+  - 10
+  - 14
+  - 20
+  - 88
+  - 96
+  - 154
+  - 238
+  - 240
+  - 314
+  - 316
+  - 442
+  - 513
+  - 656
+  - 717
+  - 777
+  - 873
+  - 875
+  - 902
+  - 920
+  - 927
+  - 934
+  - 988
+  - 1022
+  - 1056
+  - 1066
+  - 1074
+  - 1184
+  - 1301
+  - 1324
+  - 1327
+  - 1432
+  - 1457
+  - 1478
+  - 1481
+  - 1510
+  - 1553
+  - 1709
+  - 1737
+  - 1751
+  - 1753
+  - 1979
+  - 2188
+  - 2214
+  - 2789
+  - 2921
+  - 2977
+  - 3000
+  - 3013
+  - 3045
+  - 3057
+  - 3073
+  - 3185
+  - 3206
+  - 3257
+  - 3259
+  - 3299
+  - 3300
+  - 3408
+  - 3419
+  - 3501
+  - 3509
+  - 3518
+  - 3538
+  - 3557
+  - 3563
+  - 3589
+  - 3593
+  - 3607
+  - 3700
+  - 3709
+  - 3713
+  - 3757
+  - 3762
+  - 3778
+  - 3779
+  - 3793
+  - 3915
+  - 3933
+  - 3954
+  - 3965
+  - 3972
+  - 3992
+  - 4008
+  - 4155
+  - 4171
+  - 4184
+  - 4222
+  - 4272
+  - 4300
+  - 4310
+  - 4330
+  - 4354
+  - 4372
+  - 4375
+  - 4455
+  - 4471
+  - 4482
+  - 4503
+  - 4506
+  - 4543
+  - 4694
+  - 4772
+  - 4877
+  - 5118
+  - 5119
+  - 5167
+  - 5195
+  - 5327
+  - 5349
+  - 5426
+  - 5448
+  - 5715
+  - 5730
+  - 5735
+  - 6004
+  - 6016
+  - 6064
+  - 6081
+  - 6239
+  - 6412
+  - 6439
+  - 6512
+  - 6553
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+---
+# 账号与上游
+
+## 适用版本与边界
+
+本页收录的做法只对照钉住提交 `911f49cbd49f4fe2516979754a7488a3fd14fe64` 里仍然存在的配置、路由或命令。本页不是官方行为承诺。密钥、Cookie、邮箱、授权文件和用户请求正文都没有抄入。
+
+## 短做法
+
+- <a id="exp-accounts-codex-login-again"></a>**套餐或令牌变化后重新登录 Codex**（`exp.accounts.codex-login-again`）。现象：Plus、Pro、Team 或刷新令牌变化后，旧凭证仍像免费账号或返回 401。做法：重新执行 --codex-login。新文件另行保存，不会就地改写旧文件。过期的 refresh token 没有自动修复。配额接口报 unauthorized 时也要换一份新的 OAuth 凭证，而不是非 OAuth 文件。来源 issue：[#2188](https://github.com/router-for-me/CLIProxyAPI/issues/2188)、[#3013](https://github.com/router-for-me/CLIProxyAPI/issues/3013)、[#3045](https://github.com/router-for-me/CLIProxyAPI/issues/3045)、[#3259](https://github.com/router-for-me/CLIProxyAPI/issues/3259)、[#3509](https://github.com/router-for-me/CLIProxyAPI/issues/3509)、[#3538](https://github.com/router-for-me/CLIProxyAPI/issues/3538)、[#3793](https://github.com/router-for-me/CLIProxyAPI/issues/3793)、[#4330](https://github.com/router-for-me/CLIProxyAPI/issues/4330)、[#4455](https://github.com/router-for-me/CLIProxyAPI/issues/4455)、[#4482](https://github.com/router-for-me/CLIProxyAPI/issues/4482)、[#4877](https://github.com/router-for-me/CLIProxyAPI/issues/4877)、[#6512](https://github.com/router-for-me/CLIProxyAPI/issues/6512)。对应官方页：[Codex 登录](/cn/accounts/codex)、[模型目录](/cn/introduction/models)、[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-codex-keep-workspaces"></a>**同一 Codex 账号保留两份工作区**（`exp.accounts.codex-keep-workspaces`）。现象：同一账号的 Plus 和 Team 登录会互相覆盖。做法：每次 --codex-login 成功后重命名 auth 文件，再登录另一个工作区，两份凭证就能同时留在 auth-dir。来源 issue：[#875](https://github.com/router-for-me/CLIProxyAPI/issues/875)。对应官方页：[Codex 登录](/cn/accounts/codex)、[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-codex-callback-enter"></a>**Codex 回调成功后回到终端确认**（`exp.accounts.codex-callback-enter`）。现象：浏览器只显示 localhost 成功，但凭证没有写下来。做法：这说明回调已经完成。回到执行 --codex-login 的终端按 Enter，才会保存凭证。来源 issue：[#988](https://github.com/router-for-me/CLIProxyAPI/issues/988)。对应官方页：[Codex 登录](/cn/accounts/codex)。
+- <a id="exp-accounts-antigravity-instead-of-gemini-cli"></a>**Google 账号改用 Antigravity 登录**（`exp.accounts.antigravity-instead-of-gemini-cli`）。现象：旧的 Gemini CLI 或 Gemini Web 登录已经不能用。做法：钉住版本没有这些原生登录。Google 账号使用 --antigravity-login。图像生成也不要再找已移除的 Gemini Web 登录。来源 issue：[#316](https://github.com/router-for-me/CLIProxyAPI/issues/316)、[#3709](https://github.com/router-for-me/CLIProxyAPI/issues/3709)、[#3915](https://github.com/router-for-me/CLIProxyAPI/issues/3915)、[#3933](https://github.com/router-for-me/CLIProxyAPI/issues/3933)、[#3954](https://github.com/router-for-me/CLIProxyAPI/issues/3954)、[#3972](https://github.com/router-for-me/CLIProxyAPI/issues/3972)。对应官方页：[反重力登录](/cn/accounts/antigravity)。
+- <a id="exp-accounts-antigravity-login-again"></a>**Antigravity 凭证失效后重新登录**（`exp.accounts.antigravity-login-again`）。现象：缺少 project_id、400 或 429，或者要把同一份文件拷到第二台机器。做法：删除该凭证并重新执行 --antigravity-login，让它重新发现项目。不要把同一份文件复制到两台同时运行的服务器，否则刷新会冲突。来源 issue：[#442](https://github.com/router-for-me/CLIProxyAPI/issues/442)、[#902](https://github.com/router-for-me/CLIProxyAPI/issues/902)、[#1022](https://github.com/router-for-me/CLIProxyAPI/issues/1022)、[#4008](https://github.com/router-for-me/CLIProxyAPI/issues/4008)、[#4300](https://github.com/router-for-me/CLIProxyAPI/issues/4300)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-antigravity-wait-for-callback"></a>**Antigravity 登录时继续等待回调**（`exp.accounts.antigravity-wait-for-callback`）。现象：--antigravity-login 停住，不清楚该粘贴 URL 还是按 Enter。做法：按 Enter 是继续等待浏览器回调，不是粘贴回调地址。需要手动打开链接时加上 --no-browser。来源 issue：[#934](https://github.com/router-for-me/CLIProxyAPI/issues/934)。对应官方页：[反重力登录](/cn/accounts/antigravity)。
+- <a id="exp-accounts-antigravity-user-agent"></a>**在 Antigravity 凭证上设置 User-Agent**（`exp.accounts.antigravity-user-agent`）。现象：希望改这份 Antigravity 凭证发出的 User-Agent。做法：登录后只在该凭证的 user_agent 字段填写 User-Agent。不要写入密钥、Cookie 或授权文件。这不保证上游不再返回 403。来源 issue：[#4272](https://github.com/router-for-me/CLIProxyAPI/issues/4272)。对应官方页：[反重力登录](/cn/accounts/antigravity)。
+- <a id="exp-accounts-xai-device-login"></a>**用设备码登录 xAI**（`exp.accounts.xai-device-login`）。现象：Grok Build、Grok CLI 或 SuperGrok 订阅要接到当前版本。做法：使用 --xai-login。钉住版本走设备码，不再使用更旧的浏览器流程。来源 issue：[#3408](https://github.com/router-for-me/CLIProxyAPI/issues/3408)、[#3419](https://github.com/router-for-me/CLIProxyAPI/issues/3419)、[#3518](https://github.com/router-for-me/CLIProxyAPI/issues/3518)、[#3557](https://github.com/router-for-me/CLIProxyAPI/issues/3557)、[#4155](https://github.com/router-for-me/CLIProxyAPI/issues/4155)。对应官方页：[xAI 登录](/cn/accounts/xai)。
+- <a id="exp-accounts-kimi-international-login"></a>**Kimi 使用国际站登录**（`exp.accounts.kimi-international-login`）。现象：国内站 Kimi OAuth 返回 404。做法：使用 --kimi-login 完成国际站登录。不要改走会 404 的国内站地址。来源 issue：[#1553](https://github.com/router-for-me/CLIProxyAPI/issues/1553)。对应官方页：[Kimi 登录](/cn/accounts/kimi)。
+- <a id="exp-accounts-openai-compatible-provider"></a>**用 OpenAI 兼容段接入第三方**（`exp.accounts.openai-compatible-provider`）。现象：Z.AI、Ollama、Mistral、GLM、Kimi、MiniMax、iFlow 或类似服务不是内置 OAuth 提供商。做法：在 api-keys 的 openai-compatibility 中填写 base-url、api-key，以及 models 的 name 或 alias。Claude 形态的中转改用 claude 的 api-key 和 base-url。没有上游要求时不要额外加 headers。地址使用提供商文档中的基址。来源 issue：[#10](https://github.com/router-for-me/CLIProxyAPI/issues/10)、[#20](https://github.com/router-for-me/CLIProxyAPI/issues/20)、[#96](https://github.com/router-for-me/CLIProxyAPI/issues/96)、[#656](https://github.com/router-for-me/CLIProxyAPI/issues/656)、[#920](https://github.com/router-for-me/CLIProxyAPI/issues/920)、[#1432](https://github.com/router-for-me/CLIProxyAPI/issues/1432)、[#1737](https://github.com/router-for-me/CLIProxyAPI/issues/1737)、[#3185](https://github.com/router-for-me/CLIProxyAPI/issues/3185)、[#3299](https://github.com/router-for-me/CLIProxyAPI/issues/3299)、[#4354](https://github.com/router-for-me/CLIProxyAPI/issues/4354)。对应官方页：[上游 API 密钥](/cn/accounts/api-keys-api)、[上游基础地址](/cn/accounts/api-keys-base)、[上游模型别名](/cn/accounts/api-keys-models)。
+- <a id="exp-accounts-openai-base-url-v1"></a>**OpenAI 兼容基址带上版本段**（`exp.accounts.openai-base-url-v1`）。现象：模型列表成功，但调用或 responses 流认证失败、响应为空。做法：openai-compatibility 的 base-url 要包含提供商要求的 /v1 段。不要只写到主机名。来源 issue：[#1066](https://github.com/router-for-me/CLIProxyAPI/issues/1066)、[#1478](https://github.com/router-for-me/CLIProxyAPI/issues/1478)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-base-url-no-extra-slash"></a>**基址不要在版本段后再加斜杠**（`exp.accounts.base-url-no-extra-slash`）。现象：Codex 或 OpenAI 兼容的 base-url 多了一个结尾斜杠。做法：按该提供商模板书写 base-url，版本段后面不要再保留斜杠。来源 issue：[#238](https://github.com/router-for-me/CLIProxyAPI/issues/238)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)。
+- <a id="exp-accounts-codex-api-key-base-url"></a>**responses 上游写到 Codex API key**（`exp.accounts.codex-api-key-base-url`）。现象：第三方只接受 responses 协议，写在聊天补全的兼容段里会失败。做法：把该上游配到 codex 的 api-key 和 base-url。base-url 包含 /v1，或包含提供商文档给出的 responses 路径。openai-compatibility 只表示聊天补全。来源 issue：[#1709](https://github.com/router-for-me/CLIProxyAPI/issues/1709)、[#1979](https://github.com/router-for-me/CLIProxyAPI/issues/1979)、[#2921](https://github.com/router-for-me/CLIProxyAPI/issues/2921)、[#5195](https://github.com/router-for-me/CLIProxyAPI/issues/5195)。对应官方页：[上游 API 密钥](/cn/accounts/api-keys-api)、[上游基础地址](/cn/accounts/api-keys-base)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-claude-base-url-host-only"></a>**Claude 基址不要重复 /v1**（`exp.accounts.claude-base-url-host-only`）。现象：Anthropic 兼容地址写成了带 /v1 的完整路径。做法：claude 的 base-url 只写主机。代理会自己追加消息路径，基址里再写 /v1 会变成 /v1/v1/messages。来源 issue：[#3778](https://github.com/router-for-me/CLIProxyAPI/issues/3778)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)。
+- <a id="exp-accounts-dedicated-auth-dir"></a>**把凭证目录指到专用路径**（`exp.accounts.dedicated-auth-dir`）。现象：启动时把无关文件当成凭证，或 Windows 上读不到刚保存的文件。做法：把 oauth.auth-dir 设为只放凭证的目录。Windows 上使用绝对路径，使登录写入的文件就是服务加载的文件。来源 issue：[#5](https://github.com/router-for-me/CLIProxyAPI/issues/5)、[#14](https://github.com/router-for-me/CLIProxyAPI/issues/14)。对应官方页：[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-move-auth-file"></a>**移出目录来停用凭证**（`exp.accounts.move-auth-file`）。现象：想停用一份凭证，但又不删除它。做法：把文件移出 auth-dir 即停用，移回原目录即恢复。来源 issue：[#717](https://github.com/router-for-me/CLIProxyAPI/issues/717)。对应官方页：[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-copy-auth-dir"></a>**整目录复制凭证**（`exp.accounts.copy-auth-dir`）。现象：面板一次只能下载少数凭证。做法：在服务器上复制整个 auth-dir 目录。不要依赖面板逐个下载。来源 issue：[#1074](https://github.com/router-for-me/CLIProxyAPI/issues/1074)、[#3593](https://github.com/router-for-me/CLIProxyAPI/issues/3593)。对应官方页：[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-alias-client-model"></a>**用别名把客户端模型名映射到真实模型**（`exp.accounts.alias-client-model`）。现象：客户端仍请求旧 id、带 gemini- 前缀的名字，或其他渠道的名字。做法：在 oauth-model-alias 中把客户端 id 指到该凭证实际提供的模型。未配置别名时，代理不改写请求中的模型名。别名不会把同一个上游模型变成多个不同模型。来源 issue：[#873](https://github.com/router-for-me/CLIProxyAPI/issues/873)、[#1056](https://github.com/router-for-me/CLIProxyAPI/issues/1056)、[#1184](https://github.com/router-for-me/CLIProxyAPI/issues/1184)、[#1481](https://github.com/router-for-me/CLIProxyAPI/issues/1481)、[#1510](https://github.com/router-for-me/CLIProxyAPI/issues/1510)、[#3073](https://github.com/router-for-me/CLIProxyAPI/issues/3073)、[#3300](https://github.com/router-for-me/CLIProxyAPI/issues/3300)、[#3607](https://github.com/router-for-me/CLIProxyAPI/issues/3607)、[#4506](https://github.com/router-for-me/CLIProxyAPI/issues/4506)、[#5118](https://github.com/router-for-me/CLIProxyAPI/issues/5118)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[OAuth 目录、别名与排除](/cn/accounts/oauth)、[OpenAI Chat](/cn/api/openai-chat)、[Claude Messages](/cn/api/claude-messages)、[路由策略](/cn/routing/strategy)。
+- <a id="exp-accounts-refresh-workers-zero"></a>**刷新线程数为 0 时仍使用默认值**（`exp.accounts.refresh-workers-zero`）。现象：把 auth-auto-refresh-workers 写成 0，期望自动刷新停止。做法：0 和负数都保持默认的 16 个线程，不会关闭刷新。只有大于 0 的值才会替换默认线程数。来源 issue：[#6439](https://github.com/router-for-me/CLIProxyAPI/issues/6439)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-gemini-custom-base-url"></a>**自定义 Gemini 地址有两种写法**（`exp.accounts.gemini-custom-base-url`）。现象：需要把 Gemini 请求发到自定义端点。做法：可写入 openai-compatibility 的 base-url，也可以使用原生 gemini 的 base-url。空的兼容基址在整理时会被去掉。来源 issue：[#88](https://github.com/router-for-me/CLIProxyAPI/issues/88)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)。
+- <a id="exp-accounts-codex-login-for-claude-code"></a>**Claude Code 使用 Codex 登录而不是原始令牌**（`exp.accounts.codex-login-for-claude-code`）。现象：把 Codex 的原始令牌文件放进 auth-dir 后，Claude Code 仍然失败。做法：先执行 --codex-login 生成凭证，再让 Claude Code 调用 /v1/messages。原始令牌文件不是可用的 auth-dir 凭证。来源 issue：[#154](https://github.com/router-for-me/CLIProxyAPI/issues/154)。对应官方页：[Codex 登录](/cn/accounts/codex)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-accounts-aistudio-for-images"></a>**图像改走 AI Studio**（`exp.accounts.aistudio-for-images`）。现象：旧的 Gemini CLI 图像模型已经不可用。做法：不要退回旧代理版本。图像调用改用 AI Studio 提供商。来源 issue：[#240](https://github.com/router-for-me/CLIProxyAPI/issues/240)。对应官方页：[AI Studio WebSocket 认证](/cn/configuration/provider/ai-studio)。
+- <a id="exp-accounts-exclude-model"></a>**在单份凭证上排除模型**（`exp.accounts.exclude-model`）。现象：同名模型被不想使用的凭证一起选中，或某个文件不该暴露某个模型。做法：在该 OAuth 凭证或对应提供商的 excluded-models 里写下要隐藏的模型。GET /v1/models 会跟着这份凭证隐藏它。不要用全局排除去处理单个文件。来源 issue：[#314](https://github.com/router-for-me/CLIProxyAPI/issues/314)、[#1753](https://github.com/router-for-me/CLIProxyAPI/issues/1753)、[#2214](https://github.com/router-for-me/CLIProxyAPI/issues/2214)、[#3501](https://github.com/router-for-me/CLIProxyAPI/issues/3501)、[#3779](https://github.com/router-for-me/CLIProxyAPI/issues/3779)、[#4171](https://github.com/router-for-me/CLIProxyAPI/issues/4171)、[#4184](https://github.com/router-for-me/CLIProxyAPI/issues/4184)。对应官方页：[按密钥排除模型](/cn/accounts/api-keys-excluded)、[Codex 登录](/cn/accounts/codex)、[模型目录](/cn/introduction/models)、[OAuth 目录、别名与排除](/cn/accounts/oauth)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-accounts-aistudio-wss"></a>**HTTPS 页面使用 wss**（`exp.accounts.aistudio-wss`）。现象：远程 AI Studio 页面在 HTTPS 上连接失败。做法：WebSocket 地址使用 wss，不要使用明文 ws。来源 issue：[#513](https://github.com/router-for-me/CLIProxyAPI/issues/513)。对应官方页：[AI Studio WebSocket 认证](/cn/configuration/provider/ai-studio)。
+- <a id="exp-accounts-alias-matches-request"></a>**别名要和请求的模型名一致才参与轮询**（`exp.accounts.alias-matches-request`）。现象：Claude API 凭证没有进入轮换。做法：只有模型名或 alias 与请求一致时，该凭证才会进入 routing.strategy。alias 映射的是上游模型名。来源 issue：[#777](https://github.com/router-for-me/CLIProxyAPI/issues/777)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)、[配额兼容开关](/cn/routing/quota-exceeded)、[路由策略](/cn/routing/strategy)。
+- <a id="exp-accounts-multiple-keys-one-provider"></a>**同一基址下增加多把密钥**（`exp.accounts.multiple-keys-one-provider`）。现象：一个上游地址要放多把密钥。做法：按示例在该提供商下新增多条密钥。OpenAI 兼容段用 api-key-entries。Claude 密钥是并列条目，不是兼容段那种嵌套列表。来源 issue：[#927](https://github.com/router-for-me/CLIProxyAPI/issues/927)、[#1457](https://github.com/router-for-me/CLIProxyAPI/issues/1457)、[#3563](https://github.com/router-for-me/CLIProxyAPI/issues/3563)。对应官方页：[上游 API 密钥](/cn/accounts/api-keys-api)。
+- <a id="exp-accounts-trace-key-proxy"></a>**畸形响应先检查密钥上的代理**（`exp.accounts.trace-key-proxy`）。现象：OpenAI 兼容响应无法解析。做法：先看该密钥条目的 proxy-url，不要在同一个字段里再写第二个基址。来源 issue：[#1301](https://github.com/router-for-me/CLIProxyAPI/issues/1301)。对应官方页：[上游 API 密钥](/cn/accounts/api-keys-api)、[出站请求](/cn/routing/requests-value)。
+- <a id="exp-accounts-compat-base-and-alias"></a>**兼容提供商要同时有基址和别名**（`exp.accounts.compat-base-and-alias`）。现象：OpenAI 兼容提供商被拒绝加载。做法：按示例同时填写 base-url 和模型 alias。缺一都会在整理时被去掉。来源 issue：[#1324](https://github.com/router-for-me/CLIProxyAPI/issues/1324)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[上游模型别名](/cn/accounts/api-keys-models)。
+- <a id="exp-accounts-kimi-user-agent"></a>**Kimi 兼容调用需要 User-Agent**（`exp.accounts.kimi-user-agent`）。现象：Kimi For Coding 拒绝密钥。做法：在该 openai-compatibility 提供商的 headers 里设置客户端 User-Agent，并填写正确的 base-url。来源 issue：[#1327](https://github.com/router-for-me/CLIProxyAPI/issues/1327)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[上游额外请求头](/cn/accounts/api-keys-headers)。
+- <a id="exp-accounts-disable-compat-provider"></a>**用 disabled 停用兼容提供商**（`exp.accounts.disable-compat-provider`）。现象：某个 OpenAI 兼容提供商不稳定，但不想删掉配置。做法：把该提供商的 disabled 设为 true，或注释掉整段。钉住版本会保存这个开关。来源 issue：[#1751](https://github.com/router-for-me/CLIProxyAPI/issues/1751)、[#2977](https://github.com/router-for-me/CLIProxyAPI/issues/2977)、[#3206](https://github.com/router-for-me/CLIProxyAPI/issues/3206)。对应官方页：[停用 OpenAI 兼容提供商](/cn/accounts/api-keys-disabled)。
+- <a id="exp-accounts-claude-cloak-off"></a>**不需要伪装时关闭 Claude cloak**（`exp.accounts.claude-cloak-off`）。现象：OAuth 改写了系统提示，或提示缓存和预期不一致。做法：把 upstream.claude.disable-claude-cloak-mode 设为 true，或在凭证里把 cloak_mode 设为 never。伪装只对齐一份测过的 Claude Code 版本，其他版本按第三方客户端处理。来源 issue：[#2789](https://github.com/router-for-me/CLIProxyAPI/issues/2789)、[#5715](https://github.com/router-for-me/CLIProxyAPI/issues/5715)、[#5730](https://github.com/router-for-me/CLIProxyAPI/issues/5730)。对应官方页：[Claude 登录](/cn/accounts/claude)、[Claude 上游行为](/cn/accounts/upstream)。
+- <a id="exp-accounts-codex-client-user-agent"></a>**Codex 客户端要匹配 User-Agent 默认值**（`exp.accounts.codex-client-user-agent`）。现象：原始 responses 成功，Codex 客户端里的同一模型失败。做法：让 oauth.providers.codex 的 header-defaults.user-agent 与该客户端一致。来源 issue：[#3000](https://github.com/router-for-me/CLIProxyAPI/issues/3000)。对应官方页：[Codex 登录](/cn/accounts/codex)、[Codex 提供商选项](/cn/configuration/provider/codex)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-codex-oauth-for-images"></a>**内置图像使用 Codex OAuth**（`exp.accounts.codex-oauth-for-images`）。现象：图像路由要求一个本地 OpenAI API key。做法：内置图像生成和 Codex 桌面端都使用 --codex-login。它是 responses 上的图像工具，不是本地编辑器，也不使用本地 OpenAI API key。免费账号可能被跳过。来源 issue：[#3057](https://github.com/router-for-me/CLIProxyAPI/issues/3057)、[#3700](https://github.com/router-for-me/CLIProxyAPI/issues/3700)、[#3713](https://github.com/router-for-me/CLIProxyAPI/issues/3713)、[#4222](https://github.com/router-for-me/CLIProxyAPI/issues/4222)、[#4375](https://github.com/router-for-me/CLIProxyAPI/issues/4375)。对应官方页：[Codex 登录](/cn/accounts/codex)、[图像、语音与视频](/cn/api/media)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-codex-goal-mode"></a>**Codex goal 模式要同时设置三项**（`exp.accounts.codex-goal-mode`）。现象：goal 模式停在已经耗尽的账号上。做法：同时设置该 Codex 凭证的 priority、websockets，以及 routing.strategy 的 round-robin。来源 issue：[#3257](https://github.com/router-for-me/CLIProxyAPI/issues/3257)。对应官方页：[凭证优先级](/cn/accounts/api-keys-priority)、[Responses WebSocket 传输](/cn/accounts/api-keys-websockets)、[路由策略](/cn/routing/strategy)。
+- <a id="exp-accounts-kimi-oauth-instead-of-broken-key"></a>**失效的 Kimi 密钥改走 OAuth**（`exp.accounts.kimi-oauth-instead-of-broken-key`）。现象：Kimi API key 已不可用，报告里也没有足够的密钥配置。做法：改用 --kimi-login。不要在缺少密钥材料时继续调试旧 key。来源 issue：[#3589](https://github.com/router-for-me/CLIProxyAPI/issues/3589)。对应官方页：[Kimi 登录](/cn/accounts/kimi)。
+- <a id="exp-accounts-codex-auth-file-shape"></a>**Codex 凭证文件不能写注释**（`exp.accounts.codex-auth-file-shape`）。现象：手改的 auth.json 无法加载。做法：凭证 JSON 不能包含注释。客户端使用的密钥必须是本代理的 access.api-keys，不是这份文件里的上游令牌。来源 issue：[#3757](https://github.com/router-for-me/CLIProxyAPI/issues/3757)。对应官方页：[Codex 登录](/cn/accounts/codex)。
+- <a id="exp-accounts-rotate-vertex-key"></a>**轮换被上游判定违规的 Vertex 凭证**（`exp.accounts.rotate-vertex-key`）。现象：Google 表示这份 Vertex 服务账号违反政策。做法：轮换该服务账号。代理没有配置键可以跳过这个上游判定。来源 issue：[#3762](https://github.com/router-for-me/CLIProxyAPI/issues/3762)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)。
+- <a id="exp-accounts-force-mapping-alias"></a>**force-mapping 把响应模型改成别名**（`exp.accounts.force-mapping-alias`）。现象：响应里的模型名仍是上游原名。做法：打开该模型的 force-mapping 后，响应中的模型字段会写成 alias。来源 issue：[#3965](https://github.com/router-for-me/CLIProxyAPI/issues/3965)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)。
+- <a id="exp-accounts-codex-refresh-security"></a>**高级账号安全会让 Codex 更常刷新**（`exp.accounts.codex-refresh-security`）。现象：Codex 凭证刷新很频繁。做法：这来自 ChatGPT 的高级账号安全，不是代理里的刷新间隔键。来源 issue：[#3992](https://github.com/router-for-me/CLIProxyAPI/issues/3992)。对应官方页：[Codex 登录](/cn/accounts/codex)。
+- <a id="exp-accounts-codex-websocket-or-http"></a>**Codex 可用客户端或代理的 WebSocket**（`exp.accounts.codex-websocket-or-http`）。现象：HTTP responses 缺少第一个事件，或对话不能在代理上延续。做法：使用客户端 WebSocket 或代理的 websockets。HTTP responses 是无状态的，不会在代理上保持对话。来源 issue：[#4310](https://github.com/router-for-me/CLIProxyAPI/issues/4310)、[#5735](https://github.com/router-for-me/CLIProxyAPI/issues/5735)。对应官方页：[Responses WebSocket 传输](/cn/accounts/api-keys-websockets)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-xai-api-key-fallback"></a>**xAI 403 时改用 API key**（`exp.accounts.xai-api-key-fallback`）。现象：SuperGrok OAuth 返回 403。做法：这是 xAI 服务端限制。临时改用 xAI 的 api-key 和 base-url，而不是继续用这次 OAuth。来源 issue：[#4372](https://github.com/router-for-me/CLIProxyAPI/issues/4372)。对应官方页：[上游基础地址](/cn/accounts/api-keys-base)、[xAI 登录](/cn/accounts/xai)。
+- <a id="exp-accounts-display-name-field"></a>**展示名和别名是两个字段**（`exp.accounts.display-name-field`）。现象：想给 Claude API key 模型一个展示名。做法：使用该模型已有的 display-name，不要把它写进 alias。来源 issue：[#4471](https://github.com/router-for-me/CLIProxyAPI/issues/4471)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)。
+- <a id="exp-accounts-compat-preserves-signed-thinking"></a>**兼容模型保留签名思考**（`exp.accounts.compat-preserves-signed-thinking`）。现象：第三方 Claude 的签名思考被丢掉。做法：把该模型标成 is-compat 后，签名思考会保留。对不兼容上游，外来的加密推理会被故意去掉。来源 issue：[#4772](https://github.com/router-for-me/CLIProxyAPI/issues/4772)、[#5167](https://github.com/router-for-me/CLIProxyAPI/issues/5167)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)、[Claude Messages](/cn/api/claude-messages)。
+- <a id="exp-accounts-list-compat-models"></a>**兼容模型要写入配置才出现在列表**（`exp.accounts.list-compat-models`）。现象：GET /v1/models 没有第三方模型。做法：先在 openai-compatibility 的 models 里写下 name。列表是本地的 OpenAI 形状，不附加上下文上限，也不透传上游模态字段。无前缀名字用 alias 暴露，不是再加一个列表开关。来源 issue：[#4543](https://github.com/router-for-me/CLIProxyAPI/issues/4543)、[#5119](https://github.com/router-for-me/CLIProxyAPI/issues/5119)、[#5327](https://github.com/router-for-me/CLIProxyAPI/issues/5327)、[#5349](https://github.com/router-for-me/CLIProxyAPI/issues/5349)、[#6081](https://github.com/router-for-me/CLIProxyAPI/issues/6081)。对应官方页：[上游模型别名](/cn/accounts/api-keys-models)、[模型名前缀](/cn/accounts/api-keys-prefix)、[OpenAI Chat](/cn/api/openai-chat)。
+- <a id="exp-accounts-request-scoped-error-action"></a>**用请求级错误规则处理特定 429**（`exp.accounts.request-scoped-error-action`）。现象：Claude 额外用量的 429 被当成普通限流。做法：在 oauth-request-scoped-errors 或兼容提供商的 request-scoped-errors 里匹配状态和动作。动作是继续、停止或冷却当前凭证，不会增加同提供商重试次数。来源 issue：[#5426](https://github.com/router-for-me/CLIProxyAPI/issues/5426)、[#6004](https://github.com/router-for-me/CLIProxyAPI/issues/6004)。对应官方页：[重试与请求级错误](/cn/accounts/api-keys-request)、[OAuth 目录、别名与排除](/cn/accounts/oauth)。
+- <a id="exp-accounts-codex-desktop-proxy"></a>**桌面端按自己的方式指向代理**（`exp.accounts.codex-desktop-proxy`）。现象：Codex 桌面端的速度控制消失。做法：按该客户端自己的代理方式指向本代理。速度控制属于客户端，代理没有对应开关。来源 issue：[#5448](https://github.com/router-for-me/CLIProxyAPI/issues/5448)。对应官方页：[Codex 登录](/cn/accounts/codex)。
+- <a id="exp-accounts-codex-cloak-and-user-agent"></a>**503 时同时检查 Codex 伪装和 User-Agent**（`exp.accounts.codex-cloak-and-user-agent`）。现象：某个 Codex 模型返回 503。做法：把 upstream.codex.disable-codex-cloaking 设为 true，并设置 Codex header-defaults 的 user-agent。这不保证上游不再返回 503。来源 issue：[#6064](https://github.com/router-for-me/CLIProxyAPI/issues/6064)。对应官方页：[Codex 提供商选项](/cn/configuration/provider/codex)。
+- <a id="exp-accounts-provider-headers"></a>**兼容提供商的头只作用于该提供商**（`exp.accounts.provider-headers`）。现象：别的上游没有带上看到的 User-Agent 或会话头。做法：在该 openai-compatibility 提供商的 headers 里设置。这些头不会自动套到其他提供商。来源 issue：[#4694](https://github.com/router-for-me/CLIProxyAPI/issues/4694)、[#6239](https://github.com/router-for-me/CLIProxyAPI/issues/6239)。对应官方页：[上游额外请求头](/cn/accounts/api-keys-headers)。
+- <a id="exp-accounts-antigravity-hides-unusable-models"></a>**Antigravity 会隐藏账号不能用的模型**（`exp.accounts.antigravity-hides-unusable-models`）。现象：模型列表比账号实际能调用的更多。做法：Antigravity 凭证加载 Google 的模型列表，并隐藏该账号不能使用的模型。网页搜索也只出现在暴露了 Google 搜索的模型上。来源 issue：[#4503](https://github.com/router-for-me/CLIProxyAPI/issues/4503)、[#6412](https://github.com/router-for-me/CLIProxyAPI/issues/6412)。对应官方页：[反重力登录](/cn/accounts/antigravity)、[模型目录](/cn/introduction/models)、[Responses](/cn/api/responses)。
+- <a id="exp-accounts-claude-manual-login"></a>**没有浏览器时使用手动登录**（`exp.accounts.claude-manual-login`）。现象：服务器上的 Claude 登录打不开 localhost 回调。做法：加上 --no-browser，改用手动登录流程。免费会员无法完成 Claude OAuth，本代理只支持 OAuth 登录。来源 issue：[#6016](https://github.com/router-for-me/CLIProxyAPI/issues/6016)、[#6553](https://github.com/router-for-me/CLIProxyAPI/issues/6553)。对应官方页：[Claude 登录](/cn/accounts/claude)、[命令行参数](/cn/introduction/install)。
+
+## 独立页
+
+这一区域没有需要独立成页的做法。

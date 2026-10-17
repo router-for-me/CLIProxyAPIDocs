@@ -17,8 +17,63 @@ export default defineConfig({
                 items: [
                     {text: 'CLIProxyAPI是什么？', link: '/cn/introduction/what-is-cliproxyapi'},
                     {text: '快速开始', link: '/cn/introduction/quick-start'},
+                    {text: '命令行参数', link: '/cn/introduction/install'},
+                    {text: '模型目录', link: '/cn/introduction/models'},
                     {text: 'GitHub', link: 'https://github.com/router-for-me/CLIProxyAPI'}
                 ]
+            },
+            {
+                text: '接入 API',
+                items: [
+                    {text: '客户端密钥', link: '/cn/api/access'},
+                    {text: 'OpenAI Chat', link: '/cn/api/openai-chat'},
+                    {text: 'Responses', link: '/cn/api/responses'},
+                    {text: 'Claude Messages', link: '/cn/api/claude-messages'},
+                    {text: 'Gemini', link: '/cn/api/gemini'},
+                    {text: '图像、语音与视频', link: '/cn/api/media'},
+                    {text: '实时会话', link: '/cn/api/realtime'},
+                    {text: '其他入口', link: '/cn/api/openai-other'},
+                ]
+            },
+            {
+                text: '账号与上游',
+                items: [
+                { text: '反重力登录', link: '/cn/accounts/antigravity' },
+                { text: 'Claude 登录', link: '/cn/accounts/claude' },
+                { text: 'Codex 登录', link: '/cn/accounts/codex' },
+                { text: 'Devin 登录', link: '/cn/accounts/devin' },
+                { text: 'Kimi 登录', link: '/cn/accounts/kimi' },
+                { text: 'Kimi.ai 登录', link: '/cn/accounts/kimi-ai' },
+                { text: 'Meta 登录', link: '/cn/accounts/meta' },
+                { text: 'Vertex 导入', link: '/cn/accounts/vertex' },
+                { text: 'xAI 登录', link: '/cn/accounts/xai' },
+                { text: 'OAuth 目录与别名', link: '/cn/accounts/oauth' },
+                { text: 'OAuth 回调', link: '/cn/accounts/oauth-callback' },
+                { text: '凭证并发', link: '/cn/accounts/credentials' },
+                { text: 'Claude 上游行为', link: '/cn/accounts/upstream' },
+                { text: '上游 API 密钥', link: '/cn/accounts/api-keys-api' },
+                { text: '上游基础地址', link: '/cn/accounts/api-keys-base' },
+                { text: '上游模型别名', link: '/cn/accounts/api-keys-models' },
+                { text: '模型名前缀', link: '/cn/accounts/api-keys-prefix' },
+                { text: '凭证优先级', link: '/cn/accounts/api-keys-priority' },
+                { text: '凭证权重', link: '/cn/accounts/api-keys-weight' },
+                { text: '按密钥代理', link: '/cn/accounts/api-keys-proxy' },
+                { text: '上游请求头', link: '/cn/accounts/api-keys-headers' },
+                { text: '按密钥排除模型', link: '/cn/accounts/api-keys-excluded' },
+                { text: '冷却与伪装开关', link: '/cn/accounts/api-keys-disable' },
+                { text: '重试与请求级错误', link: '/cn/accounts/api-keys-request' },
+                { text: 'Claude 伪装', link: '/cn/accounts/api-keys-cloak' },
+                { text: 'Claude 指纹', link: '/cn/accounts/api-keys-fingerprint' },
+                { text: '实验性 CCH', link: '/cn/accounts/api-keys-experimental' },
+                { text: '原生工具搜索', link: '/cn/accounts/api-keys-native' },
+                { text: '重建 system 消息', link: '/cn/accounts/api-keys-rebuild' },
+                { text: 'WebSocket 传输', link: '/cn/accounts/api-keys-websockets' },
+                { text: 'Alpha Search', link: '/cn/accounts/api-keys-alpha' },
+                { text: 'Vertex Interactions', link: '/cn/accounts/api-keys-interactions' },
+                { text: '停用兼容提供商', link: '/cn/accounts/api-keys-disabled' },
+                { text: '兼容提供商名称', link: '/cn/accounts/api-keys-name' },
+                { text: 'prompt_cache_key', link: '/cn/accounts/api-keys-support' },
+                ],
             },
             {
                 text: '配置',
@@ -50,6 +105,37 @@ export default defineConfig({
                         ]
                     },
                     {text: '思考量设置', link: '/cn/configuration/thinking'},
+                    {text: '模型思考能力', link: '/cn/configuration/thinking-models'},
+                ]
+            },
+            {
+                text: '路由与请求',
+                items: [
+                    {text: '路由策略', link: '/cn/routing/strategy'},
+                    {text: '冷却', link: '/cn/routing/cooldown'},
+                    {text: '配额兼容开关', link: '/cn/routing/quota-exceeded'},
+                    {text: 'Codex 客户端目录', link: '/cn/routing/client'},
+                    {text: '出站请求', link: '/cn/routing/requests-value'},
+                    {text: '流式保活', link: '/cn/routing/requests-keepalive'},
+                    {text: '首字节前重试', link: '/cn/routing/requests-bootstrap'},
+                    {text: '首个 token 前保活', link: '/cn/routing/requests-send'},
+                    {text: '默认载荷规则', link: '/cn/routing/requests-default'},
+                    {text: '覆盖载荷规则', link: '/cn/routing/requests-override'},
+                    {text: '过滤载荷规则', link: '/cn/routing/requests-filter'},
+                ]
+            },
+            {
+                text: '运行',
+                items: [
+                    {text: '监听与进程', link: '/cn/operations/server'},
+                    {text: 'TLS', link: '/cn/operations/tls'},
+                    {text: '局域网发现', link: '/cn/operations/discovery'},
+                    {text: '健康检查', link: '/cn/operations/health'},
+                    {text: '日志与用量', link: '/cn/operations/observability'},
+                    {text: '管理端设置', link: '/cn/operations/management-settings'},
+                    {text: '终端界面', link: '/cn/operations/tui'},
+                    {text: 'CLIProxyAPI Home', link: '/cn/operations/home'},
+                    {text: '插件加载与商店', link: '/cn/operations/plugins'},
                 ]
             },
             {
@@ -58,6 +144,13 @@ export default defineConfig({
                     {text: 'Web UI', link: '/cn/management/webui'},
                     {text: '桌面客户端', link: '/cn/management/gui'},
                     {text: '管理 API v8', link: '/cn/management/apiv8'},
+                    {text: '凭证', link: '/cn/management/v8-credentials'},
+                    {text: 'OAuth', link: '/cn/management/v8-oauth'},
+                    {text: '日志与用量', link: '/cn/management/v8-observability'},
+                    {text: '插件', link: '/cn/management/v8-plugins'},
+                    {text: '路由操作', link: '/cn/management/v8-routing'},
+                    {text: '最新版本', link: '/cn/management/v8-server'},
+                    {text: '代发请求', link: '/cn/management/v8-requests'},
                     {text: '管理 API', link: '/cn/management/api'},
                     {text: 'Redis 用量队列', link: '/cn/management/redis-usage-queue'},
                 ]
@@ -96,16 +189,19 @@ export default defineConfig({
                             {text: '请求转换', link: '/cn/plugin/request-translator'},
                             {text: '请求规整', link: '/cn/plugin/request-normalizer'},
                             {text: '请求拦截', link: '/cn/plugin/request-interceptor'},
+                            {text: '请求生命周期', link: '/cn/plugin/request-lifecycle'},
                         ]
                     },
                     {
                         text: '响应处理',
                         items: [
                             {text: '响应转换', link: '/cn/plugin/response-translator'},
+                            {text: '响应规整', link: '/cn/plugin/response-normalizer'},
                             {text: '响应转换前规整', link: '/cn/plugin/response-before-translator'},
                             {text: '响应转换后规整', link: '/cn/plugin/response-after-translator'},
                             {text: '响应拦截', link: '/cn/plugin/response-interceptor'},
                             {text: '流式响应拦截', link: '/cn/plugin/response-stream-interceptor'},
+                            {text: 'WebSocket 响应观察', link: '/cn/plugin/websocket-observer'},
                         ]
                     },
                     {
@@ -115,6 +211,7 @@ export default defineConfig({
                             {text: '用量观察', link: '/cn/plugin/usage-plugin'},
                             {text: '命令行扩展', link: '/cn/plugin/command-line-plugin'},
                             {text: 'Management API', link: '/cn/plugin/management-api'},
+                            {text: '额度提供方', link: '/cn/plugin/quota-provider'},
                             {text: '宿主回调', link: '/cn/plugin/host-callbacks'},
                         ]
                     },
@@ -123,8 +220,8 @@ export default defineConfig({
             {
                 text: 'Docker',
                 items: [
-                    {text: '使用 Docker', link: '/cn/docker/docker'},
-                    {text: '使用 Docker Compose', link: '/cn/docker/docker-compose'},
+                    {text: '使用 Docker Compose', link: '/cn/docker/docker'},
+                    {text: 'Docker Compose 导读', link: '/cn/docker/docker-compose'},
                 ]
             },
             {
@@ -140,6 +237,21 @@ export default defineConfig({
                     {text: '云部署（对象存储）', link: '/cn/hands-on/tutorial-9'},
                     {text: '云部署（Git存储）', link: '/cn/hands-on/tutorial-10'},
                     {text: '零成本部署AIStudio反代', link: '/cn/hands-on/tutorial-11'},
+                ]
+            },
+
+            {
+                text: '使用经验',
+                items: [
+                    {text: "总索引", link: "/cn/experience/index"},
+                    {text: "账号与上游", link: "/cn/experience/accounts"},
+                    {text: "接入 API", link: "/cn/experience/api"},
+                    {text: "配置", link: "/cn/experience/configuration"},
+                    {text: "Docker", link: "/cn/experience/docker"},
+                    {text: "介绍", link: "/cn/experience/introduction"},
+                    {text: "管理", link: "/cn/experience/management"},
+                    {text: "运行", link: "/cn/experience/operations"},
+                    {text: "路由与请求", link: "/cn/experience/routing"},
                 ]
             },
 

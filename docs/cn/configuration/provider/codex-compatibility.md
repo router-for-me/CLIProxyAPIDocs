@@ -1,15 +1,10 @@
-# Codex 兼容供应商
+---
+title: 导读
+feature_ids: []
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: true
+---
 
-通过 `codex-api-key` 配置上游 Codex 兼容供应商。
+# 导读
 
-- api-key: 上游供应商的API key
-- base-url: 上游供应商的端点覆盖地址
-- proxy-url: 代理服务器地址（可选）
-
-Example:
-```yaml
-codex-api-key:
-  - api-key: "sk-atSM..."
-    base-url: "https://www.example.com" # 使用第三方 Codex API 中转服务端点
-    proxy-url: "socks5://proxy.example.com:1080" # 可选：针对该密钥的代理设置
-```
+Codex 兼容上游现在写在 `api-keys.codex`。请从 [上游 API 密钥](/cn/accounts/api-keys-api) 进入。本页不再登记功能。

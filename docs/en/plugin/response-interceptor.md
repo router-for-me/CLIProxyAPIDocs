@@ -1,72 +1,68 @@
 ---
-outline: 'deep'
+title: Response Interceptor
+feature_ids:
+  - plugin.response-interceptor.intercept-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Response Interceptor Capability
+# Response Interceptor
 
-The response interceptor capability rewrites response headers or bodies before a successful non-streaming HTTP execution response is returned to the client.
+`ResponseInterceptor` rewrites a successful non-streaming HTTP execution result before it is handed downstream.
 
-## Capability Field
+## 1. What this solves
 
-```json
-{
-  "capabilities": {
-    "response_interceptor": true
-  }
-}
+The plugin can replace response headers of the same name, delete named headers, or replace the body when the body is non-empty.
+
+## 2. Scope and non-goals
+
+It only handles a successful non-streaming response. Streaming chunks are in [Streaming Response Interceptor](/plugin/response-stream-interceptor). It does not observe WebSocket frames.
+
+## 3. How to configure or call it
+
+Set `capabilities.response_interceptor` to true.
+
+```go
+InterceptResponse(context.Context, ResponseInterceptRequest) (ResponseInterceptResponse, error)
 ```
 
-Source references:
+The ABI method name is `response.intercept_after`.
 
-- `sdk/pluginapi/types.go`: `ResponseInterceptor`, `ResponseInterceptRequest`, `ResponseInterceptResponse`
-- `sdk/pluginabi/types.go`: `response.intercept_after`
-- `internal/pluginhost/adapters.go`: `InterceptResponse`
+## 4. Details
 
-Example references:
+The Default column matches the ledger `defaults` verbatim.
 
-- `internal/pluginhost/adapters_test.go`: tests for response interceptor chains, header clearing, and error handling
-- `examples/plugin/antigravity-web-search/go/main.go`: real migration example based on response interception
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.response-interceptor.intercept-response | `InterceptResponse`, ABI `response.intercept_after`. |  | Parameter `ResponseInterceptRequest`, return `ResponseInterceptResponse`. |
+| ResponseInterceptRequest.RequestID | Execution ID. |  | String. |
+| ResponseInterceptRequest.SourceFormat | Client protocol. |  | String. |
+| ResponseInterceptRequest.Model | Execution model. |  | String. |
+| ResponseInterceptRequest.RequestedModel | Model requested by the client. |  | String. |
+| ResponseInterceptRequest.Stream | Whether the request is marked as streaming. |  | This interface still rewrites only a successful non-streaming result. |
+| ResponseInterceptRequest.RequestHeaders | Request headers. |  | `http.Header`. |
+| ResponseInterceptRequest.ResponseHeaders | Current response headers. |  | `http.Header`. |
+| ResponseInterceptRequest.OriginalRequest | Original client body. |  | `[]byte`. |
+| ResponseInterceptRequest.RequestBody | Request payload that was actually executed. |  | `[]byte`. |
+| ResponseInterceptRequest.Body | Current response body. |  | `[]byte`. |
+| ResponseInterceptRequest.StatusCode | Current status code. |  | Integer. This return value cannot change the status code. |
+| ResponseInterceptRequest.Metadata | Context snapshot. |  | Read-only, understood as JSON values. |
+| ResponseInterceptResponse.Headers | Replace response headers of the same name. |  | Headers not mentioned are kept. |
+| ResponseInterceptResponse.Body | Replace the body. |  | Replaced only when non-empty. |
+| ResponseInterceptResponse.ClearHeaders | Response headers to delete first. |  | Deleted before `Headers` is applied. |
 
-## Methods
+## 5. Common errors and limits
 
-| Method | Purpose |
-| --- | --- |
-| `response.intercept_after` | Rewrites successful non-streaming responses. |
+When `error` is returned, ABI `ok` is false. When `http_status` is omitted or 0, it is treated as HTTP 500.
 
-## Request
+An empty `Body` does not replace the existing body. The return value has no status-code field.
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "Stream": false,
-  "RequestHeaders": {},
-  "ResponseHeaders": {},
-  "OriginalRequest": "base64-client-body",
-  "RequestBody": "base64-upstream-request",
-  "Body": "base64-response-body",
-  "StatusCode": 200,
-  "Metadata": {}
-}
-```
+## 6. Related behavior
 
-## Response
+Streaming chunks are in [Streaming Response Interceptor](/plugin/response-stream-interceptor). Protocol translation is in [Response Translator](/plugin/response-translator).
 
-```json
-{
-  "Headers": {
-    "X-Plugin": ["example"]
-  },
-  "Body": "base64-new-response-body",
-  "ClearHeaders": ["X-Old-Header"]
-}
-```
+## 7. Field experience
 
-## Development Notes
-
-- This only handles successful non-streaming responses. Use the [streaming response interceptor capability](./response-stream-interceptor) for streaming responses.
-- `Headers` overrides response headers with the same name while preserving headers that are not mentioned.
-- A non-empty `Body` replaces the response body.
-- Host model callbacks started with `host_callback_id` skip the originating plugin's own response interceptors.
+None yet.
 

@@ -1,87 +1,95 @@
 ---
-outline: 'deep'
+title: Model Registrar
+feature_ids:
+  - plugin.model-registrar.register-models
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Model Registrar Capability
+# Model Registrar
 
-The model registrar capability registers static model metadata provided by a plugin into the CLIProxyAPI model registry. It is suitable for plugins with a fixed model set that do not need dynamic credential-based discovery.
+`ModelRegistrar` submits a set of development-time model metadata at registration.
 
-## Capability Field
+## 1. What this solves
 
-Declare this in the registration result of `plugin.register` or `plugin.reconfigure`:
+With one call, the plugin declares its own provider key and the complete model list so the host can register those models.
 
-```json
-{
-  "capabilities": {
-    "model_registrar": true
-  }
-}
-```
+## 2. Scope and non-goals
 
-Source references:
+There is only `RegisterModels`. It does not discover models from a single credential. That is `ModelsForAuth` on [Model Provider](/plugin/model-provider). It also does not execute requests.
 
-- `sdk/pluginapi/types.go`: `ModelRegistrar`, `ModelRegistrationRequest`, `ModelRegistrationResponse`, `ModelInfo`
-- `sdk/pluginabi/types.go`: `model.register`
-- `internal/pluginhost/adapters.go`: `RegisterModels`, `callModelRegistrar`
+The registration metadata `Name`, `Version`, `Author`, and `GitHubRepository` cannot be blank. The load switch is in [Plugin loading and the store](/operations/plugins).
 
-Example reference:
+## 3. How to configure or call it
 
-- `examples/plugin/simple/go/main.go`: `MethodModelRegister`
-
-## Call Timing
-
-After the host loads or reconfigures a plugin, it calls `model.register` during the model registration phase. Returned models enter the model list and routing match flow.
-
-If the same plugin also declares the [executor capability](./executor), these models are associated with that plugin executor. Without an executor, the host registers them as normal plugin-provided model clients.
-
-## Request
-
-The `model.register` request maps to `ModelRegistrationRequest`:
+Set `capabilities.model_registrar` to true. The current contract version is 6.
 
 ```json
 {
-  "Plugin": {
-    "Name": "example",
-    "Version": "0.1.0",
-    "Author": "router-for-me"
-  }
-}
-```
-
-`Plugin` is the current plugin metadata and lets the plugin decide which models to return for its own version or configuration.
-
-## Response
-
-Return `ModelRegistrationResponse`:
-
-```json
-{
-  "Provider": "plugin-example",
-  "Models": [
-    {
-      "ID": "plugin-example-model",
-      "Object": "model",
-      "OwnedBy": "plugin-example",
-      "DisplayName": "Plugin Example Model",
-      "SupportedGenerationMethods": ["chat"],
-      "ContextLength": 8192,
-      "MaxCompletionTokens": 1024,
-      "UserDefined": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-models",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-models"
+    },
+    "capabilities": {
+      "model_registrar": true
     }
-  ]
+  }
 }
 ```
 
-Key points:
+```go
+RegisterModels(context.Context, ModelRegistrationRequest) (ModelRegistrationResponse, error)
+```
 
-- `Provider` must be a stable provider identifier.
-- `Models` must be the complete model set, not a delta.
-- `ID` is the model name used by client requests.
-- `Thinking` can declare the thinking range supported by the model for thinking configuration validation and later [Thinking applier capability](./thinking-applier).
+The ABI method name is `model.register`. Fields without a `json` tag use the Go exported name.
 
-## Development Notes
+## 4. Details
 
-- Do not return an empty `Provider` or empty model ID; the host skips invalid models.
-- A model registrar only handles static models. Use the [model provider capability](./model-provider) when models must be discovered dynamically per OAuth or file credential.
-- If the model should only be handled by a plugin executor, also declare the executor capability and set an appropriate `executor_model_scope`.
+The Default column matches the ledger `defaults` verbatim.
+
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.model-registrar.register-models | `RegisterModels`, ABI `model.register`. |  | Parameter `ModelRegistrationRequest`, return `ModelRegistrationResponse`. |
+| ModelRegistrationRequest.Plugin | Metadata of the plugin being registered. |  | `Metadata`: `Name`, `Version`, `Author`, `GitHubRepository`, `Logo`, `ConfigFields`. |
+| ModelRegistrationResponse.Provider | Provider key for this set of models. |  | String. |
+| ModelRegistrationResponse.Models | Complete model set supplied by the plugin. |  | `[]ModelInfo`. |
+| ModelInfo.ID | Stable model ID used in requests. |  | String. |
+| ModelInfo.Object | API object type, usually `model`. |  | String. |
+| ModelInfo.Created | Metadata creation time. |  | Unix seconds, `int64`. |
+| ModelInfo.OwnedBy | Owner or provider. |  | String. |
+| ModelInfo.Type | Capability-family classification. |  | String. |
+| ModelInfo.DisplayName | Display name. |  | String. |
+| ModelInfo.Name | Provider-native model name. |  | String. |
+| ModelInfo.Version | Revision. It may be empty. |  | String. |
+| ModelInfo.Description | Short description. |  | String. |
+| ModelInfo.InputTokenLimit | Maximum accepted input tokens. |  | `int64`. |
+| ModelInfo.OutputTokenLimit | Maximum output tokens. |  | `int64`. |
+| ModelInfo.SupportedGenerationMethods | Supported generation method names. |  | `[]string`. |
+| ModelInfo.ContextLength | Upper bound of the total context length. |  | `int64`. |
+| ModelInfo.MaxCompletionTokens | Maximum completion tokens. |  | `int64`. |
+| ModelInfo.SupportedParameters | Supported request parameter names. |  | `[]string`. |
+| ModelInfo.SupportedInputModalities | Input modalities. |  | `[]string`. |
+| ModelInfo.SupportedOutputModalities | Output modalities. |  | `[]string`. |
+| ModelInfo.Thinking | Optional reasoning budget. |  | `ThinkingSupport`: `Min`, `Max`, `ZeroAllowed`, `DynamicAllowed`, `Levels`. |
+| ModelInfo.UserDefined | Whether it comes from user configuration. |  | Boolean. |
+
+## 5. Common errors and limits
+
+When the method returns `error`, the ABI envelope `ok` is false. `error.code` and `error.message` are required. When `http_status` is omitted or 0, it is treated as HTTP 500.
+
+`Models` means the complete set, not an incremental patch.
+
+## 6. Related behavior
+
+Discovering models by credential is in [Model Provider](/plugin/model-provider). Actually sending the request is in [Executor](/plugin/executor).
+
+## 7. Field experience
+
+None yet.
 

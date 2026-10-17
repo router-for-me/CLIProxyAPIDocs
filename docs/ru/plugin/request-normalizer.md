@@ -1,82 +1,56 @@
 ---
-outline: 'deep'
+title: Приведение запроса
+feature_ids:
+  - plugin.request-normalizer.normalize-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность нормализации запросов
+# Приведение запроса
 
-Возможность нормализации запросов изменяет request payload перед входом в путь выполнения так, чтобы последующим этапам хоста было проще его обработать. Она часто используется для добавления значений по умолчанию, исправления provider-specific payload или лёгких изменений запроса.
+`RequestNormalizer` сводит payload запроса, специфичный для провайдера, к канонической форме.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "request_normalizer": true
-  }
-}
+Плагин получает формат источника, целевой формат, модель, потоковый ли ответ и тело, и возвращает байты канонического payload.
+
+## 2. Когда применимо и чего здесь нет
+
+Есть только `NormalizeRequest`. Перевод канонической формы в формат провайдера — это [Преобразование запроса](/ru/plugin/request-translator). Приведение ответа — другой интерфейс.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.request_normalizer` равным true.
+
+```go
+NormalizeRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-Исходный код:
+Имя метода ABI — `request.normalize`. Параметры и возвращаемое значение используют ту же пару структур, что и преобразование запроса.
 
-- `sdk/pluginapi/types.go`: `RequestNormalizer`, `RequestTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `request.normalize`
-- `internal/pluginhost/adapters.go`: `NormalizeRequest`, `callRequestNormalizer`
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/request-normalizer/go/main.go`
-- `examples/plugin/codex-service-tier/go/main.go`
-- `examples/plugin/codex-service-tier/README.md`
-- `examples/plugin/simple/go/main.go`: `MethodRequestNormalize`
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.request-normalizer.normalize-request | `NormalizeRequest`, ABI `request.normalize`. |  | Параметр `RequestTransformRequest`, возврат `PayloadResponse`. |
+| RequestTransformRequest.FromFormat | Протокол источника. |  | Строка. |
+| RequestTransformRequest.ToFormat | Целевой протокол. |  | Строка. |
+| RequestTransformRequest.Model | ID модели. |  | Строка. |
+| RequestTransformRequest.Stream | Ожидается ли потоковый вывод. |  | Логическое значение. |
+| RequestTransformRequest.Body | Payload для приведения. |  | `[]byte`. |
+| PayloadResponse.Body | Приведённый payload. |  | `[]byte`. |
 
-## Методы
+## 5. Типичные ошибки и границы
 
-| Метод | Назначение |
-| --- | --- |
-| `request.normalize` | Возвращает новое тело запроса на основе формата, модели и stream flag. |
+Когда возвращается `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500.
 
-## Запрос
+## 6. Связанные возможности
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "codex",
-  "Model": "gpt-5.5",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+Обратный вывод канонической формы описан в разделе [Преобразование запроса](/ru/plugin/request-translator).
 
-## Ответ
+## 7. Практический опыт
 
-```json
-{
-  "Body": "base64-normalized-body"
-}
-```
-
-## Пример: Codex service tier
-
-`examples/plugin/codex-service-tier` — пример request normalizer, близкий к реальному использованию. Он читает поле `fast` из конфигурации плагина и изменяет Codex-запросы при выполнении всех условий:
-
-- `ToFormat` равен `codex`
-- `Model` равен `gpt-5.5`
-- `fast` равен `true`
-
-Пример конфигурации:
-
-```yaml
-plugins:
-  configs:
-    codex-service-tier:
-      enabled: true
-      priority: 1
-      fast: true
-```
-
-## Замечания по разработке
-
-- Нормализация запросов должна быть узкой и предсказуемой; она не должна брать на себя обязанности executor.
-- Пустой `Body` не позволяет хосту применить эффективное изменение. Если нужно сохранить исходный текст, возвращайте исходный `Body`.
-- Собственная конфигурация плагина передаётся в `plugin.register` и `plugin.reconfigure` через `config_yaml`; разбирайте и кэшируйте её там.
-
+Пока нет.

@@ -1,66 +1,56 @@
 ---
-outline: 'deep'
+title: Преобразование запроса
+feature_ids:
+  - plugin.request-translator.translate-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность преобразования запросов
+# Преобразование запроса
 
-Возможность преобразования запросов конвертирует канонический запрос в протокол целевого провайдера. Она находится на этапе protocol translation перед выполнением запроса и подходит для перевода нормализованного CLIProxyAPI тела запроса в payload, нужный upstream.
+`RequestTranslator` преобразует payload запроса, который уже в канонической форме, в другой формат.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "request_translator": true
-  }
-}
+По формату источника, целевому формату, модели, потоковому ли ответу и телу плагин возвращает преобразованные исходные байты.
+
+## 2. Когда применимо и чего здесь нет
+
+Есть только `TranslateRequest`. Сведение запроса провайдера к канонической форме — это [Приведение запроса](/ru/plugin/request-normalizer), а не этот интерфейс. Ответы здесь не описаны.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.request_translator` равным true.
+
+```go
+TranslateRequest(context.Context, RequestTransformRequest) (PayloadResponse, error)
 ```
 
-Исходный код:
+Имя метода ABI — `request.translate`.
 
-- `sdk/pluginapi/types.go`: `RequestTranslator`, `RequestTransformRequest`, `PayloadResponse`
-- `sdk/pluginabi/types.go`: `request.translate`
-- `internal/pluginhost/adapters.go`: `TranslateRequest`, `callRequestTranslator`
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `examples/plugin/request-translator/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodRequestTranslate`
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.request-translator.translate-request | `TranslateRequest`, ABI `request.translate`. |  | Параметр `RequestTransformRequest`, возврат `PayloadResponse`. |
+| RequestTransformRequest.FromFormat | Протокол источника. |  | Строка. |
+| RequestTransformRequest.ToFormat | Целевой протокол. |  | Строка. |
+| RequestTransformRequest.Model | ID модели. |  | Строка. |
+| RequestTransformRequest.Stream | Ожидается ли потоковый вывод. |  | Логическое значение. |
+| RequestTransformRequest.Body | Payload для преобразования. |  | `[]byte`, в JSON это base64. |
+| PayloadResponse.Body | Преобразованный payload. |  | `[]byte`. |
 
-## Методы
+## 5. Типичные ошибки и границы
 
-| Метод | Назначение |
-| --- | --- |
-| `request.translate` | Преобразует `Body` из `FromFormat` в `ToFormat`. |
+Когда возвращается `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500. Этот метод не меняет учётные данные и не прекращает запрос.
 
-## Запрос
+## 6. Связанные возможности
 
-```json
-{
-  "FromFormat": "chat-completions",
-  "ToFormat": "anthropic",
-  "Model": "claude-sonnet",
-  "Stream": false,
-  "Body": "base64-request-body"
-}
-```
+Обратное сведение к канонической форме описано в разделе [Приведение запроса](/ru/plugin/request-normalizer). Переписывание запроса, который вот-вот будет отправлен, — в разделе [Перехват запроса](/ru/plugin/request-interceptor).
 
-## Ответ
+## 7. Практический опыт
 
-```json
-{
-  "Body": "base64-translated-body"
-}
-```
-
-## Отличие от нормализации запросов
-
-- [Возможность нормализации запросов](./request-normalizer) приводит provider или специальные входные запросы к каноническому формату, понятному хосту.
-- Возможность преобразования запросов переводит канонический формат в целевой upstream-протокол.
-
-## Замечания по разработке
-
-- Обрабатывайте только явно поддерживаемые сочетания форматов. Если сочетание не поддерживается, верните ошибку или не объявляйте эту возможность.
-- `Body` должен быть полным и валидным payload целевого протокола.
-- Не выполняйте выбор учётных данных или upstream HTTP-запросы внутри translator; это относится к этапам scheduler и executor.
-
+Пока нет.

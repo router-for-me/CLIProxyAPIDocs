@@ -1,114 +1,126 @@
 ---
-outline: 'deep'
+title: Executor
+feature_ids:
+  - plugin.provider-executor.identifier
+  - plugin.provider-executor.execute
+  - plugin.provider-executor.execute-stream
+  - plugin.provider-executor.count-tokens
+  - plugin.provider-executor.http-request
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Executor Capability
+# Executor
 
-The executor capability sends model requests to an upstream provider or local backend. It is the capability closest to an upstream adapter.
+`ProviderExecutor` sends a request to an upstream or local backend and provides streaming, counting, and raw HTTP.
 
-## Capability Field
+## 1. What this solves
+
+After the host has selected a credential and a protocol, the plugin performs non-streaming execution, streaming execution, token counting, or one HTTP request of its own as the executor.
+
+## 2. Scope and non-goals
+
+All five methods belong to this one interface. Protocol translation is not the executor's job. See the request and response pages. Upstream HTTP should use the `HTTPClient` in the parameters rather than bypassing the host from the plugin. See [Host Callbacks](/plugin/host-callbacks).
+
+An executor must declare at least one input format and one output format. An empty `executor_model_scope` is treated as `both`. A value that cannot be recognized is also treated as `both`. `both` covers both static models and OAuth credential models. `static` is only non-OAuth static models. `oauth` is only OAuth credential models.
+
+Format names are normalized by alias first: `chat-completions`, `chat_completions`, `openai-chat-completions`, and `openai_chat_completions` are all `openai`. `responses`, `openai-responses`, and `openai_responses` are all `openai-response`. `anthropic` is `claude`. An empty string and `none` are dropped. Every other name is used after surrounding whitespace is trimmed. Public formats in `sdk/translator` also include `gemini`, `codex`, `antigravity`, and `interactions`.
+
+## 3. How to configure or call it
+
+Set `capabilities.executor` to true and write the scope and formats.
 
 ```json
 {
-  "capabilities": {
-    "executor": true,
-    "executor_model_scope": "both",
-    "executor_input_formats": ["chat-completions"],
-    "executor_output_formats": ["chat-completions"]
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-executor",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-executor"
+    },
+    "capabilities": {
+      "executor": true,
+      "executor_model_scope": "both",
+      "executor_input_formats": ["openai"],
+      "executor_output_formats": ["openai"]
+    }
   }
 }
 ```
 
-Source references:
-
-- `sdk/pluginapi/types.go`: `ProviderExecutor`, `ExecutorRequest`, `ExecutorResponse`, `ExecutorStreamResponse`, `ExecutorHTTPRequest`
-- `sdk/pluginabi/types.go`: `executor.identifier`, `executor.execute`, `executor.execute_stream`, `executor.count_tokens`, `executor.http_request`
-- `internal/pluginhost/adapters.go`: executor registration, protocol format selection, and execution bridge
-
-Example references:
-
-- `examples/plugin/executor/go/main.go`
-- `examples/plugin/protocol-format/go/main.go`
-- `examples/plugin/simple/go/main.go`: executor-related methods
-
-## Methods
-
-| Method | Purpose |
-| --- | --- |
-| `executor.identifier` | Returns the provider identifier handled by this executor. |
-| `executor.execute` | Executes a non-streaming model request. |
-| `executor.execute_stream` | Executes a streaming model request. |
-| `executor.count_tokens` | Handles a token counting request. |
-| `executor.http_request` | Entry point for executor-owned HTTP requests. |
-
-## Protocol Formats
-
-`executor_input_formats` declares the request protocols the executor can receive directly. `executor_output_formats` declares the response protocols the executor outputs directly.
-
-Common values:
-
-- `chat-completions`
-- `responses`
-- `anthropic`
-
-`examples/plugin/protocol-format` demonstrates a declaration with `chat-completions` input and `responses` output.
-
-## Model Scope
-
-`executor_model_scope` controls how the executor relates to model registration:
-
-| Value | Description |
-| --- | --- |
-| `static` | The executor only serves static models. |
-| `oauth` | The executor only serves OAuth or credential-bound models. |
-| `both` | The executor serves both static and credential-bound models. |
-
-An empty value is treated as `both`.
-
-## ExecutorRequest
-
-The execution request contains:
-
-```json
-{
-  "AuthID": "auth-1",
-  "AuthProvider": "plugin-example",
-  "Model": "plugin-example-model",
-  "Format": "chat-completions",
-  "Stream": false,
-  "Headers": {},
-  "Query": {},
-  "OriginalRequest": "base64-client-body",
-  "SourceFormat": "chat-completions",
-  "Payload": "base64-provider-payload",
-  "StorageJSON": "base64-auth-json",
-  "AuthMetadata": {},
-  "AuthAttributes": {}
-}
+```go
+Identifier() string
+Execute(context.Context, ExecutorRequest) (ExecutorResponse, error)
+ExecuteStream(context.Context, ExecutorRequest) (ExecutorStreamResponse, error)
+CountTokens(context.Context, ExecutorRequest) (ExecutorResponse, error)
+HttpRequest(context.Context, ExecutorHTTPRequest) (ExecutorHTTPResponse, error)
 ```
 
-When a plugin sends HTTP requests upstream, it should use the host-provided HTTP client through `host.http.*`. This keeps request logging, proxy settings, transport policy, and credential context under host control.
+The ABI method names are `executor.identifier`, `executor.execute`, `executor.execute_stream`, `executor.count_tokens`, and `executor.http_request`. The identifier result field is `identifier`.
 
-## Responses
+## 4. Details
 
-Non-streaming response:
+The Default column matches the ledger `defaults` verbatim.
 
-```json
-{
-  "Payload": "base64-response-body",
-  "Headers": {
-    "content-type": ["application/json"]
-  },
-  "Metadata": {}
-}
-```
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| plugin.provider-executor.identifier | `Identifier`, ABI `executor.identifier`. |  | No parameters. Returns a string. Failure or blank is treated as an empty string. |
+| plugin.provider-executor.execute | `Execute`, ABI `executor.execute`. |  | Parameter `ExecutorRequest`, return `ExecutorResponse`. |
+| plugin.provider-executor.execute-stream | `ExecuteStream`, ABI `executor.execute_stream`. |  | Parameter `ExecutorRequest`, return `ExecutorStreamResponse`. |
+| plugin.provider-executor.count-tokens | `CountTokens`, ABI `executor.count_tokens`. |  | Parameter `ExecutorRequest`, return `ExecutorResponse`. |
+| plugin.provider-executor.http-request | `HttpRequest`, ABI `executor.http_request`. |  | Parameter `ExecutorHTTPRequest`, return `ExecutorHTTPResponse`. |
+| ExecutorRequest.AuthID | Selected credential ID. |  | String. |
+| ExecutorRequest.AuthProvider | Credential provider. |  | String. |
+| ExecutorRequest.Model | Requested model. |  | String. |
+| ExecutorRequest.Format | Target protocol format. |  | Must fall within the declared formats. |
+| ExecutorRequest.Stream | Whether it is streaming. |  | Boolean. |
+| ExecutorRequest.Alt | Alternate route or mode suffix. |  | String. |
+| ExecutorRequest.Headers | Headers handed to the executor. |  | `http.Header`. |
+| ExecutorRequest.Query | Query parameters. |  | `url.Values`. |
+| ExecutorRequest.OriginalRequest | Original client body. |  | `[]byte`. |
+| ExecutorRequest.SourceFormat | Original client protocol. |  | String. |
+| ExecutorRequest.Payload | Already translated provider payload. |  | `[]byte`. |
+| ExecutorRequest.Metadata | Extension bag. |  | `map[string]any`. |
+| ExecutorRequest.StorageJSON | Plugin storage for this credential. |  | `[]byte`. |
+| ExecutorRequest.AuthMetadata | Host-mutable credential metadata. |  | `map[string]any`. |
+| ExecutorRequest.AuthAttributes | Immutable attributes. |  | `map[string]string`. |
+| ExecutorRequest.HTTPClient | Host HTTP client. |  | Ignored by JSON. |
+| ExecutorResponse.Payload | Raw response body. |  | `[]byte`. |
+| ExecutorResponse.Headers | Response headers to forward or inspect. |  | `http.Header`. |
+| ExecutorResponse.Metadata | Executor extension data. |  | `map[string]any`. |
+| ExecutorStreamResponse.Headers | Response headers available before chunks start. |  | `http.Header`. |
+| ExecutorStreamResponse.Chunks | Streaming chunks until the channel closes. |  | Elements are `ExecutorStreamChunk`. |
+| ExecutorStreamChunk.Payload | One chunk of raw bytes. |  | `[]byte`. |
+| ExecutorStreamChunk.Err | Error attached to this chunk. |  | `error`. |
+| ExecutorHTTPRequest.AuthID | Selected credential ID. |  | String. |
+| ExecutorHTTPRequest.AuthProvider | Credential provider. |  | String. |
+| ExecutorHTTPRequest.Method | HTTP method. |  | String. |
+| ExecutorHTTPRequest.URL | Absolute upstream address. |  | String. |
+| ExecutorHTTPRequest.Headers | Request headers. |  | `http.Header`. |
+| ExecutorHTTPRequest.Body | Raw body. |  | `[]byte`. |
+| ExecutorHTTPRequest.StorageJSON | Plugin credential storage. |  | `[]byte`. |
+| ExecutorHTTPRequest.Metadata | Host-mutable metadata. |  | `map[string]any`. |
+| ExecutorHTTPRequest.Attributes | Immutable attributes. |  | `map[string]string`. |
+| ExecutorHTTPRequest.HTTPClient | Host HTTP client. |  | Ignored by JSON. |
+| ExecutorHTTPResponse.StatusCode | Upstream status code. |  | Integer. |
+| ExecutorHTTPResponse.Headers | Upstream response headers. |  | `http.Header`. |
+| ExecutorHTTPResponse.Body | Raw response body. |  | `[]byte`. |
 
-A streaming response returns `Headers` and a chunk stream. C ABI examples place finite chunks in a response array, and the host converts them into an internal stream.
+## 5. Common errors and limits
 
-## Development Notes
+When no input format is left, the error is `plugin executor <identifier> declares no input formats`. When the request format is not among those declared, the error is `plugin executor <identifier> does not support input format "<format>"`. Output formats correspond to `declares no output formats` and `does not support output format`.
 
-- An executor must declare at least one input format and one output format.
-- `Payload` is already translated to the target protocol request body; do not infer the original client protocol again.
-- If you need to reuse the host model routing path, do not write an executor. Use `host.model.*` from [host callbacks](./host-callbacks).
-- Do not store or print upstream secrets in the plugin. Credential data from `StorageJSON` should be used and then discarded.
+When a method returns `error`, an omitted or 0 ABI `http_status` is treated as HTTP 500. `HTTPClient` does not enter JSON.
+
+## 6. Related behavior
+
+Sending a request into this executor is in [Model Router](/plugin/model-router). Outbound HTTP is in [Host Callbacks](/plugin/host-callbacks).
+
+## 7. Field experience
+
+None yet.
 

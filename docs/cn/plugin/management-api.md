@@ -1,122 +1,80 @@
 ---
-outline: 'deep'
+title: 管理接口
+feature_ids:
+  - plugin.management-api.register-management
+  - plugin.management-handler.handle-management
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
 ---
 
-# Management API 能力
+# 管理接口
 
-Management API 能力允许插件注册自己的管理接口和浏览器资源页面。它适合提供状态页、诊断页、配置辅助工具或插件专属操作入口。
+本页承接已经分配到这里的两个公开接口：`ManagementAPI` 负责登记路由，`ManagementHandler` 负责处理命中的请求。
 
-## 能力字段
+## 1. 这段解决什么问题
 
-```json
-{
-  "capabilities": {
-    "management_api": true
-  }
-}
+插件在宿主给出的前缀下声明精确的管理路由和浏览器资源路由，并在请求到达时返回状态码、头和正文。
+
+## 2. 适用条件与不做的事
+
+不实现宿主自己的管理 API。登记请求里的 `BasePath` 是插件唯一可以挂管理路由的前缀，值为 `/v0/management`。`ResourceBasePath` 是 `/v0/resource/plugins/` 加上插件 ID。
+
+资源路由不走管理认证。带非空 `Menu` 的 GET 管理声明不会同时登记管理端点，只会按资源路由登记。
+
+## 3. 怎么配置或怎么调用
+
+`capabilities.management_api` 设为 true。
+
+```go
+RegisterManagement(context.Context, ManagementRegistrationRequest) (ManagementRegistrationResponse, error)
+HandleManagement(context.Context, ManagementRequest) (ManagementResponse, error)
 ```
 
-源码参考：
+ABI 方法名是 `management.register` 与 `management.handle`。每条 `ManagementRoute` 和 `ResourceRoute` 的 `Handler` 实现第二个接口。
 
-- `sdk/pluginapi/types.go`：`ManagementAPI`、`ManagementRegistrationRequest`、`ManagementRoute`、`ResourceRoute`、`ManagementRequest`、`ManagementResponse`
-- `sdk/pluginabi/types.go`：`management.register`、`management.handle`
-- `internal/pluginhost/management.go`：管理路由与资源路由注册、鉴权边界
+## 4. 细项说明
 
-示例参考：
+「默认值」与台账 defaults 逐字相同。
 
-- `examples/plugin/management-api/go/main.go`
-- `examples/plugin/host-callback/go/main.go`
-- `examples/plugin/host-model-callback/go/main.go`
-- `examples/plugin/simple/go/main.go`：`MethodManagementRegister`、`MethodManagementHandle`
-
-## 方法
-
-| 方法 | 作用 |
-| --- | --- |
-| `management.register` | 注册插件自己的管理路由和浏览器资源。 |
-| `management.handle` | 处理匹配到插件路由的 HTTP 请求。 |
-
-## 路由类型
-
-| 类型 | 注册字段 | 暴露路径 | 认证 |
+| 字段 | 含义 | 默认值 | 约束 |
 | --- | --- | --- | --- |
-| 插件自有管理接口 | `Routes` | `/v0/management/...` | 需要管理密钥。 |
-| 浏览器资源页面 | `Resources` | `/v0/resource/plugins/<pluginID>/...` | 资源请求本身不走管理鉴权。同源管理中心部署下，受信任页面的 JavaScript 可以读取已保存的管理密钥并调用 `/v0/management/...`。 |
+| plugin.management-api.register-management | `RegisterManagement`，ABI `management.register`。 |  | 参数 `ManagementRegistrationRequest`。 |
+| plugin.management-handler.handle-management | `HandleManagement`，ABI `management.handle`。 |  | 参数 `ManagementRequest`，返回 `ManagementResponse`。 |
+| ManagementRegistrationRequest.Plugin | 插件元数据。 |  | `Metadata`。 |
+| ManagementRegistrationRequest.BasePath | 管理路由前缀。 |  | 固定为 `/v0/management`。 |
+| ManagementRegistrationRequest.ResourceBasePath | 资源前缀。 |  | `/v0/resource/plugins/<pluginID>`。 |
+| ManagementRegistrationResponse.Routes | 要暴露的精确管理路由。 |  | `[]ManagementRoute`。 |
+| ManagementRegistrationResponse.Resources | 浏览器资源。 |  | 挂在资源前缀下。 |
+| ManagementRoute.Method | HTTP 方法。 |  | 空白按 GET。含空白则整条路由无效。 |
+| ManagementRoute.Path | 精确路径。 |  | 相对路径会补上 `/`，再挂到 `/v0/management` 下。已带该前缀的会先去掉再挂回。 |
+| ManagementRoute.Menu | 旧式资源菜单标题。 |  | GET 且非空时不登记 `/v0/management` 端点，只按资源路由登记。 |
+| ManagementRoute.Description | 旧式菜单说明。 |  | 字符串。 |
+| ManagementRoute.Handler | 处理该路由的对象。 |  | 不能为空，否则路由无效。 |
+| ResourceRoute.Path | 资源精确路径。 |  | 挂到该插件的资源前缀下。 |
+| ResourceRoute.Menu | 管理界面菜单标题。 |  | 资源请求是 GET。 |
+| ResourceRoute.Description | 界面说明。 |  | 字符串。 |
+| ResourceRoute.Handler | 资源处理对象。 |  | 不能为空。资源请求不带管理认证。 |
+| ManagementRequest.Method | 实际 HTTP 方法。 |  | 字符串。 |
+| ManagementRequest.Path | 请求路径。 |  | 字符串。 |
+| ManagementRequest.Headers | 请求头。 |  | `http.Header`。 |
+| ManagementRequest.Query | 查询参数。 |  | `url.Values`。 |
+| ManagementRequest.Body | 原始正文。 |  | `[]byte`。资源 GET 不使用正文。 |
+| ManagementResponse.StatusCode | HTTP 状态码。 |  | 0 按 200。 |
+| ManagementResponse.Headers | 响应头。 |  | `http.Header`。 |
+| ManagementResponse.Body | 原始响应正文。 |  | 契约 6 及以上的 JSON 字符串不做 HTML 转义。低于 6 时仍转义。当前版本是 6。 |
 
-## 注册响应
+## 5. 常见错误与边界
 
-```json
-{
-  "Routes": [
-    {
-      "Method": "POST",
-      "Path": "/plugins/example/run"
-    }
-  ],
-  "Resources": [
-    {
-      "Path": "/status",
-      "Menu": "Example Plugin",
-      "Description": "Shows example plugin status."
-    }
-  ]
-}
-```
+处理函数返回 `error` 时，管理请求得到 HTTP 502，正文是 `plugin management handler failed`。资源请求同样是 502，正文是 `plugin resource handler failed`。
 
-资源示例最终路径：
+下列路由不会被登记：空路径、方法含空白、最终路径不在对应前缀之下、路径含空白、`:` 或 `*`。资源路径还拒绝 `..`。与保留路由冲突，或与更高优先级插件的资源路径冲突时，该条被跳过。带非空 `Menu` 的 GET 管理声明不会进入 `/v0/management`，只会按资源路由登记。
 
-```text
-/v0/resource/plugins/example/status
-```
+登记方法自己的 `error` 仍走 ABI 信封。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
-## 处理请求
+## 6. 相关功能
 
-`management.handle` 接收：
+宿主管理面的既有路由不在本页。插件安装见 [插件加载与商店](/cn/operations/plugins)。
 
-```json
-{
-  "Method": "GET",
-  "Path": "/v0/resource/plugins/example/status",
-  "Headers": {},
-  "Query": {},
-  "Body": "base64-body"
-}
-```
+## 7. 使用经验
 
-响应：
-
-```json
-{
-  "StatusCode": 200,
-  "Headers": {
-    "Content-Type": ["text/html; charset=utf-8"]
-  },
-  "Body": "base64-html"
-}
-```
-
-## 鉴权边界
-
-- `/v0/management/...` 下的插件管理接口需要管理密钥。
-- `/v0/resource/plugins/<pluginID>/...` 是浏览器资源路径。用于返回页面的 GET 请求本身不走 Management API 鉴权。
-- 同源部署下，插件资源页可以读取管理中心的 `localStorage`，并复用其中保存的管理密钥。安装并启用这类插件，应视为信任该插件的浏览器端代码。
-- 跨源部署不能依赖这个存储访问方式。插件页面必须处理管理状态缺失或无法读取的情况。
-- 带 `Menu` 的旧式 GET management route 会被宿主迁移为资源路由，避免把菜单页面暴露成管理 API。
-
-## 受信任资源页模式
-
-需要执行特权操作时，推荐采用这种结构：
-
-1. 用资源页承载插件 UI。
-2. 页面 JavaScript 在同源可用时读取管理中心存储。
-3. 使用读到的管理密钥，通过 `Authorization: Bearer <management-key>` 调用插件自己的 `/v0/management/...` 路由。
-
-不要把敏感动作直接绑定到未鉴权的资源 GET 请求上。资源路由如果读取 query 后立刻修改配置、读取凭证文件，或调用特权宿主回调，只要资源 URL 可访问，这些动作就暴露出去了。
-
-## 开发注意
-
-- 插件管理路由不能覆盖宿主已有 `/v0/management` 路由。
-- 资源路径不能包含空白、`:`、`*` 或 `..`。
-- 返回 HTML 时仍要避免把 secret、token 或凭证 JSON 渲染到页面。
-- 插件资源页应自行打包脚本。加载第三方脚本会让这些脚本获得同源管理存储的访问能力。
-- 需要调用宿主模型、HTTP 或凭证文件能力时，使用 [宿主回调](./host-callbacks)。
+暂无

@@ -1,107 +1,89 @@
 ---
-outline: 'deep'
+title: Провайдер моделей
+feature_ids:
+  - plugin.model-provider.static-models
+  - plugin.model-provider.models-for-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность провайдера моделей
+# Провайдер моделей
 
-Возможность провайдера моделей предоставляет статические модели и динамически обнаруживает модели для конкретной записи учётных данных. Она лучше, чем registrar моделей, подходит для OAuth, файловых учётных данных или плагинов, которым нужен доступ к upstream-списку моделей.
+`ModelProvider` предоставляет статические модели и модели, обнаруженные по одной учётной записи.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "model_provider": true
-  }
-}
-```
+Статический список не зависит от учётных данных входа. `ModelsForAuth` использует эти учётные данные, чтобы запросить модели у провайдера, и может заодно вернуть обновлённые учётные данные.
 
-Исходный код:
+## 2. Когда применимо и чего здесь нет
 
-- `sdk/pluginapi/types.go`: `ModelProvider`, `StaticModelRequest`, `AuthModelRequest`, `ModelResponse`
-- `sdk/pluginabi/types.go`: `model.static`, `model.for_auth`
-- `internal/pluginhost/adapters.go`: `RegisterModels`, `ModelsForAuth`
+Нужно реализовать оба метода. Разовая регистрация на этапе разработки — это [Регистратор моделей](/ru/plugin/model-registrar), а не этот интерфейс. Этот интерфейс не выполняет запросы чата.
 
-Примеры:
+Если у того же плагина есть исполнитель, `executor_model_scope` решает, какая сторона доступна для статических моделей и моделей учётных данных OAuth: `static`, `oauth` или `both`. Пустое значение считается `both`. Это поле относится к регистрации исполнителя. См. [Исполнитель](/ru/plugin/executor).
 
-- `examples/plugin/model/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodModelStatic`, `MethodModelForAuth`
+## 3. Как настроить или вызвать
 
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `model.static` | Возвращает статический список моделей, не зависящий от конкретных учётных данных. |
-| `model.for_auth` | Возвращает список моделей для записи учётных данных и может одновременно вернуть обновление учётных данных. |
-
-## Запрос статических моделей
-
-`model.static` получает `StaticModelRequest`:
+Задайте `capabilities.model_provider` равным true.
 
 ```json
 {
-  "Plugin": {},
-  "Host": {
-    "AuthDir": "~/.cli-proxy-api",
-    "ProxyURL": "",
-    "ForceModelPrefix": false
-  }
-}
-```
-
-## Обнаружение моделей по учётным данным
-
-`model.for_auth` получает `AuthModelRequest`:
-
-```json
-{
-  "AuthID": "auth-1",
-  "AuthProvider": "plugin-example",
-  "StorageJSON": "base64-json",
-  "Metadata": {},
-  "Attributes": {},
-  "Host": {}
-}
-```
-
-Если плагину нужно обратиться к upstream API моделей, используйте мост `host.http.*`, соответствующий HTTP-клиенту хоста из запроса. Так proxy, транспортная политика и логирование запросов остаются под управлением хоста.
-
-## Ответ
-
-`model.static` и `model.for_auth` возвращают `ModelResponse`:
-
-```json
-{
-  "Provider": "plugin-example",
-  "Models": [
-    {
-      "ID": "plugin-example-model",
-      "Object": "model",
-      "OwnedBy": "plugin-example",
-      "DisplayName": "Plugin Example Model",
-      "SupportedGenerationMethods": ["chat"],
-      "ContextLength": 8192,
-      "MaxCompletionTokens": 1024,
-      "UserDefined": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-model-provider",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-model-provider"
+    },
+    "capabilities": {
+      "model_provider": true
     }
-  ],
-  "AuthUpdate": {}
+  }
 }
 ```
 
-`AuthUpdate` может обновлять данные учётных данных во время обнаружения моделей, например информацию аккаунта, project ID или время следующего обновления, возвращённые upstream.
+```go
+StaticModels(context.Context, StaticModelRequest) (ModelResponse, error)
+ModelsForAuth(context.Context, AuthModelRequest) (ModelResponse, error)
+```
 
-## Связь с executor
+Имена методов ABI — `model.static` и `model.for_auth`. Поля без тега используют экспортируемое имя Go. `[]byte` — это base64.
 
-Если плагин также объявляет [возможность исполнителя](./executor), `executor_model_scope` управляет путём регистрации провайдера моделей:
+## 4. Подробности
 
-- `static`: регистрирует только статические модели.
-- `oauth`: обрабатывает только модели, найденные по учётным данным.
-- `both` или пустое значение: поддерживает оба типа моделей.
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-## Замечания по разработке
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.model-provider.static-models | `StaticModels`, ABI `model.static`. |  | Параметр `StaticModelRequest`, возврат `ModelResponse`. |
+| plugin.model-provider.models-for-auth | `ModelsForAuth`, ABI `model.for_auth`. |  | Параметр `AuthModelRequest`, возврат `ModelResponse`. |
+| StaticModelRequest.Plugin | Метаданные плагина. |  | `Metadata`. |
+| StaticModelRequest.Host | Сводка конфигурации хоста. |  | `AuthDir`, `ProxyURL`, `ForceModelPrefix`, `OAuthModelAlias`, `ExcludedModels`. |
+| AuthModelRequest.Plugin | Метаданные плагина. |  | `Metadata`. |
+| AuthModelRequest.AuthID | ID учётных данных для обнаружения. |  | Строка. |
+| AuthModelRequest.AuthProvider | Провайдер учётных данных. |  | Строка. |
+| AuthModelRequest.StorageJSON | Сохранённые данные плагина. |  | `[]byte`. |
+| AuthModelRequest.Metadata | Метаданные, которые хост может менять. |  | `map[string]any`. |
+| AuthModelRequest.Attributes | Неизменяемые атрибуты. |  | `map[string]string`. |
+| AuthModelRequest.Host | Сводка конфигурации хоста. |  | `HostConfigSummary`. |
+| AuthModelRequest.HTTPClient | HTTP-клиент хоста. |  | JSON игнорирует. См. [Callback хоста](/ru/plugin/host-callbacks). |
+| ModelResponse.Provider | Provider, которому принадлежат модели. |  | Строка. |
+| ModelResponse.Models | Полный обнаруженный набор моделей. |  | `[]ModelInfo`. Поля те же, что `ModelInfo` в разделе [Регистратор моделей](/ru/plugin/model-registrar). |
+| ModelResponse.AuthUpdate | Учётные данные, которые обнаружение должно записать обратно. |  | `AuthData`. Оставьте пустым, если обновление не нужно. |
 
-- `model.for_auth` должен обрабатывать только распознанных им провайдеров учётных данных.
-- Если `Provider` пустой, хост попытается использовать provider текущих учётных данных.
-- Ошибка динамического обнаружения заставит хост считать обнаружение моделей для этих учётных данных обработанным, но неуспешным.
+## 5. Типичные ошибки и границы
+
+Когда возвращается `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500.
+
+`Models` — полный набор. `HTTPClient` не входит в JSON.
+
+## 6. Связанные возможности
+
+Разовая регистрация описана в разделе [Регистратор моделей](/ru/plugin/model-registrar). Форма учётных данных — в разделе [Провайдер учётных данных](/ru/plugin/auth-provider).
+
+## 7. Практический опыт
+
+Пока нет.
 

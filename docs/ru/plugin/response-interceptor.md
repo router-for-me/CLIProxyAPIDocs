@@ -1,72 +1,68 @@
 ---
-outline: 'deep'
+title: Перехват ответов
+feature_ids:
+  - plugin.response-interceptor.intercept-response
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность перехвата ответов
+# Перехват ответов
 
-Возможность перехвата ответов изменяет заголовки или тело успешного нестримингового HTTP-ответа перед возвратом клиенту.
+`ResponseInterceptor` переписывает успешный непотоковый результат HTTP-выполнения до передачи вниз.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
 
-```json
-{
-  "capabilities": {
-    "response_interceptor": true
-  }
-}
+Плагин может заменить одноимённые заголовки ответа, удалить указанные заголовки или заменить тело, если тело непустое.
+
+## 2. Когда применимо и чего здесь нет
+
+Обрабатывается только успешный непотоковый ответ. Потоковые блоки описаны в разделе [Перехват стриминговых ответов](/ru/plugin/response-stream-interceptor). Кадры WebSocket он не наблюдает.
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.response_interceptor` равным true.
+
+```go
+InterceptResponse(context.Context, ResponseInterceptRequest) (ResponseInterceptResponse, error)
 ```
 
-Исходный код:
+Имя метода ABI — `response.intercept_after`.
 
-- `sdk/pluginapi/types.go`: `ResponseInterceptor`, `ResponseInterceptRequest`, `ResponseInterceptResponse`
-- `sdk/pluginabi/types.go`: `response.intercept_after`
-- `internal/pluginhost/adapters.go`: `InterceptResponse`
+## 4. Подробности
 
-Примеры:
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-- `internal/pluginhost/adapters_test.go`: тесты цепочки response interceptor, очистки header и обработки ошибок
-- `examples/plugin/antigravity-web-search/go/main.go`: реальный пример миграции на response interception
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.response-interceptor.intercept-response | `InterceptResponse`, ABI `response.intercept_after`. |  | Параметр `ResponseInterceptRequest`, возврат `ResponseInterceptResponse`. |
+| ResponseInterceptRequest.RequestID | ID выполнения. |  | Строка. |
+| ResponseInterceptRequest.SourceFormat | Протокол клиента. |  | Строка. |
+| ResponseInterceptRequest.Model | Модель выполнения. |  | Строка. |
+| ResponseInterceptRequest.RequestedModel | Модель, запрошенная клиентом. |  | Строка. |
+| ResponseInterceptRequest.Stream | Помечен ли запрос как потоковый. |  | Этот интерфейс всё равно переписывает только успешный непотоковый результат. |
+| ResponseInterceptRequest.RequestHeaders | Заголовки запроса. |  | `http.Header`. |
+| ResponseInterceptRequest.ResponseHeaders | Текущие заголовки ответа. |  | `http.Header`. |
+| ResponseInterceptRequest.OriginalRequest | Исходное тело клиента. |  | `[]byte`. |
+| ResponseInterceptRequest.RequestBody | Фактически выполненный payload запроса. |  | `[]byte`. |
+| ResponseInterceptRequest.Body | Текущее тело ответа. |  | `[]byte`. |
+| ResponseInterceptRequest.StatusCode | Текущий код состояния. |  | Целое число. Это возвращаемое значение не может изменить код состояния. |
+| ResponseInterceptRequest.Metadata | Снимок контекста. |  | Только для чтения, понимается как значения JSON. |
+| ResponseInterceptResponse.Headers | Заменить одноимённые заголовки ответа. |  | Неупомянутые заголовки сохраняются. |
+| ResponseInterceptResponse.Body | Заменить тело. |  | Замена только если непустое. |
+| ResponseInterceptResponse.ClearHeaders | Заголовки ответа, которые удаляются сначала. |  | Удаляются до применения `Headers`. |
 
-## Методы
+## 5. Типичные ошибки и границы
 
-| Метод | Назначение |
-| --- | --- |
-| `response.intercept_after` | Изменяет успешный нестриминговый ответ. |
+Когда возвращается `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500.
 
-## Запрос
+Пустой `Body` не заменяет существующее тело. У возвращаемого значения нет поля кода состояния.
 
-```json
-{
-  "SourceFormat": "chat-completions",
-  "Model": "gpt-5.5",
-  "RequestedModel": "gpt-5.5",
-  "Stream": false,
-  "RequestHeaders": {},
-  "ResponseHeaders": {},
-  "OriginalRequest": "base64-client-body",
-  "RequestBody": "base64-upstream-request",
-  "Body": "base64-response-body",
-  "StatusCode": 200,
-  "Metadata": {}
-}
-```
+## 6. Связанные возможности
 
-## Ответ
+Потоковые блоки описаны в разделе [Перехват стриминговых ответов](/ru/plugin/response-stream-interceptor). Преобразование протокола — в разделе [Преобразование ответов](/ru/plugin/response-translator).
 
-```json
-{
-  "Headers": {
-    "X-Plugin": ["example"]
-  },
-  "Body": "base64-new-response-body",
-  "ClearHeaders": ["X-Old-Header"]
-}
-```
+## 7. Практический опыт
 
-## Замечания по разработке
-
-- Обрабатывает только успешные нестриминговые ответы; для стриминговых ответов используйте [возможность перехвата стриминговых ответов](./response-stream-interceptor).
-- `Headers` перезаписывает одноимённые response header, но сохраняет header, которые не указаны.
-- Непустой `Body` заменяет тело ответа.
-- Callback моделей хоста, запущенные с `host_callback_id`, пропускают собственные response interceptor плагина-источника.
+Пока нет.
 

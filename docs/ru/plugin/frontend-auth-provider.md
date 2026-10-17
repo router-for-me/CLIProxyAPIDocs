@@ -1,76 +1,82 @@
 ---
-outline: 'deep'
+title: Провайдер фронтенд-аутентификации
+feature_ids:
+  - plugin.frontend-auth-provider.identifier
+  - plugin.frontend-auth-provider.authenticate
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
 ---
 
-# Возможность провайдера фронтенд-аутентификации
+# Провайдер фронтенд-аутентификации
 
-Возможность провайдера фронтенд-аутентификации аутентифицирует клиентские запросы до входа в proxy-процесс. Она отвечает на вопрос «кто может вызывать CLIProxyAPI» и не отвечает за выбор upstream-учётных данных.
+`FrontendAuthProvider` выполняет фронтенд-аутентификацию до того, как запрос войдёт в обработку прокси.
 
-## Поле возможности
+## 1. Какую задачу решает этот раздел
+
+Плагин смотрит входящий метод, путь, заголовки, запрос и тело, решает, принимать ли запрос, и выдаёт идентификатор субъекта и атрибуты, доступные дальше.
+
+## 2. Когда применимо и чего здесь нет
+
+Он не разбирает файлы учётных данных upstream. Это [Провайдер учётных данных](/ru/plugin/auth-provider). Переключатель исключительности — не метод. См. [Эксклюзивный режим фронтенд-аутентификации](/ru/plugin/frontend-auth-exclusive).
+
+## 3. Как настроить или вызвать
+
+Задайте `capabilities.frontend_auth_provider` равным true. Если нужен исключительный режим, добавьте ещё `frontend_auth_provider_exclusive`. Этот переключатель на этой странице не объясняется.
 
 ```json
 {
-  "capabilities": {
-    "frontend_auth_provider": true
+  "ok": true,
+  "result": {
+    "schema_version": 6,
+    "metadata": {
+      "Name": "example-frontend-auth",
+      "Version": "0.1.0",
+      "Author": "example",
+      "GitHubRepository": "https://example.invalid/example-frontend-auth"
+    },
+    "capabilities": {
+      "frontend_auth_provider": true
+    }
   }
 }
 ```
 
-Исходный код:
-
-- `sdk/pluginapi/types.go`: `FrontendAuthProvider`, `FrontendAuthRequest`, `FrontendAuthResponse`
-- `sdk/pluginabi/types.go`: `frontend_auth.identifier`, `frontend_auth.authenticate`
-- `internal/pluginhost/adapters.go`: `RegisterFrontendAuthProviders`
-
-Примеры:
-
-- `examples/plugin/frontend-auth/go/main.go`
-- `examples/plugin/simple/go/main.go`: `MethodFrontendAuthIdentifier`, `MethodFrontendAuthAuthenticate`
-
-## Методы
-
-| Метод | Назначение |
-| --- | --- |
-| `frontend_auth.identifier` | Возвращает стабильный идентификатор этого провайдера фронтенд-аутентификации. |
-| `frontend_auth.authenticate` | По содержимому HTTP-запроса определяет, прошла ли аутентификация. |
-
-## Запрос
-
-`frontend_auth.authenticate` получает:
-
-```json
-{
-  "Method": "POST",
-  "Path": "/v1/chat/completions",
-  "Headers": {
-    "Authorization": ["Bearer ..."]
-  },
-  "Query": {},
-  "Body": "base64-body"
-}
+```go
+Identifier() string
+Authenticate(context.Context, FrontendAuthRequest) (FrontendAuthResponse, error)
 ```
 
-## Ответ
+Имена методов ABI — `frontend_auth.identifier` и `frontend_auth.authenticate`. Поле объекта результата идентификатора — `identifier`. Пример — `examples/plugin/frontend-auth`.
 
-```json
-{
-  "Authenticated": true,
-  "Principal": "user-or-client-id",
-  "Metadata": {
-    "provider": "example-frontend-auth-go"
-  }
-}
-```
+## 4. Подробности
 
-`Principal` — аутентифицированный субъект. `Metadata` может передавать downstream атрибуты идентичности.
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
 
-## Связь со встроенными API Key
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| plugin.frontend-auth-provider.identifier | `Identifier`, ABI `frontend_auth.identifier`. |  | Без параметров. Возвращает строку. Ошибка или пустое значение считаются пустой строкой. |
+| plugin.frontend-auth-provider.authenticate | `Authenticate`, ABI `frontend_auth.authenticate`. |  | Параметр `FrontendAuthRequest`, возврат `FrontendAuthResponse`. |
+| FrontendAuthRequest.Method | Метод HTTP. |  | Строка. |
+| FrontendAuthRequest.Path | Путь запроса. |  | Строка. |
+| FrontendAuthRequest.Headers | Входящие заголовки. |  | `http.Header`. |
+| FrontendAuthRequest.Query | Параметры запроса. |  | `url.Values`. |
+| FrontendAuthRequest.Body | Исходное тело. |  | `[]byte`, в JSON это base64. |
+| FrontendAuthResponse.Authenticated | Принят ли запрос. |  | Логическое значение. |
+| FrontendAuthResponse.Principal | Идентификатор аутентифицированного субъекта. |  | Строка. |
+| FrontendAuthResponse.Metadata | Атрибуты личности, передаваемые дальше. |  | `map[string]string`. |
 
-Обычный провайдер фронтенд-аутентификации работает вместе с существующими способами аутентификации хоста. Только при объявлении [эксклюзивного режима фронтенд-аутентификации](./frontend-auth-exclusive) плагин после выбора может стать единственным источником фронтенд-аутентификации.
+## 5. Типичные ошибки и границы
 
-## Замечания по разработке
+Когда `Authenticate` возвращает `error`, ABI `ok` равен false. Если `http_status` опущен или равен 0, он считается HTTP 500.
 
-- Фронтенд-аутентификация проверяет только клиентские запросы и не должна читать или возвращать upstream-учётные данные.
-- Будьте осторожны с размером тела запроса и чувствительной информацией при аутентификации по body. Не логируйте исходный body.
-- Когда плагин возвращает `Authenticated: false`, хост продолжает текущую цепочку аутентификации или отклоняет запрос, в зависимости от того, включён ли эксклюзивный режим.
+`Authenticated` равный false означает, что запрос не принят. Это не тот же путь, что возврат ошибки методом.
+
+## 6. Связанные возможности
+
+Логическое значение исключительности описано в разделе [Эксклюзивный режим фронтенд-аутентификации](/ru/plugin/frontend-auth-exclusive). Учётные данные upstream — в разделе [Провайдер учётных данных](/ru/plugin/auth-provider).
+
+## 7. Практический опыт
+
+Пока нет.
 

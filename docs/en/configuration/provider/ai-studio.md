@@ -1,27 +1,51 @@
-# AI Studio Instructions
+---
+title: AI Studio WebSocket authentication
+feature_ids:
+  - oauth.providers.aistudio-ws-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
 
-You can use this service as a backend for [this AI Studio App](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL). Follow the steps below to configure it:
+# AI Studio WebSocket authentication
 
-1.  **Start the CLIProxyAPI Service**: Ensure your CLIProxyAPI instance is running, either locally or remotely.
-2.  **Access the AI Studio App**: Log in to your Google account in your browser, then open the following link:
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
-  
-**Note**: If you are using the Brave browser, you may need to disable its shields feature as it can block the WebSocket connection. This issue can also occur with other ad-blockers.
+## 1. What this solves
 
-## Connection Configuration
+Decide whether the WebSocket API requires authentication.
 
-By default, the AI Studio App attempts to connect to a local CLIProxyAPI instance at `ws://127.0.0.1:8317`.
+## 2. Scope and non-goals
 
--   **Connecting to a Remote Service**:
-    If you need to connect to a remotely deployed CLIProxyAPI, modify the `config.ts` file in the AI Studio App to update the `WEBSOCKET_PROXY_URL` value.
-    -   Use the `wss://` protocol if your remote service has SSL enabled.
-    -   Use the `ws://` protocol if SSL is not enabled.
+This page no longer describes third-party AI Studio applications. It keeps only ws-auth from the pinned code.
 
-## Authentication Configuration
+## 3. How to configure or call it
 
-By default, WebSocket connections to CLIProxyAPI do not require authentication.
+```yaml
+oauth:
+  providers:
+    aistudio:
+      ws-auth: true
+```
 
--   **Enable Authentication on the CLIProxyAPI Server**:
-    In your `config.yaml` file, set `ws_auth` to `true`.
--   **Configure Authentication on the AI Studio Client**:
-    In the `config.ts` file of the AI Studio App, set the `JWT_TOKEN` value to your authentication token.
+An old file can still write `ws-auth` at the root. The sample maps this switch to `/v1/ws`.
+
+## 4. Details
+
+The Default column matches the ledger `defaults` verbatim.
+
+| Field | Meaning | Default | Constraint |
+| --- | --- | --- | --- |
+| oauth.providers.aistudio.ws-auth | oauth.providers.aistudio.ws-auth | false | oauth.providers.aistudio.ws-auth |
+
+## 5. Common errors and limits
+
+The loader sets the value to true before parsing YAML, so omitting it means authentication is on. Only an explicit false turns it off. The default text in the table is still the ledger's false. That is the field's zero value, not the loaded result.
+
+## 6. Related behavior
+
+Login and aliases are in [OAuth directory, aliases, and exclusions](/accounts/oauth).
+
+## 7. Field experience
+
+- [Send images through AI Studio](/experience/accounts#exp-accounts-aistudio-for-images)
+- [An HTTPS page uses wss](/experience/accounts#exp-accounts-aistudio-wss)
+- [Gemini images and structured output use the native route](/experience/api#exp-api-gemini-native-route)

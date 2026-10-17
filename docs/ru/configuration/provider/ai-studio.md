@@ -1,27 +1,51 @@
-# Инструкции AI Studio
+---
+title: Аутентификация WebSocket AI Studio
+feature_ids:
+  - oauth.providers.aistudio-ws-auth
+pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
+stub: false
+translation_pending: false
+---
 
-Вы можете использовать этот сервис в качестве backend для [этого AI Studio App](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL). Выполните следующие шаги для его настройки:
+# Аутентификация WebSocket AI Studio
 
-1.  **Запустите сервис CLIProxyAPI**: Убедитесь, что ваш экземпляр CLIProxyAPI запущен локально или удаленно.
-2.  **Доступ к AI Studio App**: Войдите в свой аккаунт Google в браузере, затем откройте следующую ссылку:
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
-  
-**Примечание**: Если вы используете браузер Brave, вам может потребоваться отключить функцию shields, так как она может блокировать WebSocket соединение. Эта проблема также может возникать с другими блокировщиками рекламы.
+## 1. Какую задачу решает этот раздел
 
-## Конфигурация соединения
+Решает, требует ли API WebSocket аутентификацию.
 
-По умолчанию AI Studio App пытается подключиться к локальному экземпляру CLIProxyAPI по адресу `ws://127.0.0.1:8317`.
+## 2. Когда применимо и чего здесь нет
 
--   **Подключение к удаленному сервису**:
-    Если вам нужно подключиться к удаленно развернутому CLIProxyAPI, измените файл `config.ts` в AI Studio App, чтобы обновить значение `WEBSOCKET_PROXY_URL`.
-    -   Используйте протокол `wss://`, если на вашем удаленном сервисе включен SSL.
-    -   Используйте протокол `ws://`, если SSL не включен.
+Сторонние приложения AI Studio здесь больше не описываются. Сохраняется только ws-auth из закреплённого кода.
 
-## Конфигурация аутентификации
+## 3. Как настроить или вызвать
 
-По умолчанию WebSocket соединения с CLIProxyAPI не требуют аутентификации.
+```yaml
+oauth:
+  providers:
+    aistudio:
+      ws-auth: true
+```
 
--   **Включите аутентификацию на сервере CLIProxyAPI**:
-    В файле `config.yaml` установите `ws_auth` в значение `true`.
--   **Настройте аутентификацию в клиенте AI Studio**:
-    В файле `config.ts` приложения AI Studio App установите значение `JWT_TOKEN` равным вашему токену аутентификации.
+Старый файл всё ещё может записать `ws-auth` в корне. Пример сопоставляет этот переключатель с `/v1/ws`.
+
+## 4. Подробности
+
+Столбец «По умолчанию» совпадает с `defaults` в реестре дословно.
+
+| Поле | Значение | По умолчанию | Ограничение |
+| --- | --- | --- | --- |
+| oauth.providers.aistudio.ws-auth | oauth.providers.aistudio.ws-auth | false | oauth.providers.aistudio.ws-auth |
+
+## 5. Типичные ошибки и границы
+
+Загрузчик задаёт это значение true до разбора YAML, поэтому пропуск означает, что аутентификация включена. Выключает только явный false. Текст по умолчанию в таблице — это false из реестра. Это нулевое значение поля, а не результат загрузки.
+
+## 6. Связанные возможности
+
+Вход и псевдонимы описаны в разделе [Каталог OAuth, псевдонимы и исключения](/ru/accounts/oauth).
+
+## 7. Практический опыт
+
+- [Изображения отправляйте через AI Studio](/ru/experience/accounts#exp-accounts-aistudio-for-images)
+- [Страница HTTPS использует wss](/ru/experience/accounts#exp-accounts-aistudio-wss)
+- [Изображения Gemini и структурированный вывод идут нативным маршрутом](/ru/experience/api#exp-api-gemini-native-route)
