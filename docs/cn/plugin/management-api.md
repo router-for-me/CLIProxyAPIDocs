@@ -19,7 +19,7 @@ stub: false
 
 不实现宿主自己的管理 API。登记请求里的 `BasePath` 是插件唯一可以挂管理路由的前缀，值为 `/v0/management`。`ResourceBasePath` 是 `/v0/resource/plugins/` 加上插件 ID。
 
-资源路由不走管理认证。带非空 `Menu` 的 GET 管理路由会同时作为资源登记。
+资源路由不走管理认证。带非空 `Menu` 的 GET 管理声明不会同时登记管理端点，只会按资源路由登记。
 
 ## 3. 怎么配置或怎么调用
 
@@ -47,7 +47,7 @@ ABI 方法名是 `management.register` 与 `management.handle`。每条 `Managem
 | ManagementRegistrationResponse.Resources | 浏览器资源。 |  | 挂在资源前缀下。 |
 | ManagementRoute.Method | HTTP 方法。 |  | 空白按 GET。含空白则整条路由无效。 |
 | ManagementRoute.Path | 精确路径。 |  | 相对路径会补上 `/`，再挂到 `/v0/management` 下。已带该前缀的会先去掉再挂回。 |
-| ManagementRoute.Menu | 旧式资源菜单标题。 |  | GET 且非空时额外登记为资源。 |
+| ManagementRoute.Menu | 旧式资源菜单标题。 |  | GET 且非空时不登记 `/v0/management` 端点，只按资源路由登记。 |
 | ManagementRoute.Description | 旧式菜单说明。 |  | 字符串。 |
 | ManagementRoute.Handler | 处理该路由的对象。 |  | 不能为空，否则路由无效。 |
 | ResourceRoute.Path | 资源精确路径。 |  | 挂到该插件的资源前缀下。 |
@@ -67,7 +67,7 @@ ABI 方法名是 `management.register` 与 `management.handle`。每条 `Managem
 
 处理函数返回 `error` 时，管理请求得到 HTTP 502，正文是 `plugin management handler failed`。资源请求同样是 502，正文是 `plugin resource handler failed`。
 
-下列路由不会被登记：空路径、方法含空白、最终路径不在对应前缀之下、路径含空白、`:` 或 `*`。资源路径还拒绝 `..`。与保留路由冲突，或与更高优先级插件的资源路径冲突时，该条被跳过。
+下列路由不会被登记：空路径、方法含空白、最终路径不在对应前缀之下、路径含空白、`:` 或 `*`。资源路径还拒绝 `..`。与保留路由冲突，或与更高优先级插件的资源路径冲突时，该条被跳过。带非空 `Menu` 的 GET 管理声明不会进入 `/v0/management`，只会按资源路由登记。
 
 登记方法自己的 `error` 仍走 ABI 信封。`http_status` 省略或为 0 时按 HTTP 500 处理。
 
