@@ -1,7 +1,29 @@
 ---
-title: "Four: Интеграция Relay Forwarding"
-translation_pending: true
-stub: false
+title: "Четыре: подключение пересылки через релей"
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# Четыре: подключение пересылки через релей
+
+Поставьте совместимый с OpenAI релей или upstream API Claude либо Codex за этим прокси, затем вызывайте этот прокси клиентским ключом.
+
+## Сценарий
+
+У вас уже есть базовый адрес релея и ключ upstream. Адреса в документации записываются как `https://example.invalid`. И ключ upstream, и клиентский ключ записываются как `YOUR_API_KEY`. Не записывайте настоящий ключ из консоли поставщика в репозиторий.
+
+## Шаги
+
+1. Сначала разделите два вида ключей. Клиент вызывает этот прокси. См. [Клиентские ключи](/ru/api/access). Ключ, отправляемый upstream, описан в разделе [Ключи upstream API](/ru/accounts/api-keys-api).
+2. Базовый адрес принадлежит всей группе, а не одному ключу. См. [Базовые URL upstream](/ru/accounts/api-keys-base). У провайдера, совместимого с OpenAI, нет встроенного официального адреса. Заполните его так, как сказано на той странице.
+3. Дайте совместимому с OpenAI upstream имя. См. [Имя провайдера, совместимого с OpenAI](/ru/accounts/api-keys-name).
+4. Чтобы сопоставить имя модели, которое видит клиент, с именем модели релея, см. [Псевдонимы моделей upstream](/ru/accounts/api-keys-models). Чтобы открыть только часть моделей, см. [Префикс имени модели](/ru/accounts/api-keys-prefix) и [Исключённые модели ключа](/ru/accounts/api-keys-excluded).
+5. Чтобы задать нескольким ключам приоритет или вес, см. [Приоритет учётных данных](/ru/accounts/api-keys-priority) и [Вес учётных данных](/ru/accounts/api-keys-weight). Если один ключ идёт через собственный прокси, см. [Прокси ключа](/ru/accounts/api-keys-proxy).
+6. Не разбирайте на этой странице отключение всей группы, дополнительные заголовки, повторы и охлаждение одного ключа. См. [Отключение провайдера, совместимого с OpenAI](/ru/accounts/api-keys-disabled), [Дополнительные заголовки upstream](/ru/accounts/api-keys-headers), [Повторы и ошибки уровня запроса](/ru/accounts/api-keys-request) и [Охлаждение и переключатель маскировки Codex](/ru/accounts/api-keys-disable).
+7. Если для Claude ещё нужно изменить поведение upstream, см. [Поведение Claude upstream](/ru/accounts/upstream). Не смешивайте это со страницами ключей API.
+8. После записи конфигурации вызовите зарегистрированный маршрут клиентским ключом. Дополнение чата — в разделе [OpenAI Chat](/ru/api/openai-chat), Responses — в разделе [Responses](/ru/api/responses), Claude — в разделе [Claude Messages](/ru/api/claude-messages).
+9. Если одновременно доступны несколько upstream, порядок выбора описан в разделе [Стратегия маршрутизации](/ru/routing/strategy).
+10. Агент меняет только собственный адрес провайдера и клиентский ключ этого прокси. См. [Codex](/ru/agent-client/codex), [Claude Code](/ru/agent-client/claude-code), [OpenCode](/ru/agent-client/opencode), [Factory Droid](/ru/agent-client/droid), [PI](/ru/agent-client/pi) и [Grok Build](/ru/agent-client/grok-build).
+
+## Чего не следует завершать на этой странице
+
+Не вставляйте настоящий адрес, снимок экрана или полную конфигурацию конкретного релея. Форма полей определяется функциональными страницами из шагов.

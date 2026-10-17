@@ -1,8 +1,8 @@
 ---
-title: Docker Compose 导读
+title: Указатель Docker Compose
 feature_ids: []
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+Актуальное описание Compose находится в разделе [Запуск через Docker Compose](/ru/docker/docker). Эта страница только сохраняет прежний адрес.

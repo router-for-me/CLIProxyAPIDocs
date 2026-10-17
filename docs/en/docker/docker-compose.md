@@ -1,8 +1,8 @@
 ---
-title: Docker Compose 导读
+title: Docker Compose pointer
 feature_ids: []
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+The current Compose instructions are in [Run with Docker Compose](/docker/docker). This page only keeps the old address.
