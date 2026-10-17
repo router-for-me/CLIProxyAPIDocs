@@ -1,9 +1,11 @@
 ---
-title: 导读
+title: Guide
 feature_ids: []
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# Guide
+
+A Claude-compatible upstream is now written under `api-keys.claude`. Start from [Upstream API keys](/accounts/api-keys-api), and look up the address, models, headers, and cloaking for the task. This page no longer registers features.

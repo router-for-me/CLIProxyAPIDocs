@@ -1,9 +1,11 @@
 ---
-title: 导读
+title: Указатель
 feature_ids: []
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# Указатель
+
+Мышление моделей вынесено в раздел [Мышление моделей](/ru/configuration/thinking-models). Там по пунктам перечислены levels, min, max, zero-allowed и dynamic-allowed восьми провайдеров. Эта страница больше не регистрирует возможности.

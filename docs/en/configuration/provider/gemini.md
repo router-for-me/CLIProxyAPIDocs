@@ -1,9 +1,11 @@
 ---
-title: 导读
+title: Guide
 feature_ids: []
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: true
-translation_pending: true
+translation_pending: false
 ---
 
-正文以中文页为准，翻译尚未完成。
+# Guide
+
+Gemini API keys are now written under `api-keys.gemini`. Start from [Upstream API keys](/accounts/api-keys-api). This page no longer registers features.
