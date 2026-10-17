@@ -1,5 +1,67 @@
 ---
 title: "运行 使用经验"
+related_feature_ids:
+  - auth.claude.login
+  - cli.server.antigravity-login
+  - cli.server.codex-login
+  - cli.server.config
+  - cli.server.tui
+  - management.allow-remote.value
+  - management.disable-control-panel.value
+  - management.secret-key.value
+  - management.v8.get-observability-usage-api-keys
+  - management.v8.get-observability-usage-queue
+  - models.catalog.value
+  - oauth.auth-dir.value
+  - observability.logs.debug
+  - observability.logs.logging-to-file
+  - observability.logs.logs-max-total-size-mb
+  - observability.logs.request-log
+  - observability.usage.usage-statistics-enabled
+  - route.management-html.get
+  - server.commercial-mode.value
+  - server.host.value
+  - server.port.value
+  - server.tls.cert
+  - server.tls.enable
+  - server.tls.key
+source_issues:
+  - 56
+  - 190
+  - 541
+  - 635
+  - 681
+  - 844
+  - 863
+  - 944
+  - 954
+  - 1020
+  - 1393
+  - 1497
+  - 1589
+  - 1772
+  - 1790
+  - 2195
+  - 2315
+  - 2498
+  - 2541
+  - 2617
+  - 2828
+  - 2925
+  - 2955
+  - 3035
+  - 3220
+  - 3270
+  - 3405
+  - 3732
+  - 3743
+  - 4019
+  - 4483
+  - 4807
+  - 5314
+  - 5972
+  - 6060
+  - 6323
 pinned_commit: 911f49cbd49f4fe2516979754a7488a3fd14fe64
 stub: false
 translation_pending: true
