@@ -1,10 +1,10 @@
 # AI Studio 使用说明
 
-您可以将本服务 (CLIProxyAPI) 作为后端，配合 [这个 AI Studio 应用](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL) 使用。请遵循以下步骤进行配置：
+您可以将本服务 (CLIProxyAPI) 作为后端，配合 [这个 AI Studio 应用](https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be) 使用。请遵循以下步骤进行配置：
 
 1.  **启动 CLIProxyAPI 服务**：确保您的 CLIProxyAPI 实例正在本地或远程运行。
 2.  **访问 AI Studio 应用**：在浏览器中登录您的 Google 账户，然后打开以下链接：
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
+    - [https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be](https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be)
 
 ## 连接配置
 

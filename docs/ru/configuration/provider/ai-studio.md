@@ -1,10 +1,10 @@
 # Инструкции AI Studio
 
-Вы можете использовать этот сервис в качестве backend для [этого AI Studio App](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL). Выполните следующие шаги для его настройки:
+Вы можете использовать этот сервис в качестве backend для [этого AI Studio App](https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be). Выполните следующие шаги для его настройки:
 
 1.  **Запустите сервис CLIProxyAPI**: Убедитесь, что ваш экземпляр CLIProxyAPI запущен локально или удаленно.
 2.  **Доступ к AI Studio App**: Войдите в свой аккаунт Google в браузере, затем откройте следующую ссылку:
-    - [https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL)
+    - [https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be](https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be)
   
 **Примечание**: Если вы используете браузер Brave, вам может потребоваться отключить функцию shields, так как она может блокировать WebSocket соединение. Эта проблема также может возникать с другими блокировщиками рекламы.
 

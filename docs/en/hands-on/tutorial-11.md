@@ -10,7 +10,7 @@ To solve this problem, I spent some time trying various headless browser solutio
 
 ### Step 1: Configure the AIStudioBuild Application
 
-You need to configure the WebSocket communication program on AIStudioBuild according to your `CLIProxyAPI` settings: Open the official [sample program](https://aistudio.google.com/apps/drive/1CPW7FpWGsDZzkaYgYOyXQ_6FWgxieLmL), copy it, and then you **must** modify the two places marked in the red box in the image. Specifically, if `wsauth` is set to `true` in `CLIProxyAPI`, you need to set `JWT_TOKEN` to the `api-keys` value intended for authentication in `CLIProxyAPI`. Set `WEBSOCKET_PROXY_URL` to the address of your `CLIProxyAPI`, for example: `wss://mycap.example.com/v1/ws`. After configuring, save it and keep the link to this application for later use.
+You need to configure the WebSocket communication program on AIStudioBuild according to your `CLIProxyAPI` settings: Open the official [sample program](https://ai.studio/apps/949f2248-4b3c-44f9-8e6e-5a967ab930be), copy it, and then you **must** modify the two places marked in the red box in the image. Specifically, if `wsauth` is set to `true` in `CLIProxyAPI`, you need to set `JWT_TOKEN` to the `api-keys` value intended for authentication in `CLIProxyAPI`. Set `WEBSOCKET_PROXY_URL` to the address of your `CLIProxyAPI`, for example: `wss://mycap.example.com/v1/ws`. After configuring, save it and keep the link to this application for later use.
 
 ![](https://img.072899.xyz/2025/11/359a2572d0206c20dba7fe12a136d6e8.png)
 
